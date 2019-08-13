@@ -1,7 +1,7 @@
 {
     "name": "samson/contao-linkscollection-bundle",
     "type": "contao-bundle",
-    "description": "Linkscollection-Bundle für Contao 4",
+    "description": "Linkscollection-Bundle fÃ¼r Contao 4",
     "license": "LGPL-3.0-or-later",
     "authors": [
         {
@@ -42,6 +42,6 @@
     },
     "support": {
         "issues": "https://github.com/samson/contao-linkscollection-bundle/issues",
-        "source": "https://github.com/samson/contao-linkscollection-bundle"
+        "source": "https://github.com/samson/contao-linkscollection-bundle" 
     }
 }
