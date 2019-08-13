@@ -1,0 +1,23 @@
+<?php
+
+namespace Samson\ContaoLinkscollectionBundle\ContaoManager;
+
+use Contao\CoreBundle\ContaoCoreBundle;
+use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
+use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
+use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
+use Samson\ContaoLinkscollectionBundle\ContaoLinkscollectionBundle;
+
+class Plugin implements BundlePluginInterface
+{
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getBundles(ParserInterface $parser)
+	{
+		return [
+			BundleConfig::create(ContaoLinkscollectionBundle::class)
+				->setLoadAfter([ContaoCoreBundle::class]),
+		];
+	}
+}
