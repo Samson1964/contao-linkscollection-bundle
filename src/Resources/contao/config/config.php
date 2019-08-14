@@ -40,7 +40,7 @@ array_insert($GLOBALS['BE_MOD']['content'], 4, array
 //);
 
 // Frontend modules
-$GLOBALS['FE_MOD']['miscellaneous']['linkscollection'] = 'Samson\ContaoLinkscollectionBundle\Module\LinkscollectionModule'; 
+$GLOBALS['FE_MOD']['miscellaneous']['linkscollection'] = 'Schachbulle\ContaoLinkscollectionBundle\Module\LinkscollectionModule'; 
 
 // Cronjobs
 //$GLOBALS['TL_CRON']['daily'][] = array('LinkRebuilder', 'run');
@@ -69,4 +69,4 @@ $GLOBALS['FE_MOD']['miscellaneous']['linkscollection'] = 'Samson\ContaoLinkscoll
 /**
  * Hooks
  */
-//$GLOBALS['TL_HOOKS']['loadFormField'][] = array('Samson\Linksammlung\Helper', 'setCategoriesToForm');
+//$GLOBALS['TL_HOOKS']['loadFormField'][] = array('Schachbulle\Linksammlung\Helper', 'setCategoriesToForm');

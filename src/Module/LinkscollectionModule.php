@@ -1,6 +1,6 @@
 <?php
 
-namespace Samson\ContaoLinkscollectionBundle\Module;
+namespace Schachbulle\ContaoLinkscollectionBundle\Module;
 
 class LinkscollectionModule extends \Module
 {

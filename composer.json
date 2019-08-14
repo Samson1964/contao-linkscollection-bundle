@@ -28,16 +28,16 @@
         "symfony/phpunit-bridge": "^3.2"
     },
     "extra": {
-        "contao-manager-plugin": "Samson\\ContaoLinkscollectionBundle\\ContaoManager\\Plugin"
+        "contao-manager-plugin": "Schachbulle\\ContaoLinkscollectionBundle\\ContaoManager\\Plugin"
     },
     "autoload": {
         "psr-4": {
-            "Samson\\ContaoLinkscollectionBundle\\": "src/"
+            "Schachbulle\\ContaoLinkscollectionBundle\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Samson\\ContaoLinkscollectionBundle\\Tests\\": "tests/"
+            "Schachbulle\\ContaoLinkscollectionBundle\\Tests\\": "tests/"
         }
     },
     "support": {

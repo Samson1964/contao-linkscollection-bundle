@@ -1,12 +1,12 @@
 <?php
 
-namespace Samson\ContaoLinkscollectionBundle\ContaoManager;
+namespace Schachbulle\ContaoLinkscollectionBundle\ContaoManager;
 
 use Contao\CoreBundle\ContaoCoreBundle;
 use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
 use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
-use Samson\ContaoLinkscollectionBundle\ContaoLinkscollectionBundle;
+use Schachbulle\ContaoLinkscollectionBundle\ContaoLinkscollectionBundle;
 
 class Plugin implements BundlePluginInterface
 {

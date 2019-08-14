@@ -1,8 +1,8 @@
 <?php
 
-namespace Samson\ContaoLinkscollectionBundle\Tests;
+namespace Schachbulle\ContaoLinkscollectionBundle\Tests;
 
-use Samson\ContaoLinkscollectionBundle\ContaoLinkscollectionBundle;
+use Schachbulle\ContaoLinkscollectionBundle\ContaoLinkscollectionBundle;
 use PHPUnit\Framework\TestCase;
 
 class ContaoLinkscollectionBundleTest extends TestCase
@@ -11,6 +11,6 @@ class ContaoLinkscollectionBundleTest extends TestCase
 	{
 		$bundle = new ContaoLinkscollectionBundle();
 	
-		$this->assertInstanceOf('Samson\ContaoLinkscollectionBundle\ContaoLinkscollectionBundle', $bundle);
+		$this->assertInstanceOf('Schachbulle\ContaoLinkscollectionBundle\ContaoLinkscollectionBundle', $bundle);
 	}
 }

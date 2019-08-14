@@ -1,6 +1,6 @@
 <?php
 
-namespace Samson\ContaoLinkscollectionBundle;
+namespace Schachbulle\ContaoLinkscollectionBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
