@@ -22,17 +22,17 @@ define('DATE_NEWLINK', 60480000); // 100 Tage
  * Backend-Modul BdF anlegen und einfügen
  */
 
-array_insert($GLOBALS['BE_MOD']['content'], 4, array
-(
-	'linkscollection' => array
-	(
-		'tables'         => array('tl_linkscollection', 'tl_linkscollection_links'),
-		'icon'           => 'system/modules/linkscollection/assets/images/icon.png',
-		'analyse'        => array('Linkscollection', 'Linkanalyse'),
-		'linklist'       => array('Linkscollection', 'Linklist'),
-		'statistik'      => array('Linkscollection', 'Statistik')
-	)
-));
+//array_insert($GLOBALS['BE_MOD']['content'], 4, array
+//(
+//	'linkscollection' => array
+//	(
+//		'tables'         => array('tl_linkscollection', 'tl_linkscollection_links'),
+//		'icon'           => 'system/modules/linkscollection/assets/images/icon.png',
+//		'analyse'        => array('Linkscollection', 'Linkanalyse'),
+//		'linklist'       => array('Linkscollection', 'Linklist'),
+//		'statistik'      => array('Linkscollection', 'Statistik')
+//	)
+//));
 //
 //$GLOBALS['FE_MOD']['linkscollection'] = array
 //(
