@@ -1,4 +1,13 @@
-<?php
+<?php 
 
-// Frontend modules
-$GLOBALS['TL_LANG']['FMD']['linkscollection'] = ['Hello World', 'Gibt den Text "Hello World" aus'];
+/**
+ * Contao Open Source CMS
+ * Copyright (C) 2005-2014 Leo Feyer
+ *
+ */
+
+
+/**
+ * Back end modules
+ */
+$GLOBALS['TL_LANG']['MOD']['linkscollection'] = array('Linksammlung', 'Linksammlung verwalten');

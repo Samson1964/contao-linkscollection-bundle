@@ -1,0 +1,20 @@
+/* Favicon */
+.favicon-img {
+ 	background-repeat   : no-repeat; 
+ 	background-position : left top; 
+ 	background-size     : 18px; 
+ 	padding-left        : 20px;
+}
+
+.webarchiv, .webarchiv a {
+	color               : #949494 !important;
+}
+
+.webarchiv:first-of-type {
+	margin-top          : 30px;
+	border-top          : 1px solid black;
+}
+
+.popular {
+	font-weight         : bold;
+}
