@@ -1,5 +1,5 @@
 {
-    "name": "samson/contao-linkscollection-bundle",
+    "name": "schachbulle/contao-linkscollection-bundle",
     "type": "contao-bundle",
     "description": "Linkscollection-Bundle für Contao 4",
     "license": "LGPL-3.0-or-later",
@@ -41,7 +41,7 @@
         }
     },
     "support": {
-        "issues": "https://github.com/samson/contao-linkscollection-bundle/issues",
-        "source": "https://github.com/samson/contao-linkscollection-bundle"
+        "issues": "https://github.com/Samson1964/contao-linkscollection-bundle/issues",
+        "source": "https://github.com/Samson1964/contao-linkscollection-bundle"
     }
 }
