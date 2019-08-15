@@ -601,7 +601,7 @@ class tl_linkscollection_links extends Backend
 			'webarchiv' => \Input::post('webarchiv'),
 			'url'       => \Input::post('url')
 		);
-		$arrRow = \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::saveFavicon($arrRow);
+		$arrRow = Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::saveFavicon($arrRow);
 
 		// Update Datenbank
 		$set = array
@@ -644,7 +644,7 @@ class tl_linkscollection_links extends Backend
 		if($arrRow['statedate'] < $refreshtime)
 		{
 			// URL neu prüfen und Favicon downloaden
-			$arrRow = \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::saveFavicon($arrRow);
+			$arrRow = Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::saveFavicon($arrRow);
 		}
 		// Letzte Prüfung vor x Tagen
 		$check_days = ceil((time() - $arrRow['statedate']) / 86400);
@@ -652,7 +652,7 @@ class tl_linkscollection_links extends Backend
 		$refreshtime_next = $arrRow['statedate'] + ($GLOBALS['TL_CONFIG']['linkscollection_test_duration'] * 86400);
 
 		// Favicon suchen
-		$icon = \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($arrRow['id']);
+		$icon = Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($arrRow['id']);
 
 		switch($arrRow['statecode'])
 		{

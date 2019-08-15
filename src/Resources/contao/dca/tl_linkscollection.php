@@ -344,7 +344,7 @@ class tl_linkscollection extends Backend
 			// Infos zur aktuellen Kategorie laden
 			$objActual = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection WHERE published = ? AND id = ?')
 			                                     ->execute(1, $cat);
-			$breadcrumb[] = '<img src="system/modules/linkscollection/assets/images/category.png" width="18" height="18" alt=""> ' . $objActual->title;
+			$breadcrumb[] = '<img src="bundles/contaolinkscollection/images/category.png" width="18" height="18" alt=""> ' . $objActual->title;
 			
 			// Navigation vervollständigen
 			$pid = $objActual->pid;
@@ -352,7 +352,7 @@ class tl_linkscollection extends Backend
 			{
 				$objTemp = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection WHERE published = ? AND id = ?')
 				                                   ->execute(1, $pid);
-				$breadcrumb[] = '<img src="system/modules/linkscollection/assets/images/category.png" width="18" height="18" alt=""> <a href="' . \Controller::addToUrl('node='.$objTemp->id) . '" title="'.specialchars($GLOBALS['TL_LANG']['MSC']['selectNode']).'">' . $objTemp->title . '</a>';
+				$breadcrumb[] = '<img src="bundles/contaolinkscollection/images/category.png" width="18" height="18" alt=""> <a href="' . \Controller::addToUrl('node='.$objTemp->id) . '" title="'.specialchars($GLOBALS['TL_LANG']['MSC']['selectNode']).'">' . $objTemp->title . '</a>';
 				$pid = $objTemp->pid;
 			}
 			$breadcrumb[] = '<img src="' . TL_FILES_URL . 'system/themes/' . \Backend::getTheme() . '/images/pagemounts.gif" width="18" height="18" alt=""> <a href="' . \Controller::addToUrl('node=0') . '" title="'.specialchars($GLOBALS['TL_LANG']['MSC']['selectAllNodes']).'">' . $GLOBALS['TL_LANG']['MSC']['filterAll'] . '</a>';
@@ -388,8 +388,9 @@ class tl_linkscollection extends Backend
 			$row['protected'] = true;
 		}
 
-		$image = 'bundles/contaolinkscollection/images/category.png';
-		$imageAttribute = trim($imageAttribute . ' data-icon="category.png" data-icon-disabled="category.png"');
+		// Kategorie-Icon und Icon-Attribute zuweisen
+		$image = $row['published'] ? 'bundles/contaolinkscollection/images/category.png' : 'bundles/contaolinkscollection/images/category_inactive.png';
+		$imageAttribute = trim($imageAttribute . ' data-icon="bundles/contaolinkscollection/images/category.png" data-icon-disabled="bundles/contaolinkscollection/images/category_inactive.png"');
 
 		// Return the image only
 		if ($blnReturnImage)
@@ -532,7 +533,7 @@ class tl_linkscollection extends Backend
 	
 		// Update the database
 		$this->Database->prepare("UPDATE tl_linkscollection SET tstamp=". time() .", published='" . ($blnPublished ? '' : '1') . "' WHERE id=?")
-			->execute($intId);
+		               ->execute($intId);
 		$this->createNewVersion('tl_linkscollection', $intId);
 	}
 }

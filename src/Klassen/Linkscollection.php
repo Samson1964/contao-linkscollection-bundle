@@ -35,7 +35,7 @@ class Linkscollection
 	{
 		if($language)
 		{
-			$url = 'system/modules/linkscollection/assets/images/flags/'.$language.'.png';
+			$url = 'bundles/contaolinkscollection/images/flags/'.$language.'.png';
 			if(file_exists(TL_ROOT.'/'.$url))
 			{
 				return ' <img src="'.$url.'" width=16" height="11" title="Seitensprache: '.$language.'">';
@@ -70,16 +70,14 @@ class Linkscollection
 
 	/**
 	 * Download des Favicons und Informationen zur URL-Erreichbarkeit
-	 * @param array		Datensatz des Links
+	 * @param array     Datensatz des Links
 	 * @return array    Modifizierter Datensatz
 	 */
 	public static function saveFavicon($arrRow)
 	{
 
-		return $arrRow; // Funktion MUSS NEU GESCHRIEBEN WERDEN
-		
 		// URL prüfen und ggfs. Favicon neu laden
-		$objRequest = new Request();
+		$objRequest = new \Request(); // Instanz der Contao-Klasse anlegen
 		$objRequest->send(self::getWeblink($arrRow['url'], $arrRow['webarchiv']));
 
 		$strError = '';
@@ -88,13 +86,13 @@ class Linkscollection
 		if(!$objRequest->hasError())
 		{
 			// Kein Fehler, deshalb Favicon-Link ermitteln
-			$favicon = new Schachbulle\ContaoLinkscollectionBundle\Klassen\FaviconDownloader(self::getWeblink($arrRow['url'], $arrRow['webarchiv']));
+			$favicon = new \Schachbulle\ContaoLinkscollectionBundle\Klassen\FaviconDownloader(self::getWeblink($arrRow['url'], $arrRow['webarchiv']));
 			if($favicon->icoExists)
 			{
-			    // Saving favicon to file
-			    $filename = TL_ROOT.'/system/modules/linkscollection/assets/favicons/'.$arrRow['id'].'.'.$favicon->icoType;
-			    $icon = 'system/modules/linkscollection/assets/favicons/'.$arrRow['id'].'.'.$favicon->icoType;
-			    file_put_contents($filename, $favicon->icoData);
+				// Saving favicon to file
+				$filename = TL_ROOT.'/vendor/schachbulle/contao-linkscollection-bundle/src/Resources/public/favicons/'.$arrRow['id'].'.'.$favicon->icoType;
+				$icon = 'bundles/contaolinkscollection/favicons/'.$arrRow['id'].'.'.$favicon->icoType;
+				file_put_contents($filename, $favicon->icoData);
 			}
 			// Sprache der URL ermitteln
 			$language = self::checkLanguage($objRequest->response);
@@ -132,6 +130,13 @@ class Linkscollection
 	 */
 	public static function checkLanguage($string)
 	{
+		//$dom = new \DOMDocument();
+		//$dom->loadHTML($string);
+		//$html = $dom->getElementsByTagName('html');
+		//$lang = $html->getAttribute('lang'); 
+
+		return $lang ? $lang : '';
+
 		$return = '';
 
 		// DOM aus einem String
@@ -160,6 +165,7 @@ class Linkscollection
 	public static function checkCMS($string)
 	{
 		$return = '';
+		return $return;
 
 		// DOM aus einem String
 		$html = str_get_html($string);
