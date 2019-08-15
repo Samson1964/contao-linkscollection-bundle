@@ -35,10 +35,11 @@ class Linkscollection
 	{
 		if($language)
 		{
-			$url = 'bundles/contaolinkscollection/images/flags/'.$language.'.png';
-			if(file_exists(TL_ROOT.'/'.$url))
+			$url_web = 'bundles/contaolinkscollection/images/flags/'.$language.'.png';
+			$url_file = 'vendor/schachbulle/contao-linkscollection-bundle/src/Resources/public/images/flags/'.$language.'.png';
+			if(file_exists(TL_ROOT.'/'.$url_file))
 			{
-				return ' <img src="'.$url.'" width=16" height="11" title="Seitensprache: '.$language.'">';
+				return ' <img src="'.$url_web.'" width=16" height="11" title="Seitensprache: '.$language.'">';
 			}
 		}
 
@@ -47,20 +48,21 @@ class Linkscollection
 
 	/**
 	 * Liefert das Favicon zurück
-	 * @param string	ID des Links
-	 * @return string	Icon-Pfad
+	 * @param string    ID des Links
+	 * @return string   Icon-Pfad im Web
 	 */
 	public static function getFavicon($id)
 	{
-		$suffixes = array('ico','gif','png','jpg'); // Erlaubte Favicon-Endungen
+		$suffixes = array('ico','gif','png','jpg','svg'); // Erlaubte Favicon-Endungen
 		$string = 'bundles/contaolinkscollection/images/favicon.png'; // Standardicon setzen
 
 		foreach($suffixes as $suffix)
 		{
-			$url = 'bundles/contaolinkscollection/favicons/'.$id.'.'.$suffix;
-			if(file_exists(TL_ROOT.'/'.$url))
+			$url_web = 'bundles/contaolinkscollection/favicons/'.$id.'.'.$suffix;
+			$url_file = 'vendor/schachbulle/contao-linkscollection-bundle/src/Resources/public/favicons/'.$id.'.'.$suffix;
+			if(file_exists(TL_ROOT.'/'.$url_file))
 			{
-				$string = $url;
+				$string = $url_web;
 				break;
 			}
 		}
@@ -94,19 +96,16 @@ class Linkscollection
 				$icon = 'bundles/contaolinkscollection/favicons/'.$arrRow['id'].'.'.$favicon->icoType;
 				file_put_contents($filename, $favicon->icoData);
 			}
-			// Sprache der URL ermitteln
-			$language = self::checkLanguage($objRequest->response);
-			// CMS der URL ermitteln
-			$cms = self::checkCMS($objRequest->response);
-
+			$language = self::checkLanguage($objRequest->response); // Sprache des Links ermitteln
+			$cms = self::checkCMS($objRequest->response); // CMS des Links ermitteln
 		}
 
 		// Datenbank aktualisieren
 		$arrRow['statedate'] = time();
 		$arrRow['statecode'] = $objRequest->code;
 		$arrRow['statetext'] = ($objRequest->error) ? : 'OK';
-		$arrRow['language'] = $language;
-		$arrRow['cms'] = $cms;
+		$arrRow['language']  = $language;
+		$arrRow['cms']       = $cms;
 		$set = array
 		(
 			'statedate' => $arrRow['statedate'],
@@ -125,64 +124,38 @@ class Linkscollection
 
 	/**
 	 * Liest die Sprache aus dem DOM
-	 * @param string	HTML der Webseite
-	 * @return string
+	 * @param string    HTML der Webseite
+	 * @return string   Sprache, z.B. de-DE
 	 */
 	public static function checkLanguage($string)
 	{
-		//$dom = new \DOMDocument();
-		//$dom->loadHTML($string);
-		//$html = $dom->getElementsByTagName('html');
-		//$lang = $html->getAttribute('lang'); 
+		// DOM auf <html lang=""> untersuchen
+		$dom = new \PHPHtmlParser\Dom;
+		$dom->load($string);
+		$html = $dom->find('html')[0];
+		$lang = $html->getAttribute('lang');
 
-		return $lang ? $lang : '';
-
-		$return = '';
-
-		// DOM aus einem String
-		$html = str_get_html($string);
-		if($html)
-		{
-			// <html lang="?">
-			foreach($html->find('html') as $item)
-			{
-				if($item->lang)
-				{
-					$return = $item->lang;
-					break;
-				}
-			}
-		}
-
-		return $return;
+		return $lang ? $lang : ''; // Sprache zurückgeben
 	}
 
 	/**
 	 * Liest den Generator aus dem DOM
-	 * @param string	HTML der Webseite
-	 * @return string
+	 * @param string    HTML der Webseite
+	 * @return string   
 	 */
 	public static function checkCMS($string)
 	{
-		$return = '';
-		return $return;
-
-		// DOM aus einem String
-		$html = str_get_html($string);
-		if($html)
+		// DOM auf <meta name="generator"> untersuchen und dort das Attribut content auslesen
+		$dom = new \PHPHtmlParser\Dom;
+		$dom->load($string);
+		foreach($dom->find('meta') as $meta)
 		{
-			// <meta name="generator" content="?">
-			foreach($html->find('meta') as $item)
+			if($meta->getAttribute('name') == 'generator')
 			{
-				if($item->name == 'generator')
-				{
-					$return = $item->content;
-					break;
-				}
+				return $meta->getAttribute('content'); // CMS gefunden
 			}
 		}
-
-		return $return;
+		return ''; // Kein CMS gefunden
 	}
 
 	/**
@@ -213,7 +186,7 @@ class Linkscollection
 	 * @param string	Serialisiertes Array mit den Daten
 	 * @return array
 	 */
-	public function Linkanalyse(DataContainer $dc)
+	public function Linkanalyse()
 	{
 		if(\Input::get('key') != 'analyse')
 		{
@@ -337,11 +310,80 @@ class Linkscollection
 
 
 	/**
+	 * Listet den Datensatz eines Links im Backend auf
+	 * @param array     Array mit dem Datensatz
+	 * @param boolean   true/false = Buttons generieren (nicht nötig bei Standardausgabe)
+	 * @return string   HTML-Ausgabe
+	 */
+	public function ViewLinkrow($record, $buttons = false)
+	{
+		$refreshtime = time() - ($GLOBALS['TL_CONFIG']['linkscollection_test_duration'] * 86400);
+
+		if($record['statedate'] < $refreshtime)
+		{
+			// URL neu prüfen und Favicon downloaden
+			$record = self::saveFavicon($record);
+		}
+		// Letzte Prüfung ausgeben
+		$sekunden = time() - $record['statedate'];
+		if($sekunden < 61) $check_time = $sekunden.' Sek.'; // <= 1 Minute
+		elseif($sekunden < 7201) $check_time = ceil($sekunden / 60).' Min.'; // <= 2 Stunden
+		elseif($sekunden < 259201) $check_time = ceil($sekunden / 3600).' Std.'; // <= 3 Tage
+		else $check_time = ceil($sekunden / 86400).' Tg.';
+
+		// Nächster Zeitpunkt für eine Prüfung
+		$refreshtime_next = $record['statedate'] + ($GLOBALS['TL_CONFIG']['linkscollection_test_duration'] * 86400);
+
+		// Favicon suchen
+		$icon = self::getFavicon($record['id']);
+		// Sprache-Icon zurückgeben
+		$language = self::getLanguageIcon($record['language']);
+
+		switch($record['statecode'])
+		{
+			case 0:
+				$info = ' <span style="color:red">invalid host</span>';
+				$style = 'background-color:#FF0000; color:white; padding-left:2px; padding-right:2px;';
+				$record['statecode'] = '000';
+				break;
+			case ($record['statecode'] >= 400):
+				$info = ' <span style="color:red">not found ('.$record['statetext'].')</span>';
+				$style = 'background-color:#FF0000; color:white; padding-left:2px; padding-right:2px;';
+				break;
+			case ($record['statecode'] >= 300):
+				$info = ' <span style="color:blue">redirect ('.$record['statetext'].')</span>';
+				$style = 'background-color:#FFFF00; padding-left:2px; padding-right:2px;';
+				break;
+			case ($record['statecode'] >= 200):
+				$style = 'background-color:#00FF00; padding-left:2px; padding-right:2px;';
+				break;
+			default:
+				$info = '';
+		}
+		
+		$archivclass = ($record['webarchiv']) ? ' webarchiv' : ''; // Webarchiv-Klasse hinzufügen
+		
+		$line = '';
+		$line .= '<div class="tl_content_right height18">';
+		$line .= '<span style="margin-right:5px; color:#9F5000;" title="Verwendetes CMS">'.$record['cms'].'</span>';
+		$line .= '<span style="'.$style.' font-weight:bold;">'.$record['statecode'].'</span>';
+		$line .= '<span style="font-size:0.6rem; margin-left:3px; display:inline-block; width:60px;" title="Zeitpunkt der letzten Prüfung. Nächste Prüfung: '.date('d.m.Y H:i',$refreshtime_next).'"> vor '.$check_time.'</span>';
+		$line .= '</div>';
+		$line .= '<div class="favicon-img height18'.$archivclass.'" style="background-image: url('.$icon.');">';
+		$line .= '<a href="'.$record['url'].'" target="_blank"><b>'.$record['title'].'</b></a> - '.$language.' '.$record['url'].$info;
+		if($record['text']) $line .= '<div class="description">'.$record['text'].'</div>';
+		$line .= "</div>";
+		$line .= "\n";
+
+		return $line;
+	}
+
+	/**
 	 * Listet alle Links auf
 	 * @param string	Serialisiertes Array mit den Daten
 	 * @return array
 	 */
-	public function Linklist(DataContainer $dc)
+	public function GenerateLinklist()
 	{
 		// Hilfsarrays für Filter/Suche
 		$where = array();
@@ -349,11 +391,8 @@ class Linkscollection
 
 		// Standardabfrage
 		$query = "SELECT * FROM tl_linkscollection_links";
-
 		$Template = new \BackendTemplate('be_linklist');
-
 		$Template->request = ampersand(\Environment::getInstance()->request, true);
-
 		$Template->links = array();
 
 		// Set default variables
@@ -446,18 +485,31 @@ class Linkscollection
 		{
 			while($objLinks->next())
 			{
-				$arrLinks[] = array
+				$item = array
 				(
 					'id'           => $objLinks->id,
 					'pid'          => $objLinks->pid,
 					'title'        => $objLinks->title,
 					'url'          => $objLinks->url,
 					'text'         => $objLinks->text,
+					'cms'          => $objLinks->cms,
+					'statecode'    => $objLinks->statecode,
+					'statedate'    => $objLinks->statedate,
+					'statetext'    => $objLinks->statetext,
 					'ref'          => \Input::get('ref'),
 					'icon'         => $this->getFavicon($objLinks->id),
 					'edit'         => str_replace('%s', $objLinks->id, $GLOBALS['TL_LANG']['tl_linkscollection_list']['edit']),
 					'edit_header'  => str_replace('%s', $objLinks->pid, $GLOBALS['TL_LANG']['tl_linkscollection_list']['edit_header']),
+					'language'     => $objLinks->language,
 				);
+				$header = '<div class="tl_content no_padding even click2edit toggle_select hover-div">';
+				$header .= '<div class="tl_content_right height18">';
+				$header .= '<a class="edit" title="'.$item['edit'].'" href="contao/main.php?do=linkscollection&amp;table=tl_linkscollection_links&amp;act=edit&amp;id='.$item['id'].'&amp;rt='.REQUEST_TOKEN.'&amp;ref='.$item['ref'].'"><img width="12" height="16" alt="Link bearbeiten" src="system/themes/'.\Controller::getTheme().'/images/edit.gif"></a>';
+				$header .= '<a class="editheader" title="'.$item['edit_header'].'" href="contao/main.php?do=linkscollection&amp;table=tl_linkscollection_links&amp;id='.$item['pid'].'&amp;rt='.REQUEST_TOKEN.'&amp;ref='.$item['ref'].'"><img width="12" height="16" alt="Links der Kategorie bearbeiten" src="system/themes/'.\Controller::getTheme().'/images/header.gif"></a>';
+				$header .= '</div>';
+				$header .= self::ViewLinkrow($item);
+				$header .= '</div>';
+				$arrLinks[] = $header;
 			}
 		}
 
@@ -471,7 +523,7 @@ class Linkscollection
 	 * @param string	Serialisiertes Array mit den Daten
 	 * @return array
 	 */
-	public function Statistik(DataContainer $dc)
+	public function Statistik()
 	{
 		if(\Input::get('key') != 'statistik')
 		{
@@ -479,6 +531,7 @@ class Linkscollection
 		}
 
 		//\Linkbuilder::run();
+		\Schachbulle\ContaoLinkscollectionBundle\Klassen\CreateStatistics::run();
 		
 		// Zurücklink generieren, ab C4 ist das ein symbolischer Link zu "contao"
 		if (version_compare(VERSION, '4.0', '>='))
@@ -490,8 +543,7 @@ class Linkscollection
 			$backlink = 'main.php';
 		}
 		$backlink .= '?do=linkscollection&rt='.REQUEST_TOKEN;
-		header('Location:'.$backlink);
-
+		\Controller::redirect($backlink); // Linksammlung Startseite aufrufen
 	}
 
 }

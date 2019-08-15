@@ -1,0 +1,16 @@
+<?php
+	$GLOBALS['TL_JQUERY'][] = '<script type="text/javascript" src="system/modules/linkscollection/assets/js/ajax.js"></script>'; 
+?>
+<div class="<?php echo $this->class; ?> block"<?php echo $this->cssID; ?><?php if ($this->style): ?> style="<?php echo $this->style; ?>"<?php endif; ?>>
+	
+	<div id="myFormDiv">
+		<form id="myForm" action="" method="get">
+			<label>Suchbegriff:</label>
+			<input autofocus id="s" type="text" name="s" class="form-control"> 
+			<input type="submit" value="Senden" class="btn btn-primary">
+			<span id="ajaxloader"></span>
+		</form>
+	</div>
+	<div id="searchresult"></div>
+
+</div> 

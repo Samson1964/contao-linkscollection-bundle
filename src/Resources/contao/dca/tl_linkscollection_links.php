@@ -639,59 +639,8 @@ class tl_linkscollection_links extends Backend
 	 */
 	public function listLinks($arrRow)
 	{
-		$refreshtime = time() - ($GLOBALS['TL_CONFIG']['linkscollection_test_duration'] * 86400);
 
-		if($arrRow['statedate'] < $refreshtime)
-		{
-			// URL neu prüfen und Favicon downloaden
-			$arrRow = Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::saveFavicon($arrRow);
-		}
-		// Letzte Prüfung vor x Tagen
-		$check_days = ceil((time() - $arrRow['statedate']) / 86400);
-		// Nächster Zeitpunkt für eine Prüfung
-		$refreshtime_next = $arrRow['statedate'] + ($GLOBALS['TL_CONFIG']['linkscollection_test_duration'] * 86400);
-
-		// Favicon suchen
-		$icon = Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($arrRow['id']);
-
-		switch($arrRow['statecode'])
-		{
-			case 0:
-				$info = ' <span style="color:red">invalid host</span>';
-				$style = 'background-color:#FF0000; color:white; padding-left:2px; padding-right:2px;';
-				$arrRow['statecode'] = '000';
-				break;
-			case ($arrRow['statecode'] >= 400):
-				$info = ' <span style="color:red">not found ('.$arrRow['statetext'].')</span>';
-				$style = 'background-color:#FF0000; color:white; padding-left:2px; padding-right:2px;';
-				break;
-			case ($arrRow['statecode'] >= 300):
-				$info = ' <span style="color:blue">redirect ('.$arrRow['statetext'].')</span>';
-				$style = 'background-color:#FFFF00; padding-left:2px; padding-right:2px;';
-				break;
-			case ($arrRow['statecode'] >= 200):
-				$style = 'background-color:#00FF00; padding-left:2px; padding-right:2px;';
-				break;
-			default:
-				$info = '';
-		}
-		
-		$archivclass = ($arrRow['webarchiv']) ? ' webarchiv' : ''; // Webarchiv-Klasse hinzufügen
-		
-		$line = '';
-		$line .= '<div class="tl_content_right height18">';
-		$line .= '<span style="margin-right:5px; color:#9F5000;" title="Verwendetes CMS">'.$arrRow['cms'].'</span>';
-		$line .= '<span style="'.$style.' font-weight:bold;">'.$arrRow['statecode'].'</span>';
-		$line .= '<span style="font-size:0.6rem; margin-left:3px;" title="Zeitpunkt der letzten Prüfung. Nächste Prüfung: '.date('d.m.Y H:i',$refreshtime_next).'"> vor '.$check_days.' Tag(en)</span>';
-		$line .= '</div>';
-		$line .= '<div class="favicon-img height18'.$archivclass.'" style="background-image: url('.$icon.');">';
-		$line .= '<a href="'.$arrRow['url'].'" target="_blank"><b>'.$arrRow['title'].'</b></a> - '.$arrRow['url'].$info;
-		if($arrRow['text']) $line .= '<div class="description">'.$arrRow['text'].'</div>';
-		$line .= "</div>";
-
-		$line .= "\n";
-
-		return($line);
+		return \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::ViewLinkrow($arrRow);
 
 	}
 

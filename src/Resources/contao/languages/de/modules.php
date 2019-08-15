@@ -8,6 +8,11 @@
 
 
 /**
- * Back end modules
+ * Backend-Module
  */
 $GLOBALS['TL_LANG']['MOD']['linkscollection'] = array('Linksammlung', 'Linksammlung verwalten');
+
+/**
+ * Frontend-Module
+ */
+$GLOBALS['TL_LANG']['FMD']['linkscollection'] = array('Linksammlung', 'Linksammlung anzeigen');

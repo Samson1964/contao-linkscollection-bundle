@@ -26,27 +26,17 @@ array_insert($GLOBALS['BE_MOD']['content'], 1, array
 	'linkscollection' => array
 	(
 		'tables'         => array('tl_linkscollection', 'tl_linkscollection_links'),
-		'icon'           => 'system/modules/linkscollection/assets/images/icon.png',
-		'analyse'        => array('Linkscollection', 'Linkanalyse'),
-		'linklist'       => array('Linkscollection', 'Linklist'),
-		'statistik'      => array('Linkscollection', 'Statistik')
+		'icon'           => 'bundles/contaolinkscollection/images/icon.png',
+		'analyse'        => array('Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection', 'Linkanalyse'),
+		'linklist'       => array('Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection', 'GenerateLinklist'),
+		'statistik'      => array('Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection', 'Statistik')
 	)
 ));
 
 /**
  * Frontend-Module der Linksammlung an Position 1 einfügen
  */
-array_insert($GLOBALS['FE_MOD'], 1, array
-(
-	'linkscollection'        => array
-	(
-		'linksammlung'       => 'Schachbulle\ContaoLinkscollectionBundle\Linksammlung',
-		'linkscollection'    => 'Schachbulle\ContaoLinkscollectionBundle\Linkscollection',
-	)
-));
-
-//
-$GLOBALS['FE_MOD']['linkscollection'] = array
+$GLOBALS['FE_MOD']['application'] = array
 (
 	'linkscollection'          => 'Schachbulle\ContaoLinkscollectionBundle\Module\Linksammlung',
 );
@@ -65,7 +55,7 @@ if(TL_MODE == 'BE') $GLOBALS['TL_CSS'][] = 'bundles/contaolinkscollection/css/be
  */
 
 $GLOBALS['TL_CONFIG']['linkscollection_new_duration'] = 60; // 60 Tage gilt ein Link als neu
-$GLOBALS['TL_CONFIG']['linkscollection_test_duration'] = 0; // 365 Tage bis zur nächsten Linkprüfung
+$GLOBALS['TL_CONFIG']['linkscollection_test_duration'] = 30; // 365 Tage bis zur nächsten Linkprüfung
 $GLOBALS['TL_CONFIG']['linkscollection_webarchiv'] = 'https://web.archive.org/web/*/'; // Link zum Webarchiv (Prefix)
 
 /**

@@ -1,0 +1,64 @@
+<div class="<?php echo $this->class; ?> block"<?php echo $this->cssID; ?><?php if ($this->style): ?> style="<?php echo $this->style; ?>"<?php endif; ?>>
+	
+	<?php if($this->menu): ?>
+		<div class="menu">
+			<ul>
+			<?php foreach($this->menu as $m): ?>
+				<li><a href="<?= $m['link'] ?>"><?= $m['title'] ?></a></li>
+			<?php endforeach; ?>
+			</ul>
+		</div>
+	<?php endif; ?>		
+
+	<?php if($this->breadcrumb): ?>
+		<div class="breadcrumb">
+			<ul>
+			<?php foreach($this->breadcrumb as $b): ?>
+				<li class="<?= $b['class'] ?>"><?php if($b['url']): ?><a href="<?= $b['url'] ?>"><?php endif; ?><?= $b['title'] ?><?php if($b['url']): ?></a><?php endif; ?></li>
+			<?php endforeach; ?>
+			</ul>
+		</div>
+	<?php endif; ?>		
+
+	<div class="item">
+		<h2>Linkdetails</h2>
+		<ul>
+			<li><b>Titel:</b> <?= $this->title ?></li>
+			<li><b>URL:</b> <a href="<?= $this->url_raw ?>" target="_blank"><?= $this->url_raw ?></a></li>
+			<?php if($this->webarchiv): ?>
+			<li><b>Webarchiv:</b> Seite nur noch im Webarchiv verfügbar!</li>
+			<?php endif; ?> 
+			<li><b>Favicon:</b> <img src="<?= $this->icon ?>"></li>
+			<li><b>Aufrufe:</b> <?= $this->hits ?> (<?= $this->average ?> je Tag)</li>
+			<li><b>Beschreibung:</b> <?= $this->text ?></li>
+			<li><b>Eingetragen am:</b> <?= $this->initdate ?></li>
+			<li><b>Aktualisiert am:</b> <?= $this->tstamp ?></li>
+		</ul>
+		<h2>Letzte automatische Prüfung</h2>
+		<ul>
+			<li><b>Datum:</b> <?= $this->statedate ?></li>
+			<li><b>HTTP-Code:</b> <?= $this->statecode ?></li>
+			<li><b>HTTP-Status:</b> <?= $this->statetext ?></li>
+		</ul>
+		<h2>Meldungen durch Besucher</h2>
+		<ul>
+			<li><b>Anzahl:</b> <?= $this->problemcount ?></li>
+			<li><b>Zuletzt am:</b> <?= $this->problemdate ?></li>
+		</ul>
+	</div>
+
+	<?php if($this->form): ?>
+		<h2>Korrektur/Problem melden</h2>
+		<div class="form">
+			<?= $this->form ?>
+		</div>
+	<?php endif; ?>		
+
+	<?php if($this->counter): ?>
+		<div class="counter">
+			E-Mail: {{email::links@schachbund.de}}<br>
+			Die Datenbank enthält <b><?= $this->counter['categories'] ?></b> Kategorien mit <b><?= $this->counter['links'] ?></b> Links.
+		</div>
+	<?php endif; ?>		
+
+</div> 

@@ -178,9 +178,9 @@ class Linksammlung extends \Module
 				$links[] = array
 				(
 					'title'            => $objLinks->title,
-					'url'              => 'system/modules/linkscollection/public/go.php?id='.$objLinks->id,
-					'icon'             => Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($objLinks->id),
-					'language'         => Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getLanguageIcon($objLinks->language),
+					'url'              => 'bundles/contaolinkscollection/go.php?id='.$objLinks->id,
+					'icon'             => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($objLinks->id),
+					'language'         => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getLanguageIcon($objLinks->language),
 					'new'              => $objLinks->newWindow,
 					'text'             => $objLinks->text,
 					'popular'          => $objLinks->popular,
@@ -339,13 +339,13 @@ class Linksammlung extends \Module
 			$this->Template->id = $objLink->id;
 			$this->Template->title = $objLink->title;
 			$this->Template->url_raw = $objLink->url;
-			$this->Template->url_go = 'system/modules/linkscollection/public/go.php?id='.$objLink->id;
+			$this->Template->url_go = 'bundles/contaolinkscollection/go.php?id='.$objLink->id;
 			$this->Template->newWindow = $objLink->newWindow;
 			$this->Template->text = $objLink->text;
 			$this->Template->hits = $objLink->hits;
 			$this->Template->average = ($objLink->hits == 0) ? 0 : str_replace('.',',',sprintf("%01.1f",$objLink->hits / ((time() - $objLink->initdate) / 86400)));
 			$this->Template->popular = $objLink->popular;
-			$this->Template->icon = Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($objLink->id);
+			$this->Template->icon = \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($objLink->id);
 			$this->Template->initdate = date("d.m.Y, H:i", $objLink->initdate);
 			$this->Template->tstamp = date("d.m.Y, H:i", $objLink->tstamp);
 			$this->Template->statedate = date("d.m.Y, H:i", $objLink->statedate);
@@ -359,7 +359,7 @@ class Linksammlung extends \Module
 		// Template füllen
 		$this->Template->menu = $this->Menu();
 		$this->Template->counter = array('categories'=>$this->numberCategories,'links'=>$this->numberLinks);
-		//$this->Template->form = $this->SendProblemForm($objLink);
+		$this->Template->form = $this->SendProblemForm($objLink);
 	}
 
 	protected function Menu()

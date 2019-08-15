@@ -364,7 +364,7 @@ class tl_linkscollection extends Backend
 		{
 			$GLOBALS['TL_DCA']['tl_linkscollection']['list']['sorting']['breadcrumb'] .= '
 			<ul id="tl_breadcrumb">
-  				<li>' . implode(' &gt; </li><li>', $breadcrumb) . '</li>
+				<li>' . implode(' &gt; </li><li>', $breadcrumb) . '</li>
 			</ul>';
 		}
 	}

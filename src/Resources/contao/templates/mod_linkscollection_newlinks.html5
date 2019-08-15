@@ -1,0 +1,36 @@
+<div class="<?php echo $this->class; ?> block"<?php echo $this->cssID; ?><?php if ($this->style): ?> style="<?php echo $this->style; ?>"<?php endif; ?>>
+	
+	<?php if($this->menu): ?>
+		<div class="menu">
+			<ul>
+			<?php foreach($this->menu as $m): ?>
+				<li><a href="<?= $m['link'] ?>"><?= $m['title'] ?></a></li>
+			<?php endforeach; ?>
+			</ul>
+		</div>
+	<?php endif; ?>
+
+	<?php if($this->links): ?>
+		<div class="newlinks links">
+			<h1>Neue Links</h1>
+			<ul>
+				<?= $this->links ?>
+			</ul>
+		</div>
+	<?php endif; ?>
+
+	<?php if($this->form): ?>
+		<h2>Link melden</h2>
+		<div class="form">
+			<?= $this->form ?>
+		</div>
+	<?php endif; ?>
+
+	<?php if($this->counter): ?>
+		<div class="counter">
+			E-Mail: {{email::links@schachbund.de}}<br>
+			Die Datenbank enthält <b><?= $this->counter['categories'] ?></b> Kategorien mit <b><?= $this->counter['links'] ?></b> Links.
+		</div>
+	<?php endif; ?>
+
+</div> 

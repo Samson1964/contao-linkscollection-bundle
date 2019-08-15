@@ -1,0 +1,50 @@
+<form action="<?= $this->request ?>" id="tl_filter" class="tl_form" method="post">
+	<div class="tl_formbody">
+		<input type="hidden" name="FORM_SUBMIT" value="tl_filters">
+		<input type="hidden" name="REQUEST_TOKEN" value="<?= REQUEST_TOKEN ?>">
+
+		<div class="tl_panel">
+
+			<div class="tl_submit_panel tl_subpanel">
+				<input type="image" name="filter" id="filter" src="<?= TL_FILES_URL ?>system/themes/<?= $this->getTheme() ?>/images/reload.gif" class="tl_img_submit" title="<?= $this->apply ?>" alt="<?= $this->apply ?>">
+			</div>
+
+			<div class="tl_search tl_subpanel">
+				<strong><?= $this->search ?>:</strong>
+				<select name="tl_field" class="tl_select<?= $this->searchClass ?>"><?= $this->searchOptions ?></select>
+				<span>=</span>
+				<input type="text" name="tl_value" class="tl_text<?= $this->searchClass ?>" value="<?= $this->keywords ?>">
+			</div>
+
+			<div class="clear"></div>
+
+		</div>
+	</div>
+</form>
+
+<div id="tl_buttons">
+	<a href="contao/main.php?do=linkscollection&amp;rt=<?= REQUEST_TOKEN ?>" class="header_back" title="" accesskey="b" onclick="Backend.getScrollOffset()"><?= $GLOBALS['TL_LANG']['MSC']['backBT'] ?></a> 
+</div>
+
+<div class="tl_listing_container parent_view">
+
+	<div onmouseout="Theme.hoverDiv(this,0)" onmouseover="Theme.hoverDiv(this,1)" class="tl_header click2edit toggle_select" style="">
+		<table class="tl_header_table" width="100%">
+			<tbody>
+			<tr>
+				<td><span class="tl_label">Linkliste:</span> <?= $this->numRows ?></td>
+			</tr></tbody>
+		</table>
+	</div>
+
+<?php if ($this->links): ?>
+<?php foreach ($this->links as $link): ?>
+	<?= $link ?>
+<?php endforeach; ?>
+<?php else: ?>
+	<div onmouseout="Theme.hoverDiv(this,0)" onmouseover="Theme.hoverDiv(this,1)" class="tl_content no_padding" style="">
+	Nichts gefunden
+	</div>
+<?php endif; ?>
+
+</div>

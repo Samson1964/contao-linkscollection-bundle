@@ -1,7 +1,58 @@
-<?php $this->extend('block_searchable'); ?>
+<div class="<?php echo $this->class; ?> block"<?php echo $this->cssID; ?><?php if ($this->style): ?> style="<?php echo $this->style; ?>"<?php endif; ?>>
 
-<?php $this->block('content'); ?>
+	<?php if($this->menu): ?>
+		<div class="menu">
+			<ul>
+			<?php foreach($this->menu as $m): ?>
+				<li><a href="<?= $m['link'] ?>"><?= $m['title'] ?></a></li>
+			<?php endforeach; ?>
+			</ul>
+		</div>
+	<?php endif; ?>
 
-<?= $this->message; ?>
+	<?php if($this->breadcrumb): ?>
+		<div class="breadcrumb">
+			<ul>
+			<?php foreach($this->breadcrumb as $b): ?>
+				<li class="<?= $b['class'] ?>"><?php if($b['url']): ?><a href="<?= $b['url'] ?>"><?php endif; ?><?= $b['title'] ?><?php if($b['url']): ?></a><?php endif; ?></li>
+			<?php endforeach; ?>
+			</ul>
+		</div>
+	<?php endif; ?>
 
-<?php $this->endblock(); ?>
+	<?php if($this->categories): ?>
+		<div class="categories">
+			<h2>Kategorien</h2>
+			<ul>
+			<?php foreach($this->categories as $c): ?>
+				<li class="<?= $c['class'] ?>"><a href="<?= $c['link'] ?>"><?= $c['title'] ?></a> (<?= $c['links'] ?>)<?= $c['new'] ?></li>
+			<?php endforeach; ?>
+			</ul>
+		</div>
+	<?php endif; ?>
+
+	<div style="clear:both"></div>
+
+	<?php if($this->links): ?>
+		<div class="links">
+			<h2>Links</h2>
+			<ul>
+				<?= $this->links ?>
+			</ul>
+		</div>
+	<?php endif; ?>
+
+	<?php if($this->form): ?>
+		<h2>Neuen Link eintragen</h2>
+		<div class="form">
+			<?= $this->form ?>
+		</div>
+	<?php endif; ?>
+
+	<?php if($this->counter): ?>
+		<div class="counter">
+			Die Datenbank enthält <b><?= $this->counter['categories'] ?></b> Kategorien mit <b><?= $this->counter['links'] ?></b> Links.
+		</div>
+	<?php endif; ?>
+
+</div>
