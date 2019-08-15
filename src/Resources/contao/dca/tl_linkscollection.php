@@ -61,21 +61,21 @@ $GLOBALS['TL_DCA']['tl_linkscollection'] = array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection']['linklist'],
 				'href'                => 'key=linklist',
-				'icon'                => 'bundles/contao-linkscollection/assets/images/favicon_16.png',
+				'icon'                => 'bundles/contaolinkscollection/images/favicon_16.png',
 				'attributes'          => 'onclick="Backend.getScrollOffset();"'
 			),
 			'analyse' => array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection']['analyse'],
 				'href'                => 'key=analyse',
-				'icon'                => 'system/modules/linkscollection/assets/images/problem_16.png',
+				'icon'                => 'bundles/contaolinkscollection/images/problem_16.png',
 				'attributes'          => 'onclick="Backend.getScrollOffset();"'
 			),
 			'statistik' => array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection']['statistik'],
 				'href'                => 'key=statistik',
-				'icon'                => 'system/modules/linkscollection/assets/images/statistik.png',
+				'icon'                => 'bundles/contaolinkscollection/images/statistik.png',
 				'attributes'          => 'onclick="Backend.getScrollOffset();"'
 			),
 			'toggleNodes' => array
@@ -388,7 +388,7 @@ class tl_linkscollection extends Backend
 			$row['protected'] = true;
 		}
 
-		$image = 'system/modules/linkscollection/assets/images/category.png';
+		$image = 'bundles/contaolinkscollection/images/category.png';
 		$imageAttribute = trim($imageAttribute . ' data-icon="category.png" data-icon-disabled="category.png"');
 
 		// Return the image only
@@ -438,8 +438,17 @@ class tl_linkscollection extends Backend
 		if ($varValue == '')
 		{
 			$autoAlias = true;
-			//$varValue = standardize(StringUtil::restoreBasicEntities($dc->activeRecord->title));
-			$varValue = Contao\System::getContainer()->get('contao.slug')->generate($dc->activeRecord->title);
+
+			// Optionen für die Aliasgenerierung setzen
+			// Siehe: https://github.com/ausi/slug-generator/blob/master/README.md
+			$slugOptionen = (object)array
+			(
+				'setValidChars' => 'a-z0-9',
+				'setLocale'     => 'de',
+				'setDelimiter'  => '-'
+			);
+			// Alias generieren
+			$varValue = Contao\System::getContainer()->get('contao.slug')->generate($dc->activeRecord->title, $slugOptionen);
 		}
 
 		$objAlias = $this->Database->prepare("SELECT id FROM tl_linkscollection WHERE id=? OR alias=?")

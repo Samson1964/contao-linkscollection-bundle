@@ -1,9 +1,14 @@
 /* Favicon */
 .favicon-img {
- 	background-repeat   : no-repeat; 
- 	background-position : left top; 
- 	background-size     : 18px; 
- 	padding-left        : 20px;
+	background-repeat   : no-repeat; 
+	background-position : left top; 
+	background-size     : 18px; 
+	padding-left        : 20px;
+}
+
+.height18 {
+	height              : 18px;
+	line-height         : 18px;
 }
 
 .webarchiv, .webarchiv a {

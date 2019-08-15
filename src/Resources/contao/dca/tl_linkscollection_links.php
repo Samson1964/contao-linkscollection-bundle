@@ -19,20 +19,20 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 		// Config
 		'config' => array
 		(
-			'dataContainer'               => 'Table',
-			'ptable'                      => 'tl_linkscollection',
-			'enableVersioning'            => true,
+			'dataContainer'            => 'Table',
+			'ptable'                   => 'tl_linkscollection',
+			'enableVersioning'         => true,
 			'sql' => array
 			(
 				'keys' => array
 				(
-					'id'    => 'primary',
-					'pid'   => 'index',
-					'title' => 'index',
-					'url'   => 'index'
+					'id'               => 'primary',
+					'pid'              => 'index',
+					'title'            => 'index',
+					'url'              => 'index'
 				)
 			),
-		'onsubmit_callback'  => array
+		'onsubmit_callback'            => array
 		(
 			array('tl_linkscollection_links', 'saveRecord')
 		)
@@ -51,7 +51,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'disableGrouping'         => true,
 			'child_record_callback'   => array('tl_linkscollection_links', 'listLinks'),
 			'child_record_class'      => 'no_padding',
-			//'filter'                  => BackendLinkscollectionFilter\Filter::getCurrentFilterDefinition('tl_linkscollection_links'),
+			'filter'                  => Schachbulle\ContaoLinkscollectionBundle\Klassen\Filter::getCurrentFilterDefinition('tl_linkscollection_links'),
 			//'rootPaste'               => false
 		),
 		'global_operations' => array
@@ -60,21 +60,21 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection']['linklist'],
 				'href'                => 'key=linklist',
-				'icon'                => 'system/modules/linkscollection/assets/images/favicon_16.png',
+				'icon'                => 'bundles/contaolinkscollection/images/favicon_16.png',
 				'attributes'          => 'onclick="Backend.getScrollOffset();"'
 			),
 			'analyse' => array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection']['analyse'],
 				'href'                => 'key=analyse',
-				'icon'                => 'system/modules/linkscollection/assets/images/problem_16.png',
+				'icon'                => 'bundles/contaolinkscollection/images/problem_16.png',
 				'attributes'          => 'onclick="Backend.getScrollOffset();"'
 			),
 			'statistik' => array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection']['statistik'],
 				'href'                => 'key=statistik',
-				'icon'                => 'system/modules/linkscollection/assets/images/statistik.png',
+				'icon'                => 'bundles/contaolinkscollection/images/statistik.png',
 				'attributes'          => 'onclick="Backend.getScrollOffset();"'
 			),
 			'all' => array
@@ -88,81 +88,81 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['extendedFilter'],
 				'class'               => 'header_special_filter',
-				'button_callback'     => array('tl_linkscollection_links', 'getFilterWidget') 
+				'button_callback'     => array('tl_linkscollection_links', 'getFilterWidget')
 			),
-        ),
-        'operations' => array
-        (
-            'edit' => array
-            (
-                'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['edit'],
-                'href'                => 'act=edit',
-                'icon'                => 'edit.gif'
-            ),
-            //'copy' => array
-            //(
-            //    'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['copy'],
-            //    'href'                => 'act=paste&mode=copy',
-            //    'icon'                => 'copy.gif'
-            //),
-            'cut' => array
-            (
-                'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['cut'],
-                'href'                => 'act=paste&mode=cut',
-                'icon'                => 'cut.gif'
-            ),
-            'delete' => array
-            (
-                'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['delete'],
-                'href'                => 'act=delete',
-                'icon'                => 'delete.gif',
-                'attributes'          => 'onclick="if(!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm'] . '\'))return false;Backend.getScrollOffset()"'
-            ),
+		),
+		'operations' => array
+		(
+			'edit' => array
+			(
+				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['edit'],
+				'href'                => 'act=edit',
+				'icon'                => 'edit.gif'
+			),
+			//'copy' => array
+			//(
+			//    'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['copy'],
+			//    'href'                => 'act=paste&mode=copy',
+			//    'icon'                => 'copy.gif'
+			//),
+			'cut' => array
+			(
+				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['cut'],
+				'href'                => 'act=paste&mode=cut',
+				'icon'                => 'cut.gif'
+			),
+			'delete' => array
+			(
+				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['delete'],
+				'href'                => 'act=delete',
+				'icon'                => 'delete.gif',
+				'attributes'          => 'onclick="if(!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm'] . '\'))return false;Backend.getScrollOffset()"'
+			),
 			'toggle' => array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['toggle'],
 				'icon'                => 'visible.gif',
 				'attributes'          => 'onclick="Backend.getScrollOffset();return AjaxRequest.toggleVisibility(this,%s)"',
-				'button_callback'     => array('tl_linkscollection_links', 'toggleIcon') 
+				'button_callback'     => array('tl_linkscollection_links', 'toggleIcon')
 			),
-            'show' => array
-            (
-                'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['show'],
-                'href'                => 'act=show',
-                'icon'                => 'show.gif'
-            )
-        )
-    ),
- 
+			'show' => array
+			(
+				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['show'],
+				'href'                => 'act=show',
+				'icon'                => 'show.gif'
+			)
+		)
+	),
+
 	// Palettes
 	'palettes' => array
 	(
-		'__selector__'                => array('protected'), 
+		'__selector__'                => array('protected'),
 		'default'                     => '{infobox_legend},infobox;{title_legend},title,url,language,webarchiv,popular,newWindow,text;{problem_legend},problem,problemdate,problemcount,warnings;{name_legend:hide},name,email;{hits_legend:hide},hits;{guests_legend:hide},ip,ipdate;{state_legend:hide},statecode,statetext,statedate;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space;{published_legend},published,start,stop'
-	), 
+	),
 
 	// Subpalettes
 	'subpalettes' => array
 	(
 		'protected'                   => 'groups'
-	), 
-	
-	
-    // Fields
-    'fields' => array
-    (
-        'id' => array
-        (
-            'sql'                     => "int(10) unsigned NOT NULL auto_increment"
-        ),
-        'pid' => array
-        (
-            'sql'                     => "int(10) unsigned NOT NULL default '0'"
-        ),
-        'tstamp' => array
-        (
-            'sql'                     => "int(10) unsigned NOT NULL default '0'"
-        ),
+	),
+
+
+	// Fields
+	'fields' => array
+	(
+		'id' => array
+		(
+			'sql'                     => "int(10) unsigned NOT NULL auto_increment"
+		),
+		'pid' => array
+		(
+			'sql'                     => "int(10) unsigned NOT NULL default '0'"
+		),
+		'tstamp' => array
+		(
+			'sql'                     => "int(10) unsigned NOT NULL default '0'"
+		),
 		// Eintragsdatum, wird beim ersten Speichern gesetzt
 		'initdate' => array
 		(
@@ -170,34 +170,34 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			(
 				array('tl_linkscollection_links', 'saveInitdate')
 			),
-			'flag'					  => 5,
+			'flag'                    => 5,
 			'sql'                     => "int(10) unsigned NOT NULL default '0'"
- 		), 
+ 		),
 		'infobox' => array
 		(
-			'exclude'              => true,
-			'input_field_callback' => array('tl_linkscollection_links', 'getInfobox')
-		), 
-        'title' => array
-        (
-            'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['title'],
-            'exclude'                 => true,
-            'search'                  => true,
-            'sorting'                 => true,
-            'flag'                    => 1,
-            'inputType'               => 'text',
-            'eval'                    => array('mandatory'=>true, 'maxlength'=>128, 'tl_class'=>'long'),
-            'sql'                     => "varchar(128) NOT NULL default ''"
-        ),
+			'exclude'                 => true,
+			'input_field_callback'    => array('tl_linkscollection_links', 'getInfobox')
+		),
+		'title' => array
+		(
+			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['title'],
+			'exclude'                 => true,
+			'search'                  => true,
+			'sorting'                 => true,
+			'flag'                    => 1,
+			'inputType'               => 'text',
+			'eval'                    => array('mandatory'=>true, 'maxlength'=>128, 'tl_class'=>'long'),
+			'sql'                     => "varchar(128) NOT NULL default ''"
+		),
 		'url' => array
 		(
-			'label'                 => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['url'],
-			'exclude'               => true,
-			'default'               => 'http://www.',
-			'inputType'             => 'text',
-			'eval'                  => array('mandatory'=>true, 'rgxp'=>'url', 'decodeEntities'=>true, 'tl_class'=>'w50', 'maxlength'=>255),
-			'sql'                   => "varchar(255) NOT NULL default ''",
-		), 
+			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['url'],
+			'exclude'                 => true,
+			'default'                 => '',
+			'inputType'               => 'text',
+			'eval'                    => array('mandatory'=>true, 'rgxp'=>'url', 'decodeEntities'=>true, 'tl_class'=>'w50', 'maxlength'=>255),
+			'sql'                     => "varchar(255) NOT NULL default ''",
+		),
 		'language' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['language'],
@@ -208,7 +208,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'options'                 => System::getCountries(),
 			'eval'                    => array('includeBlankOption'=>true, 'chosen'=>true, 'tl_class'=>'w50'),
 			'sql'                     => "varchar(2) NOT NULL default ''"
-		), 
+		),
 		// Link offline, aber auf www.archive.org
 		'webarchiv' => array
 		(
@@ -227,22 +227,22 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'inputType'               => 'fileTree',
 			'eval'                    => array
 			(
-				'files'               => true, 
-				'fieldType'           => 'radio', 
-				'filesOnly'           => true, 
+				'files'               => true,
+				'fieldType'           => 'radio',
+				'filesOnly'           => true,
 				'extensions'          => 'jpg,jpeg,png,gif,ico'
 			),
-			'sql'                     => "binary(16) NULL" 
+			'sql'                     => "binary(16) NULL"
 		),
-  		'text' => array
+		'text' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['text'],
 			'exclude'                 => true,
 			'search'                  => true,
 			'inputType'               => 'textarea',
-			'eval'                    => array('rte'=>'tinyMCE', 'tl_class'=>'clr'), 
-			'sql'                     => "mediumtext NULL" 
-		), 
+			'eval'                    => array('rte'=>'tinyMCE', 'tl_class'=>'clr'),
+			'sql'                     => "mediumtext NULL"
+		),
 		// Populärer Link (wird vorn einsortiert)
 		'popular' => array
 		(
@@ -251,7 +251,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'inputType'               => 'checkbox',
 			'eval'                    => array('tl_class'=>'w50'),
 			'sql'                     => "char(1) NOT NULL default ''"
-		), 
+		),
 		// Link im neuen Fenster öffnen
 		'newWindow' => array
 		(
@@ -271,7 +271,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'decodeEntities'=>true, 'tl_class'=>'w50'),
 			'sql'                     => "varchar(64) NOT NULL default ''"
-		), 
+		),
 		// Email des Linkeinreichers
 		'email' => array
 		(
@@ -279,7 +279,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'rgxp'=>'emails', 'decodeEntities'=>true, 'tl_class'=>'w50'),
 			'sql'                     => "varchar(128) NOT NULL default ''"
-		), 
+		),
 		// Anzahl der Zugriffe
 		'hits' => array
 		(
@@ -287,8 +287,8 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'exclude'                 => true,
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'rgxp'=>'numeric'),
-            'sql'                     => "int(10) unsigned NOT NULL default '0'"
-		), 
+			'sql'                     => "int(10) unsigned NOT NULL default '0'"
+		),
 		// Letzter Besucher: IP
 		'ip' => array
 		(
@@ -296,7 +296,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'tl_class'=>'w50'),
 			'sql'                     => "varchar(128) NOT NULL default ''"
-		), 
+		),
 		// Letzter Besucher: Datum
 		'ipdate' => array
 		(
@@ -304,9 +304,9 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'exclude'                 => true,
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'rgxp'=>'numeric', 'tl_class'=>'w50'),
-    		'flag'					  => 5,
-            'sql'                     => "int(10) unsigned NOT NULL default '0'"
-		), 
+			'flag'                    => 5,
+			'sql'                     => "int(10) unsigned NOT NULL default '0'"
+		),
 		// Statuscode des Links
 		'statecode' => array
 		(
@@ -314,7 +314,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'tl_class'=>'w50'),
 			'sql'                     => "varchar(3) NOT NULL default ''"
-		), 
+		),
 		// Statustext des Links (optional)
 		'statetext' => array
 		(
@@ -322,7 +322,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'tl_class'=>'w50'),
 			'sql'                     => "varchar(255) NOT NULL default ''"
-		), 
+		),
 		// Statusdatum
 		'statedate' => array
 		(
@@ -330,9 +330,9 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'exclude'                 => true,
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'rgxp'=>'numeric'),
-    		'flag'					  => 5,
-            'sql'                     => "int(10) unsigned NOT NULL default '0'"
-		), 
+			'flag'                    => 5,
+			'sql'                     => "int(10) unsigned NOT NULL default '0'"
+		),
 		// Verwendetes CMS
 		'cms' => array
 		(
@@ -351,88 +351,88 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'flag'                    => 5,
 			'sql'                     => "int(10) unsigned NOT NULL default '0'"
 		),
-  		'problem' => array
+		'problem' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['problem'],
 			'exclude'                 => true,
 			'search'                  => true,
 			'inputType'               => 'textarea',
-			'eval'                    => array('tl_class'=>'clr'), 
-			'sql'                     => "mediumtext NULL" 
-		), 
+			'eval'                    => array('tl_class'=>'clr'),
+			'sql'                     => "mediumtext NULL"
+		),
 		'problemdate' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['problemdate'],
 			'exclude'                 => true,
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'tl_class'=>'w50', 'rgxp'=>'numeric'),
-    		'flag'					  => 5,
-            'sql'                     => "int(10) unsigned NOT NULL default '0'"
-		), 
+			'flag'                    => 5,
+			'sql'                     => "int(10) unsigned NOT NULL default '0'"
+		),
 		'problemcount' => array
 		(
-			'label'                 => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['problemcount'],
-			'exclude'               => true,
-			'inputType'             => 'text',
-			'eval'                  => array('mandatory'=>false, 'tl_class'=>'w50', 'rgxp'=>'numeric'),
-            'sql'                   => "int(4) unsigned NOT NULL default '0'"
-		), 
+			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['problemcount'],
+			'exclude'                 => true,
+			'inputType'               => 'text',
+			'eval'                    => array('mandatory'=>false, 'tl_class'=>'w50', 'rgxp'=>'numeric'),
+			'sql'                     => "int(4) unsigned NOT NULL default '0'"
+		),
 		'warnings' => array
 		(
-			'label'					=> &$GLOBALS['TL_LANG']['tl_linkscollection_links']['warnings'],
-			'exclude' 				=> true,
-			'inputType' 			=> 'multiColumnWizard',
-			'eval' 					=> array
+			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['warnings'],
+			'exclude'                 => true,
+			'inputType'               => 'multiColumnWizard',
+			'eval'                    => array
 			(
-				'buttonPos' 		=> 'top',
-				'buttons'			=> array
+				'buttonPos'           => 'top',
+				'buttons'             => array
 				(
-					//'copy' 			=> false, 
+					//'copy' 			=> false,
 					//'delete' 		=> true,
-					'up' 			=> false,
-					'down'			=> false
+					'up'              => false,
+					'down'            => false
 				),
-				'columnFields' 		=> array
+				'columnFields'        => array
 				(
 					'done' => array
 					(
-						'label'                 => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['warning_done'],
-						'exclude'               => true,
-						'inputType'             => 'checkbox',
-						'eval'                  => array
-						(	
-							'style'				=> 'width: 20px',
-							'valign'			=> 'top'
+						'label'       => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['warning_done'],
+						'exclude'     => true,
+						'inputType'   => 'checkbox',
+						'eval'        => array
+						(
+							'style'   => 'width: 20px',
+							'valign'  => 'top'
 						)
 					),
 					'date' => array
 					(
-						'label'                 => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['warning_date'],
-						'exclude'               => true,
-						'inputType'             => 'text',
-						'eval' 					=> array
+						'label'       => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['warning_date'],
+						'exclude'     => true,
+						'inputType'   => 'text',
+						'eval'        => array
 						(
-							'style'				=> 'width: 140px',
-							'columnPos'			=> '1'
+							'style'             => 'width: 140px',
+							'columnPos'         => '1'
 						),
-						'load_callback'			=> array
+						'load_callback'         => array
 						(
 							array('tl_linkscollection_links', 'getDate')
 						),
-						'save_callback'			=> array
+						'save_callback'         => array
 						(
 							array('tl_linkscollection_links', 'saveDate')
 						)
-					), 
+					),
 					'name' => array
 					(
 						'label'                 => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['warning_name'],
 						'exclude'               => true,
 						'inputType'             => 'text',
-						'eval' 					=> array
+						'eval'                  => array
 						(
-							'style'				=> 'width: 140px',
-							'columnPos'			=> '1'
+							'style'             => 'width: 140px',
+							'columnPos'         => '1'
 						)
 					),
 					'newtitle' => array
@@ -440,10 +440,10 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 						'label'                 => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['warning_newtitle'],
 						'exclude'               => true,
 						'inputType'             => 'text',
-						'eval' 					=> array
+						'eval'                  => array
 						(
-							'style'				=> 'width: 140px',
-							'columnPos'			=> '1'
+							'style'             => 'width: 140px',
+							'columnPos'         => '1'
 						)
 					),
 					'error' => array
@@ -451,32 +451,32 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 						'label'                 => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['warning_error'],
 						'exclude'               => true,
 						'inputType'             => 'text',
-						'eval' 					=> array
-						(
-							'style'				=> 'width: 200px',
-							'columnPos'			=> '2'
-						)
-					), 
-					'email' => array
-					(
-						'label' 				=> &$GLOBALS['TL_LANG']['tl_linkscollection_links']['warning_email'],
-						'inputType' 			=> 'text',
 						'eval'                  => array
 						(
-							'mandatory'			=> false, 
-							'style'				=> 'width: 200px',
-							'columnPos'			=> '2'
+							'style'             => 'width: 200px',
+							'columnPos'         => '2'
+						)
+					),
+					'email' => array
+					(
+						'label'                 => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['warning_email'],
+						'inputType'             => 'text',
+						'eval'                  => array
+						(
+							'mandatory'         => false,
+							'style'             => 'width: 200px',
+							'columnPos'         => '2'
 						)
 					),
 					'newurl' => array
 					(
-						'label' 				=> &$GLOBALS['TL_LANG']['tl_linkscollection_links']['warning_newurl'],
-						'inputType' 			=> 'text',
+						'label'                 => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['warning_newurl'],
+						'inputType'             => 'text',
 						'eval'                  => array
 						(
-							'mandatory'			=> false, 
-							'style'				=> 'width: 200px',
-							'columnPos'			=> '2'
+							'mandatory'         => false,
+							'style'             => 'width: 200px',
+							'columnPos'         => '2'
 						)
 					),
 					'comment' => array
@@ -484,10 +484,10 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 						'label'                 => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['warning_comment'],
 						'exclude'               => true,
 						'inputType'             => 'textarea',
-						'eval' 					=> array
+						'eval'                  => array
 						(
-							'style'				=> 'width: 240px; height: 100px',
-							'valign'			=> 'top'
+							'style'             => 'width: 240px; height: 100px',
+							'valign'            => 'top'
 						)
 					),
 				)
@@ -546,7 +546,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'default'                 => 1,
 			'eval'                    => array('doNotCopy'=>true),
 			'sql'                     => "char(1) NOT NULL default ''"
-		), 
+		),
 		'start' => array
 		(
 			'exclude'                 => true,
@@ -562,7 +562,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'inputType'               => 'text',
 			'eval'                    => array('rgxp'=>'datim', 'datepicker'=>true, 'tl_class'=>'w50 wizard'),
 			'sql'                     => "varchar(10) NOT NULL default ''"
-		) 
+		)
 	)
 );
 
@@ -573,12 +573,12 @@ class tl_linkscollection_links extends Backend
 {
 
 	var $oldurl; // Speichert die alte URL
-	
-    /**
-     * Beim Speichern eines Datensatzes zusätzliche Änderungen vornehmen
-     * @param DataContainer
-     * @return -
-     */
+
+	/**
+	 * Beim Speichern eines Datensatzes zusätzliche Änderungen vornehmen
+	 * @param DataContainer
+	 * @return -
+	 */
 	public function saveRecord(DataContainer $dc)
 	{
 
@@ -601,7 +601,7 @@ class tl_linkscollection_links extends Backend
 			'webarchiv' => \Input::post('webarchiv'),
 			'url'       => \Input::post('url')
 		);
-		$arrRow = \Linkscollection::saveFavicon($arrRow);
+		$arrRow = \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::saveFavicon($arrRow);
 
 		// Update Datenbank
 		$set = array
@@ -631,20 +631,20 @@ class tl_linkscollection_links extends Backend
 		}
 		else return 0;
 	}
-	 
-    /**
-     * Generiere eine Zeile als HTML
-     * @param array
-     * @return string
-     */
-    public function listLinks($arrRow)
-    {
+
+	/**
+	 * Generiere eine Zeile als HTML
+	 * @param array
+	 * @return string
+	 */
+	public function listLinks($arrRow)
+	{
 		$refreshtime = time() - ($GLOBALS['TL_CONFIG']['linkscollection_test_duration'] * 86400);
 
 		if($arrRow['statedate'] < $refreshtime)
 		{
 			// URL neu prüfen und Favicon downloaden
-			$arrRow = \Linkscollection::saveFavicon($arrRow);
+			$arrRow = \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::saveFavicon($arrRow);
 		}
 		// Letzte Prüfung vor x Tagen
 		$check_days = ceil((time() - $arrRow['statedate']) / 86400);
@@ -652,59 +652,55 @@ class tl_linkscollection_links extends Backend
 		$refreshtime_next = $arrRow['statedate'] + ($GLOBALS['TL_CONFIG']['linkscollection_test_duration'] * 86400);
 
 		// Favicon suchen
-		$icon = \Linkscollection::getFavicon($arrRow['id']);
+		$icon = \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($arrRow['id']);
 
-        switch($arrRow['statecode'])
-        {
-        	case 0:
-            	$info = ' <span style="color:red">invalid host</span>';
-            	$style = 'background-color:#FF0000; color:white;';
-            	$arrRow['statecode'] = '000';
-            	break;
-            case ($arrRow['statecode'] >= 400):
-	            $info = ' <span style="color:red">not found ('.$arrRow['statetext'].')</span>';
-            	$style = 'background-color:#FF0000; color:white;';
-	            break;
-            case ($arrRow['statecode'] >= 300):
-	            $info = ' <span style="color:blue">redirect ('.$arrRow['statetext'].')</span>';
-            	$style = 'background-color:#FFFF00;';
-	            break;
-            case ($arrRow['statecode'] >= 200):
-            	$style = 'background-color:#00FF00;';
-	            break;
-	        default:
-	        	$info = '';
-	    }
-        
-        $archivclass = ($arrRow['webarchiv']) ? ' webarchiv' : ''; // Webarchiv-Klasse hinzufügen
-        
-        $line = '';
-		$line .= '<div class="tl_content_right">';
+		switch($arrRow['statecode'])
+		{
+			case 0:
+				$info = ' <span style="color:red">invalid host</span>';
+				$style = 'background-color:#FF0000; color:white; padding-left:2px; padding-right:2px;';
+				$arrRow['statecode'] = '000';
+				break;
+			case ($arrRow['statecode'] >= 400):
+				$info = ' <span style="color:red">not found ('.$arrRow['statetext'].')</span>';
+				$style = 'background-color:#FF0000; color:white; padding-left:2px; padding-right:2px;';
+				break;
+			case ($arrRow['statecode'] >= 300):
+				$info = ' <span style="color:blue">redirect ('.$arrRow['statetext'].')</span>';
+				$style = 'background-color:#FFFF00; padding-left:2px; padding-right:2px;';
+				break;
+			case ($arrRow['statecode'] >= 200):
+				$style = 'background-color:#00FF00; padding-left:2px; padding-right:2px;';
+				break;
+			default:
+				$info = '';
+		}
+		
+		$archivclass = ($arrRow['webarchiv']) ? ' webarchiv' : ''; // Webarchiv-Klasse hinzufügen
+		
+		$line = '';
+		$line .= '<div class="tl_content_right height18">';
 		$line .= '<span style="margin-right:5px; color:#9F5000;" title="Verwendetes CMS">'.$arrRow['cms'].'</span>';
 		$line .= '<span style="'.$style.' font-weight:bold;">'.$arrRow['statecode'].'</span>';
 		$line .= '<span style="font-size:0.6rem; margin-left:3px;" title="Zeitpunkt der letzten Prüfung. Nächste Prüfung: '.date('d.m.Y H:i',$refreshtime_next).'"> vor '.$check_days.' Tag(en)</span>';
 		$line .= '</div>';
-        $line .= '<div class="favicon-img'.$archivclass.'" style="background-image: url('.$icon.');">';
-        $line .= '<a href="'.$arrRow['url'].'" target="_blank"><b>'.$arrRow['title'].'</b></a> - '.$arrRow['url'].$info;
-        if($arrRow['text']) $line .= '<div class="description">'.$arrRow['text'].'</div>';
-        $line .= "</div>";
+		$line .= '<div class="favicon-img height18'.$archivclass.'" style="background-image: url('.$icon.');">';
+		$line .= '<a href="'.$arrRow['url'].'" target="_blank"><b>'.$arrRow['title'].'</b></a> - '.$arrRow['url'].$info;
+		if($arrRow['text']) $line .= '<div class="description">'.$arrRow['text'].'</div>';
+		$line .= "</div>";
 
-        $line .= "\n";
+		$line .= "\n";
 
-        return($line);
+		return($line);
 
-    }
+	}
 
 	public function getInfobox(DataContainer $dc)
 	{
-		
-		$string = '
-<div class="long">
-  <b>Kategorie:</b> '.Linkscollection::Breadcrumb($dc->activeRecord->pid).'<br>
-  <b>URL in neuem Fenster öffnen:</b> <a href="'.$dc->activeRecord->url.'" target="_blank">'.$dc->activeRecord->url.'</a>
-</div>'; 
-		
-		return $string;
+		$kategorie = \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::Breadcrumb($dc->activeRecord->pid);
+		$url = strlen($dc->activeRecord->url) > 7 ? '<br><b>URL in neuem Fenster öffnen:</b>&nbsp;<a href="'.$dc->activeRecord->url.'" target="_blank">'.$dc->activeRecord->url.'</a>' : '';
+
+		return '<div class="long widget"><b>Kategorie:</b> '.$kategorie.$url.'</div>';
 	}
 
 	/**
@@ -719,28 +715,28 @@ class tl_linkscollection_links extends Backend
 	 */
 	public function toggleIcon($row, $href, $label, $title, $icon, $attributes)
 	{
-        $this->import('BackendUser', 'User');
- 
-        if (strlen($this->Input->get('tid')))
-        {
-            $this->toggleVisibility($this->Input->get('tid'), ($this->Input->get('state') == 0));
-            $this->redirect($this->getReferer());
-        }
- 
-        // Check permissions AFTER checking the tid, so hacking attempts are logged
-        if (!$this->User->isAdmin && !$this->User->hasAccess('tl_linkscollection_links::published', 'alexf'))
-        {
-            return '';
-        }
- 
-        $href .= '&amp;id='.$this->Input->get('id').'&amp;tid='.$row['id'].'&amp;state='.$row[''];
- 
-        if (!$row['published'])
-        {
-            $icon = 'invisible.gif';
-        }
- 
-        return '<a href="'.$this->addToUrl($href).'" title="'.specialchars($title).'"'.$attributes.'>'.$this->generateImage($icon, $label).'</a> ';
+		$this->import('BackendUser', 'User');
+		
+		if (strlen($this->Input->get('tid')))
+		{
+			$this->toggleVisibility($this->Input->get('tid'), ($this->Input->get('state') == 0));
+			$this->redirect($this->getReferer());
+		}
+		
+		// Check permissions AFTER checking the tid, so hacking attempts are logged
+		if (!$this->User->isAdmin && !$this->User->hasAccess('tl_linkscollection_links::published', 'alexf'))
+		{
+			return '';
+		}
+		
+		$href .= '&amp;id='.$this->Input->get('id').'&amp;tid='.$row['id'].'&amp;state='.$row[''];
+		
+		if (!$row['published'])
+		{
+			$icon = 'invisible.gif';
+		}
+		
+		return '<a href="'.$this->addToUrl($href).'" title="'.specialchars($title).'"'.$attributes.'>'.$this->generateImage($icon, $label).'</a> ';
 	}
 
 	/**
@@ -756,9 +752,9 @@ class tl_linkscollection_links extends Backend
 			$this->log('Not enough permissions to show/hide record ID "'.$intId.'"', 'tl_linkscollection_links toggleVisibility', TL_ERROR);
 			$this->redirect('contao/main.php?act=error');
 		}
-	
+
 		$this->createInitialVersion('tl_linkscollection_links', $intId);
-	
+
 		// Trigger the save_callback
 		if (is_array($GLOBALS['TL_DCA']['tl_linkscollection_links']['fields']['published']['save_callback']))
 		{
@@ -768,7 +764,7 @@ class tl_linkscollection_links extends Backend
 				$blnPublished = $this->$callback[0]->$callback[1]($blnPublished, $this);
 			}
 		}
-	
+
 		// Update the database
 		$this->Database->prepare("UPDATE tl_linkscollection_links SET tstamp=". time() .", published='" . ($blnPublished ? '' : '1') . "' WHERE id=?")
 			->execute($intId);
@@ -782,14 +778,14 @@ class tl_linkscollection_links extends Backend
 	 */
 	public function saveInitdate($varValue)
 	{
-		if(!$varValue) 
+		if(!$varValue)
 		{
-			\System::log('[Linkscollection] New Link created: '.\Input::post('title').' ('.\Input::post('url').')', __CLASS__.'::'.__FUNCTION__, TL_CRON); 
+			\System::log('[Linkscollection] New Link created: '.\Input::post('title').' ('.\Input::post('url').')', __CLASS__.'::'.__FUNCTION__, TL_CRON);
 			return time();
 		}
-		else 
+		else
 		{
-			\System::log('[Linkscollection] Link ID '.\Input::post('id').' edited: '.\Input::post('title').' ('.\Input::post('url').')', __CLASS__.'::'.__FUNCTION__, TL_ACCESS); 
+			\System::log('[Linkscollection] Link ID '.\Input::post('id').' edited: '.\Input::post('title').' ('.\Input::post('url').')', __CLASS__.'::'.__FUNCTION__, TL_ACCESS);
 			return $varValue;
 		}
 	}
@@ -801,6 +797,6 @@ class tl_linkscollection_links extends Backend
 	{
 		//return BackendLinkscollectionFilter\Filter::getFilterWidget($this->addToUrl(''), $label, 'tl_linkscollection_links');
 	}
- 
+
 }
 
