@@ -12,6 +12,8 @@
  */
 namespace Schachbulle\ContaoLinkscollectionBundle\Module;
 
+use Haste\Form\Form;
+
 class Linksammlung extends \Module
 {
 
@@ -359,7 +361,7 @@ class Linksammlung extends \Module
 		// Template füllen
 		$this->Template->menu = $this->Menu();
 		$this->Template->counter = array('categories'=>$this->numberCategories,'links'=>$this->numberLinks);
-		$this->Template->form = $this->SendProblemForm($objLink);
+		$this->Template->form = self::SendlinkFormHaste($objLink);
 	}
 
 	protected function Menu()
@@ -564,6 +566,7 @@ class Linksammlung extends \Module
 
 	protected function SendProblemForm($object)
 	{
+
 		$dca = array
 		(
 			'id' => array
