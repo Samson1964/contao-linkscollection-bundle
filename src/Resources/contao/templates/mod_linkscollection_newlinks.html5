@@ -28,7 +28,6 @@
 
 	<?php if($this->counter): ?>
 		<div class="counter">
-			E-Mail: {{email::links@schachbund.de}}<br>
 			Die Datenbank enthält <b><?= $this->counter['categories'] ?></b> Kategorien mit <b><?= $this->counter['links'] ?></b> Links.
 		</div>
 	<?php endif; ?>

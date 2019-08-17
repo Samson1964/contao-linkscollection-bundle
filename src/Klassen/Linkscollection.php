@@ -227,7 +227,7 @@ class Linkscollection
 			<div style="clear:both"></div>
 		</li>';
 
-		if($objLinks->numRows > 1)
+		if($objLinks->numRows > 0)
 		{
 			while($objLinks->next())
 			{
@@ -244,8 +244,8 @@ class Linkscollection
 							<i>- '.$objLinks->problemcount.' Meldungen</i>
 						</div>
 						<div class="tl_right">
-							<a class="edit" title="'.$titel_edit.'" href="contao/main.php?do=linkscollection&amp;table=tl_linkscollection_links&amp;act=edit&amp;id='.$objLinks->id.'&amp;rt='.\Input::get('rt').'&amp;ref='.\Input::get('ref').'"><img width="12" height="16" alt="Link bearbeiten" src="system/themes/default/images/edit.gif"></a>
-							<a class="editheader" title="'.$titel_edit_header.'" href="contao/main.php?do=linkscollection&amp;table=tl_linkscollection_links&amp;id='.$objLinks->pid.'&amp;rt='.\Input::get('rt').'&amp;ref='.\Input::get('ref').'"><img width="16" height="16" alt="Links der Kategorie bearbeiten" src="system/themes/default/images/header.gif"></a>
+							<a class="edit" title="'.$titel_edit.'" href="contao/main.php?do=linkscollection&amp;table=tl_linkscollection_links&amp;act=edit&amp;id='.$objLinks->id.'&amp;rt='.REQUEST_TOKEN.'&amp;ref='.\Input::get('ref').'"><img width="12" height="16" alt="Link bearbeiten" src="system/themes/'.\Controller::getTheme().'/images/edit.gif"></a>
+							<a class="editheader" title="'.$titel_edit_header.'" href="contao/main.php?do=linkscollection&amp;table=tl_linkscollection_links&amp;id='.$objLinks->pid.'&amp;rt='.REQUEST_TOKEN.'&amp;ref='.\Input::get('ref').'"><img width="16" height="16" alt="Links der Kategorie bearbeiten" src="system/themes/'.\Controller::getTheme().'/images/header.gif"></a>
 						</div>
 						<div style="clear:both"></div>
 					</li>';
@@ -295,8 +295,8 @@ class Linkscollection
 						<i>von '.$objLinks->name.'</i>
 					</div>
 					<div class="tl_right">
-						<a class="edit" title="'.$titel_edit.'" href="contao/main.php?do=linkscollection&amp;table=tl_linkscollection_links&amp;act=edit&amp;id='.$objLinks->id.'&amp;rt='.\Input::get('rt').'&amp;ref='.\Input::get('ref').'"><img width="12" height="16" alt="Link bearbeiten" src="system/themes/default/images/edit.gif"></a>
-						<a class="editheader" title="'.$titel_edit_header.'" href="contao/main.php?do=linkscollection&amp;table=tl_linkscollection_links&amp;id='.$objLinks->pid.'&amp;rt='.\Input::get('rt').'&amp;ref='.\Input::get('ref').'"><img width="16" height="16" alt="Links der Kategorie bearbeiten" src="system/themes/default/images/header.gif"></a>
+						<a class="edit" title="'.$titel_edit.'" href="contao/main.php?do=linkscollection&amp;table=tl_linkscollection_links&amp;act=edit&amp;id='.$objLinks->id.'&amp;rt='.REQUEST_TOKEN.'&amp;ref='.\Input::get('ref').'"><img width="12" height="16" alt="Link bearbeiten" src="system/themes/'.\Controller::getTheme().'/images/edit.gif"></a>
+						<a class="editheader" title="'.$titel_edit_header.'" href="contao/main.php?do=linkscollection&amp;table=tl_linkscollection_links&amp;id='.$objLinks->pid.'&amp;rt='.REQUEST_TOKEN.'&amp;ref='.\Input::get('ref').'"><img width="16" height="16" alt="Links der Kategorie bearbeiten" src="system/themes/'.\Controller::getTheme().'/images/header.gif"></a>
 					</div>
 					<div style="clear:both"></div>
 				</li>';
@@ -539,7 +539,6 @@ class Linkscollection
 			return '';
 		}
 
-		//\Linkbuilder::run();
 		\Schachbulle\ContaoLinkscollectionBundle\Klassen\CreateStatistics::run();
 
 		// Zurücklink generieren, ab C4 ist das ein symbolischer Link zu "contao"

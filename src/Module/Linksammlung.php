@@ -21,7 +21,7 @@ class Linksammlung extends \Module
 	var $baum = array(); // Hilfsvariable für Baumerstellung
 	var $level = 0;
 
-	var	$tree = array(); // Kategoriebaum
+	var $tree = array(); // Kategoriebaum
 	var $numberCategories; // Anzahl der Kategorien
 	var $numberLinks; // Anzahl der Links
 	var $currentCategory; // ID der aktuellen Kategorie
@@ -75,16 +75,16 @@ class Linksammlung extends \Module
 			switch(\Input::get('view'))
 			{
 				case 'toplinks':
-					$this->Toplinks();
+					self::Toplinks();
 					break;
 				case 'newlinks':
-					$this->Newlinks();
+					self::Newlinks();
 					break;
 				case 'search':
-					$this->Search();
+					self::Search();
 					break;
 				case 'sendlink':
-					//$this->ViewNewlinkForm();
+					self::ViewFormularLinkNeu();
 					break;
 			}
 			return;
@@ -97,7 +97,7 @@ class Linksammlung extends \Module
 		}
 
 		// Kategorie zuweisen
-		$this->currentCategory = \Input::get('category') + 0;
+		$this->currentCategory = (int)\Input::get('category');
 
 		// Breadcrumb-Navigation erstellen
 		$breadcrumb = array();
@@ -107,35 +107,46 @@ class Linksammlung extends \Module
 			// Infos zur aktuellen Kategorie laden
 			$objActual = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection WHERE published = ? AND id = ?')
 			                                     ->execute(1, $this->currentCategory);
-			$breadcrumb[] = array
-			(
-				'title'                => $objActual->title,
-				'url'                  => '',
-				'class'                => 'last'
-			);
-			$pagetitle[] = $objActual->title;
 
-			// Navigation vervollständigen
-			$pid = $objActual->pid;
-			while($pid > 0)
+			// Kategorie gefunden, jetzt ausgeben
+			if($objActual->numRows > 0)
 			{
-				$objTemp = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection WHERE published = ? AND id = ?')
-				                                   ->execute(1, $pid);
 				$breadcrumb[] = array
 				(
-					'title'            => $objTemp->title,
-					'url'              => \Controller::generateFrontendUrl($objPage->row(), '/category/'.$objTemp->id),
-					'class'            => 'sibling'
+					'title'                => $objActual->title,
+					'url'                  => '',
+					'class'                => 'last'
 				);
-				$pagetitle[] = $objTemp->title;
-				$pid = $objTemp->pid;
+				$pagetitle[] = $objActual->title;
+
+				// Navigation vervollständigen
+				$pid = $objActual->pid;
+				while($pid > 0)
+				{
+					$objTemp = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection WHERE published = ? AND id = ?')
+					                                   ->execute(1, $pid);
+					$breadcrumb[] = array
+					(
+						'title'            => $objTemp->title,
+						'url'              => \Controller::generateFrontendUrl($objPage->row(), '/category/'.$objTemp->id),
+						'class'            => 'sibling'
+					);
+					$pagetitle[] = $objTemp->title;
+					$pid = $objTemp->pid;
+				}
+				$breadcrumb[] = array
+				(
+					'title'                => 'Startseite',
+					'url'                  => \Controller::generateFrontendUrl($objPage->row()),
+					'class'                => 'first sibling'
+				);
 			}
-			$breadcrumb[] = array
-			(
-				'title'                => 'Startseite',
-				'url'                  => \Controller::generateFrontendUrl($objPage->row()),
-				'class'                => 'first sibling'
-			);
+			else
+			{
+				// Kategorie nicht gefunden, dann Startseite der Linksammlung laden
+				$url = \Controller::generateFrontendUrl($objPage->row());
+				\Controller::redirect($url);
+			}
 		}
 
 		// Seitentitel modifizieren
@@ -229,8 +240,8 @@ class Linksammlung extends \Module
 				(
 					'title'            => $objLinks->title,
 					'url'              => 'system/modules/linkscollection/public/go.php?id='.$objLinks->id,
-					'icon'             => Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($objLinks->id),
-					'language'         => Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getLanguageIcon($objLinks->language),
+					'icon'             => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($objLinks->id),
+					'language'         => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getLanguageIcon($objLinks->language),
 					'new'              => $objLinks->newWindow,
 					'text'             => $objLinks->text,
 					'popular'          => $objLinks->popular,
@@ -275,8 +286,8 @@ class Linksammlung extends \Module
 				(
 					'title'            => $objLinks->title,
 					'url'              => 'system/modules/linkscollection/public/go.php?id='.$objLinks->id,
-					'icon'             => Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($objLinks->id),
-					'language'         => Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getLanguageIcon($objLinks->language),
+					'icon'             => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($objLinks->id),
+					'language'         => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getLanguageIcon($objLinks->language),
 					'new'              => $objLinks->newWindow,
 					'text'             => $objLinks->text,
 					'popular'          => $objLinks->popular,
@@ -301,7 +312,7 @@ class Linksammlung extends \Module
 	/**
 	 * Generate Linkform für neue Links
 	 */
-	protected function ViewNewlinkForm()
+	protected function ViewFormularLinkNeu()
 	{
 		global $objPage;
 
@@ -309,7 +320,7 @@ class Linksammlung extends \Module
 
 		// Template füllen
 		$this->Template->menu = $this->Menu();
-		$this->Template->form = $this->SendlinkForm();
+		$this->Template->form = $this->FormularLinkNeu();
 	}
 
 	/**
@@ -359,7 +370,7 @@ class Linksammlung extends \Module
 		// Template füllen
 		$this->Template->menu = $this->Menu();
 		$this->Template->counter = array('categories'=>$this->numberCategories,'links'=>$this->numberLinks);
-		$this->Template->form = self::FormularLinkMelden($objLink);
+		$this->Template->form = self::FormularLinkFehler($objLink);
 	}
 
 	protected function Menu()
@@ -443,73 +454,6 @@ class Linksammlung extends \Module
 		}
 	}
 
-	protected function SendlinkForm()
-	{
-		$dca = array
-		(
-			'name' => array
-			(
-				'label'		=> 'Vor- und Nachname',
-				'inputType' => 'text',
-				'eval'		=> array('mandatory'=>true, 'class'=>'form-control')
-			),
-			'email' => array
-			(
-				'label'         => 'E-Mail',
-				'inputType'     => 'text',
-				'eval'          => array('mandatory'=>true, 'rgxp'=>'email', 'class'=>'form-control')
-			),
-			'title' => array
-			(
-				'label'		=> 'Titel des Links',
-				'inputType' => 'text',
-				'eval'		=> array('mandatory'=>true, 'class'=>'form-control')
-			),
-			'url' => array
-			(
-				'label'		=> 'URL des Links',
-				'inputType' => 'text',
-				'eval'		=> array('mandatory'=>true, 'rgxp'=>'url', 'class'=>'form-control')
-			),
-			'category' => array
-			(
-				'label'		=> 'Kategorie des Links',
-				'inputType' => 'select',
-				'options'   => array_keys($this->tree),
-				'reference' => $this->tree,
-				'eval'		=> array('mandatory'=>true, 'choosen'=>true, 'class'=>'form-control')
-			),
-			'description' => array
-			(
-				'label'		=> 'Beschreibung des Links',
-				'inputType' => 'textarea',
-				'eval'		=> array('rte'=>'tinyMCE', 'class'=>'form-control')
-			),
-			'submit' => array
-			(
-				'label' 	=> 'Absenden',
-				'eval'		=> array('class'=>'btn btn-primary'),
-				'inputType' => 'submit'
-			)
-		);
-
-		$frm = new Formular('linkform');
-		$frm->setDCA($dca);
-		$frm->setConfig('generateFormat','<div>%label %field %error </div>');
-		$frm->setConfig('attributes',array('tableless'=>true));
-		$frm->category = array($this->currentCategory);
-		if($frm->isSubmitted() && $frm->validate())
-		{
-			$this->saveNewlink($frm->getData());
-			return '<div class="notice">'.$GLOBALS['TL_LANG']['MSC']['linkscollection_confirm'].'</div>';
-		}
-		else
-		{
-			return $frm->parse();
-		}
-
-	}
-
 	protected function saveNewlink($data)
 	{
 		//print_r($data);
@@ -552,96 +496,7 @@ class Linksammlung extends \Module
 		                          \Idna::decode(\Environment::get('base')) . \Environment::get('request'),
 		                          \Idna::decode(\Environment::get('base')) . 'contao/main.php?do=linkscollection&table=tl_linkscollection_links&act=edit&id=' . $objLink->insertId);
 
-		//$objEmail->html = $content;
-		//$objEmail->sendCc(array
-		//(
-		//	'Herbert Bastian <praesident@schachbund.de>',
-		//	'Uwe Bönsch <sportdirektor@schachbund.de>',
-		//	'DSB-Presse <presse@schachbund.de>'
-		//));
 		$objEmail->sendTo(array($GLOBALS['TL_ADMIN_NAME'].' <'.$GLOBALS['TL_ADMIN_EMAIL'].'>'));
-	}
-
-	protected function SendProblemForm($object)
-	{
-
-		$dca = array
-		(
-			'id' => array
-			(
-				'inputType' => 'hidden',
-				'default'   => $object->id
-			),
-			'title' => array
-			(
-				'inputType' => 'hidden',
-				'default'   => $object->title
-			),
-			'url' => array
-			(
-				'inputType' => 'hidden',
-				'default'   => $object->url
-			),
-			'name' => array
-			(
-				'label'		=> 'Vor- und Nachname',
-				'inputType' => 'text',
-				'eval'		=> array('mandatory'=>true, 'class'=>'form-control')
-			),
-			'email' => array
-			(
-				'label'     => 'E-Mail',
-				'inputType' => 'text',
-				'eval'      => array('mandatory'=>true, 'rgxp'=>'email', 'class'=>'form-control')
-			),
-			'new_title' => array
-			(
-				'label'		=> 'Neuer Titel',
-				'inputType' => 'text',
-				'eval'		=> array('mandatory'=>false, 'class'=>'form-control')
-			),
-			'new_url' => array
-			(
-				'label'		=> 'Neue URL',
-				'inputType' => 'text',
-				'eval'		=> array('mandatory'=>false, 'rgxp'=>'url', 'class'=>'form-control')
-			),
-			'error' => array
-			(
-				'label'		=> 'Fehler',
-				'inputType' => 'select',
-				'options'   => &$GLOBALS['TL_LANG']['linkscollection']['errors'],
-				'eval'		=> array('mandatory'=>false, 'choosen'=>true, 'class'=>'form-control')
-			),
-			'comment' => array
-			(
-				'label'		=> 'Kommentar',
-				'inputType' => 'textarea',
-				'eval'		=> array('mandatory'=>true, 'rte'=>'tinyMCE', 'class'=>'form-control')
-			),
-			'submit' => array
-			(
-				'label' 	=> 'Absenden',
-				'eval'		=> array('class'=>'btn btn-primary'),
-				'inputType' => 'submit'
-			)
-		);
-
-		$frm = new Formular('linkform');
-		$frm->setDCA($dca);
-		$frm->setConfig('generateFormat','<div>%label %field %error </div>');
-		$frm->setConfig('attributes',array('tableless'=>true));
-		$frm->category = array($GLOBALS['TL_LANG']['linkscollection']['errors'][0]);
-		if($frm->isSubmitted() && $frm->validate())
-		{
-			$this->saveProblemlink($frm->getData());
-			return '<div class="notice">'.$GLOBALS['TL_LANG']['MSC']['linkscollection_error_confirm'].'</div>';
-		}
-		else
-		{
-			return $frm->parse();
-		}
-
 	}
 
 	protected function saveProblemlink($data)
@@ -657,6 +512,7 @@ class Linksammlung extends \Module
 		$content .= 'E-Mail: '.$data['email']."\n\n";
 		$content .= 'Neuer Titel: '.$data['new_title']."\n";
 		$content .= 'Neue URL: '.$data['new_url']."\n\n";
+		$content .= 'Neue Beschreibung: '.$data['new_description']."\n";
 		$content .= 'Kommentar: '.$data['comment']."\n\n";
 		$content .= 'Gemeldet am '.date("d.m.Y, H:i:s", $zeit);
 
@@ -667,7 +523,23 @@ class Linksammlung extends \Module
 		{
 			// Datenbank aktualisieren
 			$anzahl = $objLink->problemcount + 1;
-			$problem = "MELDUNG NR. $anzahl\n\n".$content."\n===================================\n\n".$objLink->problem;
+
+			// Problem in Datenbank schreiben
+			$problem = "<h2>Meldung Nr. $anzahl</h2>";
+			$problem .= '<p><b>Gemeldet am '.date("d.m.Y, H:i", $zeit).'</b></p>';
+			$problem .= '<ul>';
+			$problem .= '<li><b>Titel:</b> '.$data['title'].'</li>';
+			$problem .= '<li><b>URL:</b> '.$data['url'].'</li>';
+			$problem .= '<li><b>Fehler:</b> '.$data['error'].'</li>';
+			$problem .= '<li><b>Name:</b> '.$data['name'].'</li>';
+			$problem .= '<li><b>E-Mail:</b> '.$data['email'].'</li>';
+			$problem .= '<li><b>Neuer Titel:</b> '.$data['new_title'].'</li>';
+			$problem .= '<li><b>Neue URL:</b> '.$data['new_url'].'</li>';
+			$problem .= '<li><b>Neue Beschreibung:</b> '.$data['new_description'].'</li>';
+			$problem .= '<li><b>Kommentar:</b> '.$data['comment'].'</li>';
+			$problem .= '</ul>';
+			$problem .= $objLink->problem; // Vorherige Probleme anfügen
+
 			$set = array
 			(
 				'problem'      => $problem,
@@ -694,17 +566,86 @@ class Linksammlung extends \Module
 		                          \Idna::decode(\Environment::get('base')) . \Environment::get('request'),
 		                          \Idna::decode(\Environment::get('base')) . 'contao/main.php?do=linkscollection&table=tl_linkscollection_links&act=edit&id=' . $data['id']);
 
-		//$objEmail->html = $content;
-		//$objEmail->sendCc(array
-		//(
-		//	'Herbert Bastian <praesident@schachbund.de>',
-		//	'Uwe Bönsch <sportdirektor@schachbund.de>',
-		//	'DSB-Presse <presse@schachbund.de>'
-		//));
 		$objEmail->sendTo(array($GLOBALS['TL_ADMIN_NAME'].' <'.$GLOBALS['TL_ADMIN_EMAIL'].'>'));
 	}
 
-	protected function FormularLinkMelden($object)
+	protected function FormularLinkNeu()
+	{
+
+		// Der 1. Parameter ist die Formular-ID (hier "linkform")
+		// Der 2. Parameter ist GET oder POST
+		// Der 3. Parameter ist eine Funktion, die entscheidet wann das Formular gesendet wird (Third is a callable that decides when your form is submitted)
+		// Der optionale 4. Parameter legt fest, ob das ausgegebene Formular auf Tabellen basiert (true)
+		// oder nicht (false) (You can pass an optional fourth parameter (true by default) to turn the form into a table based one)
+		$objForm = new \Haste\Form\Form('linkform', 'POST', function($objHaste)
+		{
+			return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
+		});
+		
+		// URL für action festlegen. Standard ist die Seite auf der das Formular eingebunden ist.
+		// $objForm->setFormActionFromUri();
+		
+		$objForm->addFormField('name', array(
+			'label'         => 'Vor- und Nachname',
+			'inputType'     => 'text',
+			'eval'          => array('mandatory'=>true, 'class'=>'form-control')
+		));
+		$objForm->addFormField('email', array(
+			'label'         => 'E-Mail',
+			'inputType'     => 'text',
+			'eval'          => array('mandatory'=>true, 'rgxp'=>'email', 'class'=>'form-control')
+		));
+		$objForm->addFormField('title', array(
+			'label'         => 'Titel des Links',
+			'inputType'     => 'text',
+			'eval'          => array('mandatory'=>true, 'class'=>'form-control')
+		));
+		$objForm->addFormField('url', array(
+			'label'         => 'URL des Links',
+			'inputType'     => 'text',
+			'eval'          => array('mandatory'=>true, 'rgxp'=>'url', 'class'=>'form-control')
+		));
+		$objForm->addFormField('category', array(
+			'label'         => 'Kategorie des Links',
+			'inputType'     => 'select',
+			'selected'      => array($this->currentCategory),
+			'options'       => array_keys($this->tree),
+			'reference'     => $this->tree,
+			'eval'          => array('mandatory'=>true, 'choosen'=>true, 'class'=>'form-control')
+		));
+		$objForm->addFormField('description', array(
+			'label'         => 'Beschreibung des Links',
+			'inputType'     => 'textarea',
+			'eval'          => array('mandatory'=>false, 'rte'=>'tinyMCE', 'class'=>'form-control')
+		));
+		// Submit-Button hinzufügen
+		$objForm->addFormField('submit', array(
+			'label'         => 'Absenden',
+			'inputType'     => 'submit',
+			'eval'          => array('class'=>'btn btn-primary')
+		));
+		$objForm->addCaptchaFormField('captcha');
+		// Ausgeblendete Felder FORM_SUBMIT und REQUEST_TOKEN automatisch hinzufügen.
+		// Nicht verwenden wenn generate() anschließend verwendet, da diese Felder dort standardmäßig bereitgestellt werden.
+		// $objForm->addContaoHiddenFields();
+		
+		// validate() prüft auch, ob das Formular gesendet wurde
+		if($objForm->validate())
+		{
+			// Alle gesendeten und analysierten Daten holen (funktioniert nur mit POST)
+			$arrData = $objForm->fetchAll();
+			self::saveNewlink($arrData); // Daten sichern
+			// Seite neu laden
+			\Controller::addToUrl('send=1'); // Hat keine Auswirkung, verhindert aber das das Formular ausgefüllt ist
+			\Controller::reload(); 
+		}
+		
+		// Formular als String zurückgeben
+		return $objForm->generate();
+
+	}
+
+	protected function FormularLinkFehler($object)
 	{
 
 		// Der 1. Parameter ist die Formular-ID (hier "linkform")
@@ -753,6 +694,11 @@ class Linksammlung extends \Module
 			'inputType'     => 'text',
 			'eval'          => array('mandatory'=>false, 'rgxp'=>'url', 'class'=>'form-control')
 		));
+		$objForm->addFormField('new_description', array(
+			'label'         => 'Neue Detailbeschreibung',
+			'inputType'     => 'textarea',
+			'eval'          => array('mandatory'=>false, 'rte'=>'tinyMCE', 'class'=>'form-control')
+		));
 		$objForm->addFormField('error', array(
 			'label'         => 'Fehler',
 			'inputType'     => 'select',
@@ -791,45 +737,4 @@ class Linksammlung extends \Module
 
 	}
 
-	protected function SendlinkFormNibble()
-	{
-		/* Get Nibble Forms 2 instance called mega_form */
-		$form = Nibble\NibbleForms\NibbleForm::getInstance('mega_form');
-
-		/* Text field with custom class and max length attribute */
-		$form->addField
-		(
-			'text_field',
-			'text',
-			array
-			(
-				'class'      => 'testy classes',
-				'max_length' => 20
-			)
-		);
-
-/* Email field, not required and custom label text */
-$email = $form->addfield('email', 'email', array(
-    'required' => false,
-    'label' => 'Please enter your email address'
-        ));
-/* Email confirmation field which must match the value for email */
-$email->addConfirmation('confirm_email', array(
-    'label' => 'Please confirm your email address'
-));
-
-/* Radio button field with two options, first option has an additional attribute */
-$form->addField('choice', 'radio', array(
-    'choices' => array(
-        "one" => array('data-example' => 'data-attribute-value', 'Choice One'),
-        "two" => "Choice Two"),
-    'false_values' => array("two")
-));
-
-/* If the form is valid, do something */
-if ($form->validate()) {
-    echo "Form has validated";
-}
- return $form->render();
-	}
 }

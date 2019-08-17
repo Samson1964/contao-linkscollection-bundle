@@ -2,7 +2,6 @@
 
 Linksammlung für Contao mit beliebig vielen Kategorien und Unterkategorien.
 
-Alphaversion, bitte nur zum Testen verwenden!
 Die jeweils aktuellste Version ist hier im Einsatz:
 [Deutscher Schachbund](http://www.schachbund.de/linksammlung.html)
 

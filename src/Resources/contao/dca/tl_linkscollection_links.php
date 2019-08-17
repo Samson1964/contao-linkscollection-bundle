@@ -303,7 +303,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['ipdate'],
 			'exclude'                 => true,
 			'inputType'               => 'text',
-			'eval'                    => array('mandatory'=>false, 'rgxp'=>'numeric', 'tl_class'=>'w50'),
+			'eval'                    => array('mandatory'=>false, 'rgxp'=>'datim', 'tl_class'=>'w50'),
 			'flag'                    => 5,
 			'sql'                     => "int(10) unsigned NOT NULL default '0'"
 		),
@@ -329,7 +329,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['statedate'],
 			'exclude'                 => true,
 			'inputType'               => 'text',
-			'eval'                    => array('mandatory'=>false, 'rgxp'=>'numeric'),
+			'eval'                    => array('mandatory'=>false, 'rgxp'=>'datim'),
 			'flag'                    => 5,
 			'sql'                     => "int(10) unsigned NOT NULL default '0'"
 		),
@@ -347,7 +347,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['cmsdate'],
 			'exclude'                 => true,
 			'inputType'               => 'text',
-			'eval'                    => array('mandatory'=>false, 'rgxp'=>'numeric'),
+			'eval'                    => array('mandatory'=>false, 'rgxp'=>'dateim'),
 			'flag'                    => 5,
 			'sql'                     => "int(10) unsigned NOT NULL default '0'"
 		),
@@ -357,7 +357,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'exclude'                 => true,
 			'search'                  => true,
 			'inputType'               => 'textarea',
-			'eval'                    => array('tl_class'=>'clr'),
+			'eval'                    => array('rte'=>'tinyMCE', 'tl_class'=>'clr'),
 			'sql'                     => "mediumtext NULL"
 		),
 		'problemdate' => array
@@ -365,7 +365,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['problemdate'],
 			'exclude'                 => true,
 			'inputType'               => 'text',
-			'eval'                    => array('mandatory'=>false, 'tl_class'=>'w50', 'rgxp'=>'numeric'),
+			'eval'                    => array('mandatory'=>false, 'tl_class'=>'w50', 'rgxp'=>'datim'),
 			'flag'                    => 5,
 			'sql'                     => "int(10) unsigned NOT NULL default '0'"
 		),

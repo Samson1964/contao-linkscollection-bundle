@@ -4,10 +4,10 @@
 		/* Link-Abfrage per Ajax */
 		$("#myForm").submit(function() {
 
-			$("#ajaxloader").html("<img src=\"system/modules/linkscollection/assets/images/laden.gif\" />");
+			$("#ajaxloader").html("<img src=\"bundles/contaolinkscollection/images/laden.gif\" />");
 			$.ajax({
 				type: "GET",
-				url: "system/modules/linkscollection/public/search.php",
+				url: "bundles/contaolinkscollection/search.php",
 				data: "s=" + $("#s").val(),
 				success: function(msg)
 				{

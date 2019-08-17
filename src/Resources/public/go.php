@@ -1,5 +1,5 @@
 <?php
-ini_set('display_errors', '1');
+//ini_set('display_errors', '1');
 /**
  * Contao Open Source CMS, Copyright (C) 2005-2013 Leo Feyer
  *

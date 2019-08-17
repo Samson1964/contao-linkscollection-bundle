@@ -2,7 +2,9 @@
 	<li class="favicon-img<?php if($l['popular']): ?> popular<?php endif; ?><?php if($l['webarchiv']): ?> webarchiv<?php endif; ?> <?= $l['class'] ?>" style="background-image: url(<?= $l['icon'] ?>);">
 		<a href="<?= $l['url'] ?>"<?php if($l['new']): ?> target="_blank"<?php endif; ?>><?= $l['title'] ?></a><?= $l['language'] ?><?= $l['newLink'] ?>
 		<span class="hits">(<?= $l['hits'] ?>)</span>
-		<span class="problem"><a href="<?= $l['problem_url'] ?>" title="Link melden"><img src="bundles/contaolinkscollection/images/problem.png" width="16" height="16"></a></span>
+		<?php if($l['problem_url']): ?>
+			<span class="problem"><a href="<?= $l['problem_url'] ?>" title="Link melden"><img src="bundles/contaolinkscollection/images/problem.png" width="16" height="16"></a></span>
+		<?php endif; ?>
 		<?php if($l['text']): ?>
 			<div class="description"><?= $l['text'] ?></div>
 		<?php endif; ?>
