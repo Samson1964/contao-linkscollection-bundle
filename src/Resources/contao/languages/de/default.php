@@ -51,6 +51,7 @@ $GLOBALS['TL_LANG']['linkscollection']['errors'] = array
 $GLOBALS['TL_LANG']['tl_linkscollection_list']['title'] = array('Titel', 'Titel des Links');
 $GLOBALS['TL_LANG']['tl_linkscollection_list']['url'] = array('URL', 'URL des Links');
 $GLOBALS['TL_LANG']['tl_linkscollection_list']['text'] = array('Beschreibung', 'Linkbeschreibung, HTML erlaubt');
+$GLOBALS['TL_LANG']['tl_linkscollection_list']['cms'] = array('CMS', 'Content Management System des Links');
 
 // Übersetzungen für benutzerdefinierte Backend-Listen
 $GLOBALS['TL_LANG']['tl_linkscollection_list']['edit'] = 'Link %s bearbeiten';

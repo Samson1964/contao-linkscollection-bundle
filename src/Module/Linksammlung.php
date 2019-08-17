@@ -12,8 +12,6 @@
  */
 namespace Schachbulle\ContaoLinkscollectionBundle\Module;
 
-use Haste\Form\Form;
-
 class Linksammlung extends \Module
 {
 
@@ -361,7 +359,7 @@ class Linksammlung extends \Module
 		// Template füllen
 		$this->Template->menu = $this->Menu();
 		$this->Template->counter = array('categories'=>$this->numberCategories,'links'=>$this->numberLinks);
-		$this->Template->form = self::SendlinkFormHaste($objLink);
+		$this->Template->form = self::FormularLinkMelden($objLink);
 	}
 
 	protected function Menu()
@@ -706,68 +704,89 @@ class Linksammlung extends \Module
 		$objEmail->sendTo(array($GLOBALS['TL_ADMIN_NAME'].' <'.$GLOBALS['TL_ADMIN_EMAIL'].'>'));
 	}
 
-	protected function SendlinkFormHaste()
+	protected function FormularLinkMelden($object)
 	{
 
-		// First param is the form id
-		// Second is either GET or POST
-		// Third is a callable that decides when your form is submitted
-		// You can pass an optional fourth parameter (true by default) to turn the form into a table based one
-		$objForm = new \Haste\Form\Form('someid', 'POST', function($objHaste) {
-		    return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
+		// Der 1. Parameter ist die Formular-ID (hier "linkform")
+		// Der 2. Parameter ist GET oder POST
+		// Der 3. Parameter ist eine Funktion, die entscheidet wann das Formular gesendet wird (Third is a callable that decides when your form is submitted)
+		// Der optionale 4. Parameter legt fest, ob das ausgegebene Formular auf Tabellen basiert (true)
+		// oder nicht (false) (You can pass an optional fourth parameter (true by default) to turn the form into a table based one)
+		$objForm = new \Haste\Form\Form('linkform', 'POST', function($objHaste)
+		{
+			return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
 		});
 		
-		// A form needs an action. By default it's the current request URI you
-		// place your Haste form on, but you can either set your own URI:
-		$objForm->setFormActionFromUri();
+		// URL für action festlegen. Standard ist die Seite auf der das Formular eingebunden ist.
+		// $objForm->setFormActionFromUri();
 		
-		// Now let's add form fields:
-		$objForm->addFormField('year', array(
-		    'label'         => 'Year',
-		    'inputType'     => 'text',
-		    'eval'          => array('mandatory'=>true, 'rgxp'=>'digit')
+		// Formularfelder hinzufügen
+		$objForm->addFormField('id', array(
+			'default'       => $object->id,
+			'inputType'     => 'hidden'
 		));
-		
-		// Need a checkbox?
-		$objForm->addFormField('termsOfUse', array(
-		    'label'         => array('This is the <legend>', 'This is the <label>'),
-		    'inputType'     => 'checkbox',
-		    'eval'          => array('mandatory'=>true)
+		$objForm->addFormField('title', array(
+			'default'       => $object->title,
+			'inputType'     => 'hidden'
 		));
-		
-		// Let's add  a submit button
+		$objForm->addFormField('url', array(
+			'default'       => $object->url,
+			'inputType'     => 'hidden'
+		));
+		$objForm->addFormField('name', array(
+			'label'         => 'Vor- und Nachname',
+			'inputType'     => 'text',
+			'eval'          => array('mandatory'=>true, 'class'=>'form-control')
+		));
+		$objForm->addFormField('email', array(
+			'label'         => 'E-Mail',
+			'inputType'     => 'text',
+			'eval'          => array('mandatory'=>true, 'rgxp'=>'email', 'class'=>'form-control')
+		));
+		$objForm->addFormField('new_title', array(
+			'label'         => 'Neuer Titel',
+			'inputType'     => 'text',
+			'eval'          => array('mandatory'=>false, 'class'=>'form-control')
+		));
+		$objForm->addFormField('new_url', array(
+			'label'         => 'Neue URL',
+			'inputType'     => 'text',
+			'eval'          => array('mandatory'=>false, 'rgxp'=>'url', 'class'=>'form-control')
+		));
+		$objForm->addFormField('error', array(
+			'label'         => 'Fehler',
+			'inputType'     => 'select',
+			'options'       => &$GLOBALS['TL_LANG']['linkscollection']['errors'],
+			'eval'          => array('mandatory'=>false, 'choosen'=>true, 'class'=>'form-control')
+		));
+		$objForm->addFormField('comment', array(
+			'label'         => 'Kommentar',
+			'inputType'     => 'textarea',
+			'eval'          => array('mandatory'=>true, 'rte'=>'tinyMCE', 'class'=>'form-control')
+		));
+		// Submit-Button hinzufügen
 		$objForm->addFormField('submit', array(
-		  'label'     => 'Submit form',
-		  'inputType' => 'submit'
+			'label'         => 'Absenden',
+			'inputType'     => 'submit',
+			'eval'          => array('class'=>'btn btn-primary')
 		));
-		
-		// Automatically add the FORM_SUBMIT and REQUEST_TOKEN hidden fields.
-		// DO NOT use this method with generate() as the "form" template provides those fields by default.
-		$objForm->addContaoHiddenFields();
-		
-		// For the ease of use we do provide two helpers for the submit button and captcha field
-		$objForm->addSubmitFormField('submit', 'Submit form');
 		$objForm->addCaptchaFormField('captcha');
+		// Ausgeblendete Felder FORM_SUBMIT und REQUEST_TOKEN automatisch hinzufügen.
+		// Nicht verwenden wenn generate() anschließend verwendet, da diese Felder dort standardmäßig bereitgestellt werden.
+		// $objForm->addContaoHiddenFields();
 		
-		// validate() also checks whether the form has been submitted
-		if ($objForm->validate()) {
-		
-		    // Get the submitted and parsed data of a field (only works with POST):
-		    $arrData = $objForm->fetch('year');
-		
-		    // Get all the submitted and parsed data (only works with POST):
-		    $arrData = $objForm->fetchAll();
-		
-		    // For your convenience you can also use a callable to walk over all widgets
-		    $arrData = $objForm->fetchAll(function($strName, $objWidget) {
-		        return \Input::postRaw($strName);
-		    });
-		
-		    // Read from POST: \Input::post('year');
-		    // Read from GET: \Input::get('year');
+		// validate() prüft auch, ob das Formular gesendet wurde
+		if($objForm->validate())
+		{
+			// Alle gesendeten und analysierten Daten holen (funktioniert nur mit POST)
+			$arrData = $objForm->fetchAll();
+			self::saveProblemlink($arrData); // Daten sichern
+			// Seite neu laden
+			\Controller::addToUrl('send=1'); // Hat keine Auswirkung, verhindert aber das das Formular ausgefüllt ist
+			\Controller::reload(); 
 		}
 		
-		// Get the form as string
+		// Formular als String zurückgeben
 		return $objForm->generate();
 
 	}

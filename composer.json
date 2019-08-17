@@ -14,7 +14,8 @@
         "contao/core-bundle": "4.7.*",
         "codefog/contao-haste": "^4.21",
         "symfony/framework-bundle": "^3.3",
-        "paquettg/php-html-parser": "^2.0"
+        "paquettg/php-html-parser": "^2.0",
+        "menatwork/contao-multicolumnwizard-bundle": "^3.4"
     },
     "conflict": {
         "contao/core": "*",

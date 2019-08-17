@@ -1,5 +1,10 @@
 # Linksammlung
 
+Neu: Suche nach CMS in der Linkliste
+Neu: Linkliste jetzt mit den gleichen Infos wie die Links in der normalen Kategorieliste
+Neu: Umstellung der Formulare auf Haste
+Neu: DOM-Klasse durch externes Bundle ersetzt
+
 ## Version 1.0.0 (2019-08-14)
 
 Initialversion als Bundle für Contao 4 - in dieser Version noch ohne Code

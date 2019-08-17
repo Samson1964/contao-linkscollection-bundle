@@ -133,7 +133,7 @@ class Linkscollection
 		$dom = new \PHPHtmlParser\Dom;
 		$dom->load($string);
 		$html = $dom->find('html')[0];
-		$lang = $html->getAttribute('lang');
+		if($html) $lang = $html->getAttribute('lang');
 
 		return $lang ? $lang : ''; // Sprache zurückgeben
 	}
@@ -141,7 +141,7 @@ class Linkscollection
 	/**
 	 * Liest den Generator aus dem DOM
 	 * @param string    HTML der Webseite
-	 * @return string   
+	 * @return string
 	 */
 	public static function checkCMS($string)
 	{
@@ -195,7 +195,7 @@ class Linkscollection
 
 		$content = '
 		<div id="tl_buttons">
-			<a href="contao/main.php?do=linkscollection&amp;rt='.REQUEST_TOKEN.'" class="header_back" title="" accesskey="b" onclick="Backend.getScrollOffset()">'.$GLOBALS['TL_LANG']['MSC']['backBT'].'</a> 
+			<a href="contao/main.php?do=linkscollection&amp;rt='.REQUEST_TOKEN.'" class="header_back" title="" accesskey="b" onclick="Backend.getScrollOffset()">'.$GLOBALS['TL_LANG']['MSC']['backBT'].'</a>
 		</div>';
 
 		$content .= '<div id="tl_listing" class="tl_listing_container"><ul class="tl_listing">';
@@ -311,18 +311,25 @@ class Linkscollection
 
 	/**
 	 * Listet den Datensatz eines Links im Backend auf
-	 * @param array     Array mit dem Datensatz
-	 * @param boolean   true/false = Buttons generieren (nicht nötig bei Standardausgabe)
+	 * @param array     $record           Array mit dem Datensatz
+	 * @param boolean   $buttons          true/false = Buttons generieren (nicht nötig bei Standardausgabe)
 	 * @return string   HTML-Ausgabe
 	 */
 	public function ViewLinkrow($record, $buttons = false)
 	{
 		$refreshtime = time() - ($GLOBALS['TL_CONFIG']['linkscollection_test_duration'] * 86400);
 
-		if($record['statedate'] < $refreshtime)
+		if($record['statedate'] < $refreshtime && $GLOBALS['linkscollection_linkcheck_count'] <= $GLOBALS['TL_CONFIG']['linkscollection_maxlinkcheck'])
 		{
+			$GLOBALS['linkscollection_linkcheck_count']++;
+			log_message('GLOBALS linkscollection_linkcheck_count nach Inkrementierung='.$GLOBALS['linkscollection_linkcheck_count'], 'linkscollection.log');
+			log_message('TL_CONFIG linkscollection_maxlinkcheck='.$GLOBALS['TL_CONFIG']['linkscollection_maxlinkcheck'], 'linkscollection.log');
+			log_message('Prüfe mit diesen Einstellungen:', 'linkscollection.log');
+			log_message(print_r($record, true), 'linkscollection.log');
 			// URL neu prüfen und Favicon downloaden
 			$record = self::saveFavicon($record);
+			log_message('Ergebnis:', 'linkscollection.log');
+			log_message(print_r($record, true), 'linkscollection.log');
 		}
 		// Letzte Prüfung ausgeben
 		$sekunden = time() - $record['statedate'];
@@ -360,9 +367,9 @@ class Linkscollection
 			default:
 				$info = '';
 		}
-		
+
 		$archivclass = ($record['webarchiv']) ? ' webarchiv' : ''; // Webarchiv-Klasse hinzufügen
-		
+
 		$line = '';
 		$line .= '<div class="tl_content_right height18">';
 		$line .= '<span style="margin-right:5px; color:#9F5000;" title="Verwendetes CMS">'.$record['cms'].'</span>';
@@ -453,7 +460,7 @@ class Linkscollection
 		}
 
 		// Suchoptionen
-		$fields = array('title', 'url', 'text');
+		$fields = array('title', 'url', 'text', 'cms');
 		$options = '';
 
 		foreach ($fields as $field)
@@ -479,6 +486,8 @@ class Linkscollection
 		$objLinks = \Database::getInstance()->prepare($query)
 		                                    ->limit(500)
 		                                    ->execute($value);
+
+		$GLOBALS['TL_CONFIG']['linkscollection_maxlinkcheck'] = -1; // Keine Links checken in dieser Funktion
 
 		$arrLinks = array();
 		if($objLinks->numRows > 0)
@@ -532,7 +541,7 @@ class Linkscollection
 
 		//\Linkbuilder::run();
 		\Schachbulle\ContaoLinkscollectionBundle\Klassen\CreateStatistics::run();
-		
+
 		// Zurücklink generieren, ab C4 ist das ein symbolischer Link zu "contao"
 		if (version_compare(VERSION, '4.0', '>='))
 		{

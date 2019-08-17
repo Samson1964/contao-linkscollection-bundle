@@ -55,8 +55,11 @@ if(TL_MODE == 'BE') $GLOBALS['TL_CSS'][] = 'bundles/contaolinkscollection/css/be
  */
 
 $GLOBALS['TL_CONFIG']['linkscollection_new_duration'] = 60; // 60 Tage gilt ein Link als neu
-$GLOBALS['TL_CONFIG']['linkscollection_test_duration'] = 30; // 365 Tage bis zur nächsten Linkprüfung
+$GLOBALS['TL_CONFIG']['linkscollection_test_duration'] = 365; // 365 Tage bis zur nächsten Linkprüfung
 $GLOBALS['TL_CONFIG']['linkscollection_webarchiv'] = 'https://web.archive.org/web/*/'; // Link zum Webarchiv (Prefix)
+$GLOBALS['TL_CONFIG']['linkscollection_maxlinkcheck'] = 5; // 30 Links werden maximal in einem Durchgang geprüft
+
+$GLOBALS['linkscollection_linkcheck_count'] = 0;
 
 /**
  * Define special style sheet filters
@@ -64,6 +67,7 @@ $GLOBALS['TL_CONFIG']['linkscollection_webarchiv'] = 'https://web.archive.org/we
 $GLOBALS['TL_LINKSCOLLECTION_LINKS_FILTER']['title'] = 'id IN (SELECT id FROM tl_linkscollection_links WHERE title LIKE ?)';
 $GLOBALS['TL_LINKSCOLLECTION_LINKS_FILTER']['url']   = 'id IN (SELECT id FROM tl_linkscollection_links WHERE url LIKE ?)';
 $GLOBALS['TL_LINKSCOLLECTION_LINKS_FILTER']['text']  = 'id IN (SELECT id FROM tl_linkscollection_links WHERE text LIKE ?)';
+$GLOBALS['TL_LINKSCOLLECTION_LINKS_FILTER']['cms']   = 'id IN (SELECT id FROM tl_linkscollection_links WHERE cms LIKE ?)';
 
 /**
  * Hooks
