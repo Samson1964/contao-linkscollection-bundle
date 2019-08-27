@@ -1,5 +1,9 @@
 # Linksammlung
 
+## Version 1.1.1 (2019-08-27)
+
+Fix: Toplinks hatten noch alte URL
+
 ## Version 1.1.0 (2019-08-17)
 
 Neu: Suche nach CMS in der Linkliste

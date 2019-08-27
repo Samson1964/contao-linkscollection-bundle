@@ -239,7 +239,7 @@ class Linksammlung extends \Module
 				$links[] = array
 				(
 					'title'            => $objLinks->title,
-					'url'              => 'system/modules/linkscollection/public/go.php?id='.$objLinks->id,
+					'url'              => 'bundles/contaolinkscollection/go.php?id='.$objLinks->id,
 					'icon'             => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($objLinks->id),
 					'language'         => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getLanguageIcon($objLinks->language),
 					'new'              => $objLinks->newWindow,
@@ -285,7 +285,7 @@ class Linksammlung extends \Module
 				$links[] = array
 				(
 					'title'            => $objLinks->title,
-					'url'              => 'system/modules/linkscollection/public/go.php?id='.$objLinks->id,
+					'url'              => 'bundles/contaolinkscollection/go.php?id='.$objLinks->id,
 					'icon'             => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($objLinks->id),
 					'language'         => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getLanguageIcon($objLinks->language),
 					'new'              => $objLinks->newWindow,
