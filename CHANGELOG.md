@@ -1,5 +1,9 @@
 # Linksammlung
 
+## Version 1.1.2 (2019-09-27)
+
+Fix: Abhängigkeit core-bundle auf ^4 geändert
+
 ## Version 1.1.1 (2019-08-27)
 
 Fix: Toplinks hatten noch alte URL
