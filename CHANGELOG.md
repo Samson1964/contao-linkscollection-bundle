@@ -1,5 +1,9 @@
 # Linksammlung
 
+## Version 1.1.3 (2019-09-30)
+
+Fix: Abhängigkeit Symfony entfernt
+
 ## Version 1.1.2 (2019-09-27)
 
 Fix: Abhängigkeit core-bundle auf ^4 geändert
