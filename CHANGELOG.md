@@ -1,5 +1,9 @@
 # Linksammlung
 
+## Version 1.1.4 (2019-10-01)
+
+Fix: Bundle hat FE_MOD-Array "applications" überschrieben
+
 ## Version 1.1.3 (2019-09-30)
 
 Fix: Abhängigkeit Symfony entfernt

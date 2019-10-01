@@ -36,10 +36,7 @@ array_insert($GLOBALS['BE_MOD']['content'], 1, array
 /**
  * Frontend-Module der Linksammlung an Position 1 einfügen
  */
-$GLOBALS['FE_MOD']['application'] = array
-(
-	'linkscollection'          => 'Schachbulle\ContaoLinkscollectionBundle\Module\Linksammlung',
-);
+$GLOBALS['FE_MOD']['application']['linkscollection'] = 'Schachbulle\ContaoLinkscollectionBundle\Module\Linksammlung';
 
 // Cronjobs
 //$GLOBALS['TL_CRON']['daily'][] = array('LinkRebuilder', 'run');
