@@ -91,8 +91,10 @@ class Linkscollection
 			$favicon = new \Schachbulle\ContaoLinkscollectionBundle\Klassen\FaviconDownloader(self::getWeblink($arrRow['url'], $arrRow['webarchiv']));
 			if($favicon->icoExists)
 			{
-				// Saving favicon to file
-				$filename = TL_ROOT.'/vendor/schachbulle/contao-linkscollection-bundle/src/Resources/public/favicons/'.$arrRow['id'].'.'.$favicon->icoType;
+				$favicon_dir = TL_ROOT.'/vendor/schachbulle/contao-linkscollection-bundle/src/Resources/public/favicons/';
+				if(!file_exists($favicon_dir)) mkdir($favicon_dir); // favicon-Verzeichnis anlegen, wenn nicht vorhanden
+				// Favicon als Datei speichern
+				$filename = $favicon_dir.$arrRow['id'].'.'.$favicon->icoType;
 				$icon = 'bundles/contaolinkscollection/favicons/'.$arrRow['id'].'.'.$favicon->icoType;
 				file_put_contents($filename, $favicon->icoData);
 			}

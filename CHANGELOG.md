@@ -1,5 +1,9 @@
 # Linksammlung
 
+## Version 1.1.5 (2019-10-10)
+
+Fix: favicon-Verzeichnis wurde nicht angelegt, wenn noch nicht vorhanden
+
 ## Version 1.1.4 (2019-10-01)
 
 Fix: Bundle hat FE_MOD-Array "applications" überschrieben
