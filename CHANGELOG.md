@@ -1,5 +1,9 @@
 # Linksammlung
 
+## Version 1.1.6 (2020-03-23)
+
+Fix: Abhängigkeit paquettg/php-html-parser von ^2.0 auf ^2 geändert
+
 ## Version 1.1.5 (2019-10-10)
 
 Fix: favicon-Verzeichnis wurde nicht angelegt, wenn noch nicht vorhanden
