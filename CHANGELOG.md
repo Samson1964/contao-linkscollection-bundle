@@ -1,5 +1,9 @@
 # Linksammlung
 
+## Version 1.1.7 (2020-04-25)
+
+Fix: CSS von TL_CSS nach lokal verschoben
+
 ## Version 1.1.6 (2020-03-23)
 
 Fix: Abhängigkeit paquettg/php-html-parser von ^2.0 auf ^2 geändert

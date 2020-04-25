@@ -38,13 +38,6 @@ array_insert($GLOBALS['BE_MOD']['content'], 1, array
  */
 $GLOBALS['FE_MOD']['application']['linkscollection'] = 'Schachbulle\ContaoLinkscollectionBundle\Module\Linksammlung';
 
-// Cronjobs
-//$GLOBALS['TL_CRON']['daily'][] = array('LinkRebuilder', 'run');
-
-// Standard-CSS einbinden
-$GLOBALS['TL_CSS'][] = 'bundles/contaolinkscollection/css/style.css'; 
-if(TL_MODE == 'BE') $GLOBALS['TL_CSS'][] = 'bundles/contaolinkscollection/css/be.css'; 
-
 /**
  * -------------------------------------------------------------------------
  * Voreinstellungen

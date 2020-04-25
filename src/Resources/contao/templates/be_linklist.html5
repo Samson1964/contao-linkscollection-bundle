@@ -1,3 +1,6 @@
+<link rel="stylesheet" type="text/css" href="bundles/contaolinkscollection/css/style.css" media="all" />
+<link rel="stylesheet" type="text/css" href="bundles/contaolinkscollection/css/be.css" media="all" />
+
 <form action="<?= $this->request ?>" id="tl_filter" class="tl_form" method="post">
 	<div class="tl_formbody">
 		<input type="hidden" name="FORM_SUBMIT" value="tl_filters">
