@@ -1,5 +1,9 @@
 # Linksammlung
 
+## Version 1.1.8 (2020-04-28)
+
+Add: rebuild.php in public wiederhergestellt
+
 ## Version 1.1.7 (2020-04-25)
 
 Fix: CSS von TL_CSS nach lokal verschoben
