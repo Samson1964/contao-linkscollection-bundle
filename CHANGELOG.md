@@ -1,5 +1,13 @@
 # Linksammlung
 
+## Version 1.1.9 (2020-05-02)
+
+Fix: Im Formular Link-Bearbeitung wurden in der Infobox Zeichen nicht angezeigt
+Fix: CSS in den Templates über TL_CSS eingebunden
+Fix: Backend-CSS wieder in config.php geschoben
+Fix: Linkliste im Backend war auf 18px Höhe eingestellt
+Fix: Abhängigkeit paquettg/php-html-parser auf >=2.2 geändert
+
 ## Version 1.1.8 (2020-04-28)
 
 Add: rebuild.php in public wiederhergestellt

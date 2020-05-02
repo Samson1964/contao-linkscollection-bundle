@@ -179,7 +179,7 @@ class Linkscollection
 			$x++;
 		}
 
-		$string = implode(' > ', array_reverse($breadcrumb));
+		$string = implode(' &#10140; ', array_reverse($breadcrumb));
 		return $string;
 	}
 

@@ -63,3 +63,9 @@ $GLOBALS['TL_LINKSCOLLECTION_LINKS_FILTER']['cms']   = 'id IN (SELECT id FROM tl
  * Hooks
  */
 //$GLOBALS['TL_HOOKS']['loadFormField'][] = array('Schachbulle\Linksammlung\Helper', 'setCategoriesToForm');
+
+if(TL_MODE == 'BE') 
+{
+	$GLOBALS['TL_CSS'][] = 'bundles/contaolinkscollection/css/style.css'; 
+	$GLOBALS['TL_CSS'][] = 'bundles/contaolinkscollection/css/be.css'; 
+}

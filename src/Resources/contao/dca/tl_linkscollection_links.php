@@ -647,9 +647,9 @@ class tl_linkscollection_links extends Backend
 	public function getInfobox(DataContainer $dc)
 	{
 		$kategorie = \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::Breadcrumb($dc->activeRecord->pid);
-		$url = strlen($dc->activeRecord->url) > 7 ? '<br><b>URL in neuem Fenster öffnen:</b>&nbsp;<a href="'.$dc->activeRecord->url.'" target="_blank">'.$dc->activeRecord->url.'</a>' : '';
+		$url = strlen($dc->activeRecord->url) > 7 ? '<br><b>URL in neuem Fenster öffnen:</b> <a href="'.$dc->activeRecord->url.'" target="_blank">'.$dc->activeRecord->url.'</a>' : '';
 
-		return '<div class="long widget"><b>Kategorie:</b> '.$kategorie.$url.'</div>';
+		return '<div class="long" style="margin-left: 15px; margin-right: 15px;"><b>Kategorie:</b> '.$kategorie.$url.'</div>';
 	}
 
 	/**

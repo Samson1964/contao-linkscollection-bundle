@@ -1,4 +1,6 @@
-<link rel="stylesheet" type="text/css" href="bundles/contaolinkscollection/css/style.css" media="all" />
+<?php
+$GLOBALS['TL_CSS'][] = 'bundles/contaolinkscollection/css/style.css'; 
+?>
 
 <div class="<?= $this->class ?> block"<?= $this->cssID ?><?php if ($this->style): ?> style="<?= $this->style ?>"<?php endif; ?>>
 	
