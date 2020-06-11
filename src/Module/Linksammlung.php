@@ -357,7 +357,7 @@ class Linksammlung extends \Module
 			$this->Template->average = ($objLink->hits == 0) ? 0 : str_replace('.',',',sprintf("%01.1f",$objLink->hits / ((time() - $objLink->initdate) / 86400)));
 			$this->Template->popular = $objLink->popular;
 			$this->Template->icon = \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($objLink->id);
-			$this->Template->initdate = date("d.m.Y, H:i", $objLink->initdate);
+			$this->Template->initdate = $objLink->initdate ? date("d.m.Y, H:i", $objLink->initdate) : 'unbekannt';
 			$this->Template->tstamp = date("d.m.Y, H:i", $objLink->tstamp);
 			$this->Template->statedate = date("d.m.Y, H:i", $objLink->statedate);
 			$this->Template->statecode = $objLink->statecode;

@@ -133,6 +133,7 @@ class Linkscollection
 	{
 		// DOM auf <html lang=""> untersuchen
 		$dom = new \PHPHtmlParser\Dom;
+		$string = iconv('windows-1251', 'utf-8', $string); // Fix: mb_eregi_replace() expects parameter 3 to be string, null given
 		$dom->load($string);
 		$html = $dom->find('html')[0];
 		if($html) $lang = $html->getAttribute('lang');
@@ -149,6 +150,7 @@ class Linkscollection
 	{
 		// DOM auf <meta name="generator"> untersuchen und dort das Attribut content auslesen
 		$dom = new \PHPHtmlParser\Dom;
+		$string = iconv('windows-1251', 'utf-8', $string); // Fix: mb_eregi_replace() expects parameter 3 to be string, null given
 		$dom->load($string);
 		foreach($dom->find('meta') as $meta)
 		{

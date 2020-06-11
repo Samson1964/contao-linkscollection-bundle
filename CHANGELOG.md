@@ -1,5 +1,10 @@
 # Linksammlung
 
+## Version 1.1.10 (2020-06-11)
+
+Fix: Datum "Eingetragen am" wurde bei 0 als 01.01.1970 ausgegeben
+Fix: mb_eregi_replace() expects parameter 3 to be string, null given (Klassen\Linkscollection.php)
+
 ## Version 1.1.9 (2020-05-02)
 
 Fix: Im Formular Link-Bearbeitung wurden in der Infobox Zeichen nicht angezeigt
