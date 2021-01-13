@@ -28,7 +28,7 @@ $GLOBALS['TL_CSS'][] = 'bundles/contaolinkscollection/css/style.css';
 		<h2>Linkdetails</h2>
 		<ul>
 			<li><b>Titel:</b> <?= $this->title ?></li>
-			<li><b>URL:</b> <a href="<?= $this->url_raw ?>" target="_blank"><?= $this->url_raw ?></a></li>
+			<li><b>URL:</b> <a href="<?= $this->url_raw ?>" target="_blank" rel="nofollow"><?= $this->url_raw ?></a></li>
 			<?php if($this->webarchiv): ?>
 			<li><b>Webarchiv:</b> Seite nur noch im Webarchiv verfügbar!</li>
 			<?php endif; ?>
