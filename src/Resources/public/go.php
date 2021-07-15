@@ -27,7 +27,7 @@ class LinkClick
 
 	public function __construct()
 	{
-		$this->id = \Input::get('id') + 0;
+		$this->id = intval(\Input::get('id'));
 	}
 
 	public function run()

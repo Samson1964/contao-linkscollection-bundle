@@ -22,6 +22,10 @@ $GLOBALS['TL_LANG']['tl_linkscollection']['delete'] = array('Kategorie löschen'
 $GLOBALS['TL_LANG']['tl_linkscollection']['toggle'] = array('Kategorie aktivieren/deaktivieren', 'Kategorie %s aktivieren/deaktivieren');
 $GLOBALS['TL_LANG']['tl_linkscollection']['show'] = array('Kategoriedetails anzeigen' , 'Details der Kategorie %s anzeigen');
 
+/**
+ * Buttons für zusätzliche Operationen
+ */
+
 $GLOBALS['TL_LANG']['tl_linkscollection']['analyse'] = array('Prüfbericht' , 'Linksammlung prüfen');
 $GLOBALS['TL_LANG']['tl_linkscollection']['linklist'] = array('Linkliste' , 'Komplette Linkliste anzeigen');
 $GLOBALS['TL_LANG']['tl_linkscollection']['statistik'] = array('Statistik' , 'Statistik aktualisieren');

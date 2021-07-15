@@ -19,6 +19,14 @@ $GLOBALS['TL_LANG']['tl_linkscollection_links']['toggle'] = array('Link aktivier
 $GLOBALS['TL_LANG']['tl_linkscollection_links']['show'] = array('Linkdetails anzeigen' , 'Details des Link %s anzeigen');
 
 /**
+ * Buttons für zusätzliche Operationen
+ */
+
+$GLOBALS['TL_LANG']['tl_linkscollection_links']['analyse'] = array('Prüfbericht' , 'Linksammlung prüfen');
+$GLOBALS['TL_LANG']['tl_linkscollection_links']['linklist'] = array('Linkliste' , 'Komplette Linkliste anzeigen');
+$GLOBALS['TL_LANG']['tl_linkscollection_links']['statistik'] = array('Statistik' , 'Statistik aktualisieren');
+
+/**
  * Back end modules
  */
 
@@ -40,7 +48,7 @@ $GLOBALS['TL_LANG']['tl_linkscollection_links']['problem'] = array('Probleme und
 $GLOBALS['TL_LANG']['tl_linkscollection_links']['problemdate'] = array('Letzte Meldung', 'Datum des letzten gemeldeten Problems oder Korrekturen');
 $GLOBALS['TL_LANG']['tl_linkscollection_links']['problemcount'] = array('Anzahl Meldungen', 'Anzahl gemeldeter Probleme und Korrekturen');
 
-$GLOBALS['TL_LANG']['tl_linkscollection_links']['warnings'] = array('Meldungen', 'Meldungen');
+$GLOBALS['TL_LANG']['tl_linkscollection_links']['warnings'] = array('Liste der Meldungen', 'Auflistung aller Meldungen');
 $GLOBALS['TL_LANG']['tl_linkscollection_links']['warning_done'] = array('Erledigt', 'Status');
 $GLOBALS['TL_LANG']['tl_linkscollection_links']['warning_date'] = array('Datum', 'Datum der Meldung');
 $GLOBALS['TL_LANG']['tl_linkscollection_links']['warning_error'] = array('Fehler', 'Fehlertitel');

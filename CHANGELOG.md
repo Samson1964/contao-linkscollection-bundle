@@ -1,5 +1,11 @@
 # Linksammlung
 
+## Version 1.1.12 (2021-07-15)
+
+* Fix: Übersetzungen Headerlinks fehlen in den BE-Kategorien -> tl_linkscollection_links
+* Fix: Link bearbeiten: Abschnitt Meldungen hat Textüberlagerungen
+* Fix: A non-numeric value encountered in public/go.php on line 30 -> "+ 0" durch intval-Funktion ersetzt
+
 ## Version 1.1.11 (2021-01-13)
 
 * Add: rel=nofollow bei ausgehenden Links

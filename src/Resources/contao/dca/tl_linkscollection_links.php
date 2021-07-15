@@ -384,11 +384,10 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'inputType'               => 'multiColumnWizard',
 			'eval'                    => array
 			(
+				'tl_class'            => 'long clr',
 				'buttonPos'           => 'top',
 				'buttons'             => array
 				(
-					//'copy' 			=> false,
-					//'delete' 		=> true,
 					'up'              => false,
 					'down'            => false
 				),
@@ -401,8 +400,9 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 						'inputType'   => 'checkbox',
 						'eval'        => array
 						(
-							'style'   => 'width: 20px',
-							'valign'  => 'top'
+							'style'             => 'width: 20px',
+							'valign'            => 'top',
+							'columnPos'         => '1'
 						)
 					),
 					'date' => array
@@ -412,8 +412,8 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 						'inputType'   => 'text',
 						'eval'        => array
 						(
-							'style'             => 'width: 140px',
-							'columnPos'         => '1'
+							'style'             => 'width: 180px',
+							'columnPos'         => '2'
 						),
 						'load_callback'         => array
 						(
@@ -431,8 +431,8 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 						'inputType'             => 'text',
 						'eval'                  => array
 						(
-							'style'             => 'width: 140px',
-							'columnPos'         => '1'
+							'style'             => 'width: 180px',
+							'columnPos'         => '2'
 						)
 					),
 					'newtitle' => array
@@ -442,8 +442,8 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 						'inputType'             => 'text',
 						'eval'                  => array
 						(
-							'style'             => 'width: 140px',
-							'columnPos'         => '1'
+							'style'             => 'width: 180px',
+							'columnPos'         => '2'
 						)
 					),
 					'error' => array
@@ -453,8 +453,8 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 						'inputType'             => 'text',
 						'eval'                  => array
 						(
-							'style'             => 'width: 200px',
-							'columnPos'         => '2'
+							'style'             => 'width: 230px',
+							'columnPos'         => '3'
 						)
 					),
 					'email' => array
@@ -464,8 +464,8 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 						'eval'                  => array
 						(
 							'mandatory'         => false,
-							'style'             => 'width: 200px',
-							'columnPos'         => '2'
+							'style'             => 'width: 230px',
+							'columnPos'         => '3'
 						)
 					),
 					'newurl' => array
@@ -475,8 +475,8 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 						'eval'                  => array
 						(
 							'mandatory'         => false,
-							'style'             => 'width: 200px',
-							'columnPos'         => '2'
+							'style'             => 'width: 230px',
+							'columnPos'         => '3'
 						)
 					),
 					'comment' => array
@@ -486,8 +486,11 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 						'inputType'             => 'textarea',
 						'eval'                  => array
 						(
-							'style'             => 'width: 240px; height: 100px',
-							'valign'            => 'top'
+							'style'             => 'width: 350px; height: 100px',
+							'valign'            => 'top',
+							'cols'              => 80,
+							'rows'              => 4,
+							'columnPos'         => '4'
 						)
 					),
 				)
