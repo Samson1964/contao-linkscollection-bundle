@@ -83,7 +83,7 @@ class LinkRebuilder
 				(
 					'links_all'        => $value,
 					'links_self'       => $links_self[$key],
-					'links_new'        => $links_newbie[$key],
+					'links_new'        => $links_newbie[$key] ? $links_newbie[$key] : 0,
 					'links_checkquote' => $prozent
 				);
 				\Database::getInstance()->prepare('UPDATE tl_linkscollection %s WHERE id = ?')

@@ -1,5 +1,9 @@
 # Linksammlung
 
+## Version 1.1.13 (2021-09-10)
+
+* Fix: 1048 Column 'links_new' cannot be null bei UPDATE tl_linkscollection
+
 ## Version 1.1.12 (2021-07-15)
 
 * Fix: Übersetzungen Headerlinks fehlen in den BE-Kategorien -> tl_linkscollection_links

@@ -11,16 +11,16 @@ class CreateStatistics
 
 	public function run()
 	{
-		// Startzeit für neue Links
+		// Startzeit fÃ¼r neue Links
 		$duration = time() - ($GLOBALS['TL_CONFIG']['linkscollection_new_duration'] * 86400);
 		// Unixtime vor einem Jahr:
 		$einjahr = time() - 31556926;
 
-		// Anzahl der Links in jede Kategorie eintragen, dazu zuerst alle veröffentlichten Links laden
+		// Anzahl der Links in jede Kategorie eintragen, dazu zuerst alle verÃ¶ffentlichten Links laden
 		$objLinks = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection_links WHERE published = ?')
 		                                    ->execute(1);
 
-		// Links in jeweiligen Array-Wert für die Kategorie hochzählen
+		// Links in jeweiligen Array-Wert fÃ¼r die Kategorie hochzÃ¤hlen
 		$links_all = array();
 		$links_self = array();
 		$links_new = array();
@@ -30,10 +30,10 @@ class CreateStatistics
 		while($objLinks->next())
 		{
 			$links_self[$objLinks->pid]++; // Link in eigener Kategorie addieren
-			// Status der letzten Linkprüfung eintragen - Wenn i.O. (Status 200, nicht älter als 1 Jahr) dann Zähler hochsetzen
+			// Status der letzten LinkprÃ¼fung eintragen - Wenn i.O. (Status 200, nicht Ã¤lter als 1 Jahr) dann ZÃ¤hler hochsetzen
 			if($objLinks->statecode == 200 && $objLinks->statedate >= $einjahr) $links_check[$objLinks->pid]++; // Status des Links addieren
 
-			if($objLinks->initdate >= $duration) $links_new[$objLinks->pid]++; // Neuen Link zählen
+			if($objLinks->initdate >= $duration) $links_new[$objLinks->pid]++; // Neuen Link zÃ¤hlen
 			$cats = self::foundParents($objLinks->pid); // Oberkategorien finden
 			foreach($cats as $cat)
 			{
@@ -59,7 +59,7 @@ class CreateStatistics
 		{
 			if($key)
 			{
-				// Prozent geprüfter Links ermitteln
+				// Prozent geprÃ¼fter Links ermitteln
 				$links_check[$key] += 0;
 				$links_self[$key] += 0;
 				$prozent = $links_self[$key] == 0 ? 100 : sprintf('%d', ($links_check[$key]/$links_self[$key]) * 100);
@@ -68,7 +68,7 @@ class CreateStatistics
 				(
 					'links_all'        => $value,
 					'links_self'       => $links_self[$key],
-					'links_new'        => $links_newbie[$key],
+					'links_new'        => $links_newbie[$key] ? $links_newbie[$key] : 0,
 					'links_checkquote' => $prozent
 				);
 				\Database::getInstance()->prepare('UPDATE tl_linkscollection %s WHERE id = ?')

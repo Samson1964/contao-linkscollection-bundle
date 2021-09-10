@@ -216,6 +216,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection'] = array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['links_new'],
 			'exclude'                 => true,
+			'default'                 => 0,
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'rgxp'=>'numeric'),
 			'sql'                     => "int(6) unsigned NOT NULL default '0'"
