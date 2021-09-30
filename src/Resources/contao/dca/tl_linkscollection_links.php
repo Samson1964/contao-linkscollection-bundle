@@ -611,8 +611,8 @@ class tl_linkscollection_links extends Backend
 		(
 			'initdate'      => $dc->activeRecord->initdate ? $dc->activeRecord->initdate : $dc->activeRecord->tstamp,
 			'statedate'     => $arrRow['statedate'],
-			'statecode'     => $arrRow['statecode'],
-			'statetext'     => $arrRow['statetext'],
+			'statecode'     => $arrRow['statecode'] ? $arrRow['statecode'] : '',
+			'statetext'     => $arrRow['statetext'] ? $arrRow['statetext'] : '',
 			'problemcount'  => $w
 		);
 		$this->Database->prepare("UPDATE tl_linkscollection_links %s WHERE id=?")

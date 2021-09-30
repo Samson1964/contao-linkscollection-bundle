@@ -1,5 +1,11 @@
 # Linksammlung
 
+## Version 1.1.15 (2021-09-30)
+
+* Fix: tl_linkscollection_links.statecode - 1048 Column 'statecode' cannot be null
+* Fix: tl_linkscollection_links.statetext - 1048 Column 'statetext' cannot be null
+* Fix: tl_linkscollection_links.cms - 1048 Column 'cms' cannot be null
+
 ## Version 1.1.14 (2021-09-30)
 
 * Fix: An exception occurred while executing 'UPDATE tl_linkscollection_links SET `language`='de-de'' - 1406 Data too long for column 'language' at row 1"

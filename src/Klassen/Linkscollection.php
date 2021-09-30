@@ -111,10 +111,10 @@ class Linkscollection
 		$set = array
 		(
 			'statedate' => $arrRow['statedate'],
-			'statecode' => $arrRow['statecode'],
-			'statetext' => $arrRow['statetext'],
+			'statecode' => $arrRow['statecode'] ? $arrRow['statecode'] : '',
+			'statetext' => $arrRow['statetext'] ? $arrRow['statetext'] : '',
 			'language'  => $arrRow['language'],
-			'cms'       => $arrRow['cms'],
+			'cms'       => $arrRow['cms'] ? $arrRow['cms'] : '',
 			'cmsdate'   => $arrRow['statedate']
 		);
 		\Database::getInstance()->prepare('UPDATE tl_linkscollection_links %s WHERE id = ?')
