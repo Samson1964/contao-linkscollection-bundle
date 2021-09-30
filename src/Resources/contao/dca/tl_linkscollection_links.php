@@ -207,7 +207,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'inputType'               => 'select',
 			'options'                 => System::getCountries(),
 			'eval'                    => array('includeBlankOption'=>true, 'chosen'=>true, 'tl_class'=>'w50'),
-			'sql'                     => "varchar(2) NOT NULL default ''"
+			'sql'                     => "varchar(5) NOT NULL default ''"
 		),
 		// Link offline, aber auf www.archive.org
 		'webarchiv' => array

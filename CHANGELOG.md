@@ -1,5 +1,9 @@
 # Linksammlung
 
+## Version 1.1.14 (2021-09-30)
+
+* Fix: An exception occurred while executing 'UPDATE tl_linkscollection_links SET `language`='de-de'' - 1406 Data too long for column 'language' at row 1"
+
 ## Version 1.1.13 (2021-09-10)
 
 * Fix: 1048 Column 'links_new' cannot be null bei UPDATE tl_linkscollection
