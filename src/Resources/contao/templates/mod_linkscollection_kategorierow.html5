@@ -1,0 +1,5 @@
+<?php foreach($this->kategorien as $l): ?>
+	<li class="<?= $l['class'] ?>">
+		<a href="<?= $l['url'] ?>"><?= $l['title'] ?></a>
+	</li>
+<?php endforeach; ?>

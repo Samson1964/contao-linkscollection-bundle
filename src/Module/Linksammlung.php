@@ -326,8 +326,12 @@ class Linksammlung extends \Module
 	/**
 	 * Generate Suche
 	 */
-	protected function search()
+	protected function Search()
 	{
+		global $objPage;
+
+		\Session::getInstance()->set('pageAlias', $objPage->alias); // Alias der Linksammlung in Sitzung speichern
+		\Session::getInstance()->set('pageId', $objPage->id); // ID der Linksammlung in Sitzung speichern
 		$this->Template = new \FrontendTemplate('mod_linkscollection_search');
 	}
 
@@ -403,7 +407,7 @@ class Linksammlung extends \Module
 			array
 			(
 				'title' => 'Neuen Link melden',
-				'link'  => \Controller::generateFrontendUrl($objPage->row(), '/view/sendlink'),
+				'link'  => \Controller::generateFrontendUrl($objPage->row(), '/view/sendlink/category/'.\Input::get('category')),
 			),
 		);
 		return $menu;
@@ -608,7 +612,7 @@ class Linksammlung extends \Module
 		$objForm->addFormField('category', array(
 			'label'         => 'Kategorie des Links',
 			'inputType'     => 'select',
-			'selected'      => array($this->currentCategory),
+			'default'       => array(\Input::get('category')),
 			'options'       => array_keys($this->tree),
 			'reference'     => $this->tree,
 			'eval'          => array('mandatory'=>true, 'choosen'=>true, 'class'=>'form-control')

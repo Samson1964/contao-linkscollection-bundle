@@ -1,5 +1,11 @@
 # Linksammlung
 
+## Version 1.2.0 (2021-10-04)
+
+* Fix: Bei Formular neuen Link melden wird die aktuelle Kategorie nicht angezeigt -> falsche Variable und URL-Parameter category fehlte
+* Add: Suche nach Kategorien
+* Fix: Kosmetische Verbesserungen in der Suche
+
 ## Version 1.1.15 (2021-09-30)
 
 * Fix: tl_linkscollection_links.statecode - 1048 Column 'statecode' cannot be null
