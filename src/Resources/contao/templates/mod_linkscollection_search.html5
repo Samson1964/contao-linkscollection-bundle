@@ -4,6 +4,16 @@ $GLOBALS['TL_CSS'][] = 'bundles/contaolinkscollection/css/style.css';
 <script src="bundles/contaolinkscollection/js/ajax.js"></script>
 
 <div class="<?= $this->class ?> block"<?= $this->cssID; ?><?php if ($this->style): ?> style="<?= $this->style ?>"<?php endif; ?>>
+
+	<?php if($this->menu): ?>
+		<div class="menu">
+			<ul>
+			<?php foreach($this->menu as $m): ?>
+				<li><a href="<?= $m['link'] ?>"><?= $m['title'] ?></a></li>
+			<?php endforeach; ?>
+			</ul>
+		</div>
+	<?php endif; ?>
 	
 	<div id="myFormDiv">
 		<form id="myForm" action="" method="get">

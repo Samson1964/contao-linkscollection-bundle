@@ -55,10 +55,15 @@ class Linksammlung extends \Module
 			$this->getCategories(); // Kategoriebaum anlegen und Kategorien/Links zählen
 			$this->Template = new \FrontendTemplate($this->strTemplate);
 			$this->Subtemplate = new \FrontendTemplate($this->subTemplate);
+
+			$GLOBALS['TL_CSS'][] = 'bundles/flag-icon-css/css/flag-icon.min.css|static';
 		}
 
 		$this->duration_new = time() - ($GLOBALS['TL_CONFIG']['linkscollection_new_duration'] * 86400);
 		$this->duration_test = time() - ($GLOBALS['TL_CONFIG']['linkscollection_test_duration'] * 86400);
+
+		// Symlink für das externe Bundle components/flag-icon-css erstellen, wenn noch nicht vorhanden
+		if(!is_link(TL_ROOT.'/web/bundles/flag-icon-css')) symlink(TL_ROOT.'/vendor/components/flag-icon-css/', TL_ROOT.'/web/bundles/flag-icon-css'); // Ziel, Name
 
 		return parent::generate(); // Weitermachen mit dem Modul
 	}
@@ -333,6 +338,7 @@ class Linksammlung extends \Module
 		\Session::getInstance()->set('pageAlias', $objPage->alias); // Alias der Linksammlung in Sitzung speichern
 		\Session::getInstance()->set('pageId', $objPage->id); // ID der Linksammlung in Sitzung speichern
 		$this->Template = new \FrontendTemplate('mod_linkscollection_search');
+		$this->Template->menu = $this->Menu();
 	}
 
 	/**

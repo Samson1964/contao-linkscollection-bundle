@@ -35,12 +35,8 @@ class Linkscollection
 	{
 		if($language)
 		{
-			$url_web = 'bundles/contaolinkscollection/images/flags/'.$language.'.png';
-			$url_file = 'vendor/schachbulle/contao-linkscollection-bundle/src/Resources/public/images/flags/'.$language.'.png';
-			if(file_exists(TL_ROOT.'/'.$url_file))
-			{
-				return ' <img src="'.$url_web.'" width=16" height="11" title="Seitensprache: '.$language.'">';
-			}
+			$flagge = '&nbsp;<span class="flag-icon flag-icon-'.$language.'">&nbsp;</span>';
+			return $flagge;
 		}
 
 		return '';
