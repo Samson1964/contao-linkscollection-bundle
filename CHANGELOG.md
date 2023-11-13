@@ -1,5 +1,9 @@
 # Linksammlung
 
+## Version 1.3.1 (2023-11-13)
+
+Fix: Linkscollection-Klasse -> ini_set mbstring.regex_retry_limit hochgesetzt auf 10 Millionen
+
 ## Version 1.3.0 (2022-03-09)
 
 * Fix: Menü fehlt auf der Suchseite

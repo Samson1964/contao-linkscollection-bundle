@@ -11,6 +11,7 @@
  */
 
 namespace Schachbulle\ContaoLinkscollectionBundle\Klassen;
+ini_set("mbstring.regex_retry_limit", "10000000"); // Um Fehler bei mb_eregi_replace zu fixen: Warning: mb_eregi_replace(): mbregex search failure in php_mbereg_replace_exec(): retry-limit-in-match over in Dom.php
 
 class Linkscollection
 {
