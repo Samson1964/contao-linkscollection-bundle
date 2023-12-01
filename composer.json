@@ -10,12 +10,12 @@
         }
     ],
     "require": {
-        "php": "^5.6 || ^7.0",
+        "php": "^5.6 || ^7.0 || ^8.0",
         "contao/core-bundle": "^4",
-        "codefog/contao-haste": "^4.21",
+        "codefog/contao-haste": "*",
         "components/flag-icon-css": "^3.5",
         "paquettg/php-html-parser": ">=2.2",
-        "menatwork/contao-multicolumnwizard-bundle": "^3.4"
+        "menatwork/contao-multicolumnwizard-bundle": "*"
     },
     "conflict": {
         "contao/core": "*",
