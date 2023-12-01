@@ -42,8 +42,8 @@ class LinkSearch
 
 			$pageAlias = \Session::getInstance()->get('pageAlias'); // Seitenalias aus Sitzung laden
 			$pageId = \Session::getInstance()->get('pageId'); // Seiten-ID aus Sitzung laden
-			echo $pageAlias;
-			echo $pageId;
+			//echo $pageAlias;
+			//echo $pageId;
 			$arrPage = array('id' => $pageId, 'alias' => $pageAlias);
 			
 			// Suche nach Kategorien
@@ -56,7 +56,7 @@ class LinkSearch
 				// Datensätze anzeigen
 				while($objKategorien->next())
 				{
-					$class = ($class == 'odd') ? 'even' : 'odd';
+					$class = (isset($class) == 'odd') ? 'even' : 'odd';
 					$kategorien[] = array
 					(
 						'title'       => $objKategorien->title,
@@ -102,6 +102,7 @@ class LinkSearch
 						'text'        => $objLinks->text,
 						'popular'     => $objLinks->popular,
 						'hits'        => $objLinks->hits,
+						'problem_url' => \Environment::get('base').$pageAlias.'/link/'.$objLinks->id.'.html',
 						'class'       => $class,
 						'newLink'     => ($objLinks->initdate >= $this->duration_new) ? NEWICON : '',
 						'webarchiv'   => $objLinks->webarchiv
@@ -122,7 +123,7 @@ class LinkSearch
 				echo '<p>Keine Links mit "'.$this->keywords.'" gefunden.</p>';
 			}
 
-			\System::log('[Linkscollection] Searching "'.$this->keywords.'" - found '.$objLink->numRows.' row(s)', __CLASS__.'::'.__FUNCTION__, TL_ACCESS);
+			\System::log('[Linkscollection] Searching "'.$this->keywords.'" - found '.isset($objLink->numRows).' row(s)', __CLASS__.'::'.__FUNCTION__, TL_ACCESS);
 		}
 		else
 		{

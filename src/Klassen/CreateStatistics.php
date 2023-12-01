@@ -9,7 +9,7 @@ namespace Schachbulle\ContaoLinkscollectionBundle\Klassen;
 class CreateStatistics
 {
 
-	public function run()
+	public static function run()
 	{
 		// Startzeit für neue Links
 		$duration = time() - ($GLOBALS['TL_CONFIG']['linkscollection_new_duration'] * 86400);
@@ -29,14 +29,20 @@ class CreateStatistics
 
 		while($objLinks->next())
 		{
+			if(!isset($links_self[$objLinks->pid])) $links_self[$objLinks->pid] = 0; // Initialisieren, wenn nicht vorhanden
 			$links_self[$objLinks->pid]++; // Link in eigener Kategorie addieren
 			// Status der letzten Linkprüfung eintragen - Wenn i.O. (Status 200, nicht älter als 1 Jahr) dann Zähler hochsetzen
-			if($objLinks->statecode == 200 && $objLinks->statedate >= $einjahr) $links_check[$objLinks->pid]++; // Status des Links addieren
+			if($objLinks->statecode == 200 && $objLinks->statedate >= $einjahr) 
+			{
+				if(!isset($links_check[$objLinks->pid])) $links_check[$objLinks->pid] = 0; // Initialisieren, wenn nicht vorhanden
+				$links_check[$objLinks->pid]++; // Status des Links addieren
+			}
 
 			if($objLinks->initdate >= $duration) $links_new[$objLinks->pid]++; // Neuen Link zählen
 			$cats = self::foundParents($objLinks->pid); // Oberkategorien finden
 			foreach($cats as $cat)
 			{
+				if(!isset($links_all[$cat])) $links_all[$cat] = 0; // Initialisieren, wenn nicht vorhanden
 				$links_all[$cat]++;
 			}
 		}
@@ -59,6 +65,9 @@ class CreateStatistics
 		{
 			if($key)
 			{
+				if(!isset($links_check[$key])) $links_check[$key] = 0; // Initialisieren, wenn nicht vorhanden
+				if(!isset($links_self[$key])) $links_self[$key] = 0; // Initialisieren, wenn nicht vorhanden
+				if(!isset($links_newbie[$key])) $links_newbie[$key] = 0; // Initialisieren, wenn nicht vorhanden
 				// Prozent geprüfter Links ermitteln
 				$links_check[$key] += 0;
 				$links_self[$key] += 0;
@@ -81,7 +90,7 @@ class CreateStatistics
 
 	}
 
-	protected function foundParents($id)
+	protected static function foundParents($id)
 	{
 		$katids = array($id);
 

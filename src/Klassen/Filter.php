@@ -99,7 +99,7 @@ class Filter extends \Backend
 		$arrFilterDefinitions = array();
 		
 		// adding special filter definitions
-		$filterDefinition = $GLOBALS[strtoupper($strTable) . '_FILTER'][\Input::get(self::CSS_FILTER_PARAM_FIELD_NAME)];
+		$filterDefinition = isset($GLOBALS[strtoupper($strTable) . '_FILTER'][\Input::get(self::CSS_FILTER_PARAM_FIELD_NAME)]);
 		$value = str_replace('&#35;', '#', rawurldecode(\Input::get(self::CSS_FILTER_PARAM_VALUE_NAME)));
 		$value = str_replace('*', '%', $value);
 		
@@ -111,5 +111,3 @@ class Filter extends \Backend
 		return $arrFilterDefinitions;
 	}
 }
-
-?>

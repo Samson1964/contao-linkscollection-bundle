@@ -1,5 +1,10 @@
 # Linksammlung
 
+## Version 1.4.1 (2023-12-01)
+
+* Fix: Anpassungen PHP 8 wegen undefinierter Variablen
+* Change: Toggle-Funktion durch Haste-Toggler ersetzt
+
 ## Version 1.4.0 (2023-12-01)
 
 * Add: Freigabe für PHP 8

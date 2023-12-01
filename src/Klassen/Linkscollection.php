@@ -81,6 +81,7 @@ class Linkscollection
 
 		$strError = '';
 		$language = '';
+		$cms = '';
 
 		if(!$objRequest->hasError())
 		{
@@ -134,6 +135,7 @@ class Linkscollection
 		$dom->load($string);
 		$html = $dom->find('html')[0];
 		if($html) $lang = $html->getAttribute('lang');
+		else $lang = '';
 
 		return $lang ? $lang : ''; // Sprache zurückgeben
 	}
@@ -316,7 +318,7 @@ class Linkscollection
 	 * @param boolean   $buttons          true/false = Buttons generieren (nicht nötig bei Standardausgabe)
 	 * @return string   HTML-Ausgabe
 	 */
-	public function ViewLinkrow($record, $buttons = false)
+	public static function ViewLinkrow($record, $buttons = false)
 	{
 		$refreshtime = time() - ($GLOBALS['TL_CONFIG']['linkscollection_test_duration'] * 86400);
 
@@ -346,6 +348,8 @@ class Linkscollection
 		$icon = self::getFavicon($record['id']);
 		// Sprache-Icon zurückgeben
 		$language = self::getLanguageIcon($record['language']);
+		$info = '';
+		$style = '';
 
 		switch($record['statecode'])
 		{
@@ -366,10 +370,9 @@ class Linkscollection
 				$style = 'background-color:#00FF00; padding-left:2px; padding-right:2px;';
 				break;
 			default:
-				$info = '';
 		}
 
-		$archivclass = ($record['webarchiv']) ? ' webarchiv' : ''; // Webarchiv-Klasse hinzufügen
+		$archivclass = (isset($record['webarchiv'])) ? ' webarchiv' : ''; // Webarchiv-Klasse hinzufügen
 
 		$line = '';
 		$line .= '<div class="tl_content_right height18">';
@@ -452,7 +455,7 @@ class Linkscollection
 		}
 
 		// Suchbegriff zur Abfrage hinzufügen
-		if ($session['search'][$filter]['value'] != '')
+		if(isset($session['search'][$filter]['value']) != '')
 		{
 			$where[] = "CAST(" . $session['search'][$filter]['field'] . " AS CHAR) REGEXP ?";
 			$value[] = $session['search'][$filter]['value'];
@@ -466,11 +469,11 @@ class Linkscollection
 
 		foreach ($fields as $field)
 		{
-			$options .= sprintf('<option value="%s"%s>%s</option>', $field, (($field == $session['search'][$filter]['field']) ? ' selected' : ''), (is_array($GLOBALS['TL_LANG']['tl_linkscollection_list'][$field]) ? $GLOBALS['TL_LANG']['tl_linkscollection_list'][$field][0] : $GLOBALS['TL_LANG']['tl_linkscollection_list'][$field]));
+			$options .= sprintf('<option value="%s"%s>%s</option>', $field, (($field == isset($session['search'][$filter]['field'])) ? ' selected' : ''), (is_array($GLOBALS['TL_LANG']['tl_linkscollection_list'][$field]) ? $GLOBALS['TL_LANG']['tl_linkscollection_list'][$field][0] : $GLOBALS['TL_LANG']['tl_linkscollection_list'][$field]));
 		}
 
 		$Template->searchOptions = $options;
-		$Template->keywords = specialchars($session['search'][$filter]['value']);
+		$Template->keywords = specialchars(isset($session['search'][$filter]['value']));
 		$Template->search = specialchars($GLOBALS['TL_LANG']['MSC']['search']);
 		$Template->showOnly = specialchars($GLOBALS['TL_LANG']['MSC']['showOnly']);
 

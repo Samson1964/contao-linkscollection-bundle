@@ -451,9 +451,9 @@ class Linksammlung extends \Module
 	public function getTree($id)
 	{
 		// Generiert den Baum ab der gewünschten ID
-		if($this->baum[$id])
+		if(isset($this->baum[$id]))
 		{
-			while(list($key,$val) = each($this->baum[$id]))
+			foreach($this->baum[$id] as $key => $val)
 			{
 				$this->tree[$key] = str_repeat("- ", $this->level) . $val;
 				$this->level++;
@@ -494,7 +494,7 @@ class Linksammlung extends \Module
 		$objEmail->subject = sprintf($GLOBALS['TL_LANG']['MSC']['linkscollection_subject'], \Idna::decode(\Environment::get('host')));
 
 		// Kommentar zusammenbauen
-		$strComment .= 'Titel: '.$data['title']."\n";
+		$strComment = 'Titel: '.$data['title']."\n";
 		$strComment .= 'URL: '.$data['url']."\n";
 		$strComment .= 'Kategorie: '.$data['category']."\n";
 		$strComment .= 'Beschreibung: '.$data['description'];
@@ -587,7 +587,7 @@ class Linksammlung extends \Module
 		// Der 3. Parameter ist eine Funktion, die entscheidet wann das Formular gesendet wird (Third is a callable that decides when your form is submitted)
 		// Der optionale 4. Parameter legt fest, ob das ausgegebene Formular auf Tabellen basiert (true)
 		// oder nicht (false) (You can pass an optional fourth parameter (true by default) to turn the form into a table based one)
-		$objForm = new \Haste\Form\Form('linkform', 'POST', function($objHaste)
+		$objForm = new \Codefog\HasteBundle\Form\Form('linkform', 'POST', function($objHaste)
 		{
 			return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
 		});
@@ -663,7 +663,7 @@ class Linksammlung extends \Module
 		// Der 3. Parameter ist eine Funktion, die entscheidet wann das Formular gesendet wird (Third is a callable that decides when your form is submitted)
 		// Der optionale 4. Parameter legt fest, ob das ausgegebene Formular auf Tabellen basiert (true)
 		// oder nicht (false) (You can pass an optional fourth parameter (true by default) to turn the form into a table based one)
-		$objForm = new \Haste\Form\Form('linkform', 'POST', function($objHaste)
+		$objForm = new \Codefog\HasteBundle\Form\Form('linkform', 'POST', function($objHaste)
 		{
 			return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
 		});
