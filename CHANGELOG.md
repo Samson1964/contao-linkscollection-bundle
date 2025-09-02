@@ -1,5 +1,9 @@
 # Linksammlung
 
+## Version 1.4.2 (2025-09-02)
+
+* Change: Abhängigkeit paquettg/php-html-parser von >=2.2 auf ^3 gesetzt
+
 ## Version 1.4.1 (2023-12-01)
 
 * Fix: Anpassungen PHP 8 wegen undefinierter Variablen

@@ -14,7 +14,7 @@
         "codefog/contao-haste": "*",
         "contao/core-bundle": "^4",
         "components/flag-icon-css": "^3.5",
-        "paquettg/php-html-parser": ">=2.2",
+        "paquettg/php-html-parser": "^3",
         "menatwork/contao-multicolumnwizard-bundle": "*"
     },
     "conflict": {
