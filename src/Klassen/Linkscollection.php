@@ -175,18 +175,23 @@ class Linkscollection
 	 */
 	public static function checkCMS($html)
 	{
+		if(!is_string($html))
+		{
+			return '';
+		}
+
 		$lower = strtolower($html);
 
 		// Häufige Generator-/Meta-Tags
 		$patterns = [
-			'/<meta\s+name=["\']generator["\']\s+content=["\']([^"\']+)["\']/' => 1,
-			'/<meta\s+content=["\'](?:wordpress|drupal|joomla|magento|prestashop|cyclone|www|x) cms/i' => 1,
+			'/<meta\s+name=["\']generator["\']\s+content=["\']([^"\']+)["\']/',
+			'/<meta\s+content=["\'](?:wordpress|drupal|contao|joomla|magento|prestashop|cyclone|www|x) cms/i',
 			'/<meta\s+name=["\']generator["\']\s+content=["\']([^"\']+)["\']/i',
-			'/generator.*(wordpress|drupal|joomla|magento|prestashop|woocommerce|prestashop|woocommerce)/i',
+			'/generator.*(wordpress|drupal|contao|joomla|magento|prestashop|woocommerce|prestashop|woocommerce)/i',
 			'/wp-content|wp-admin|wp-includes/i' // WordPress hints
 		];
 
-		foreach($patterns as $pat => $dummy)
+		foreach($patterns as $pat)
 		{
 			if(preg_match($pat, $lower))
 			{

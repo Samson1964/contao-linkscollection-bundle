@@ -1,5 +1,9 @@
 # Linksammlung
 
+## Version 1.5.1 (2025-09-03)
+
+* Fix: Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL in src/Klassen/Linkscollection.php (line 191) 
+
 ## Version 1.5.0 (2025-09-03)
 
 * Delete: Aufrufe PHPHtmlParser in Klasse Linkscollection auskommentiert, da nicht mehr kompatibel -> Idee: Klasse ganz ersetzen
