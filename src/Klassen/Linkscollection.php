@@ -124,41 +124,99 @@ class Linkscollection
 
 	/**
 	 * Liest die Sprache aus dem DOM
-	 * @param string    HTML der Webseite
+	 * @param $html     HTML der Webseite
 	 * @return string   Sprache, z.B. de-DE
 	 */
-	public static function checkLanguage($string)
+	public static function checkLanguage($html)
 	{
-		// DOM auf <html lang=""> untersuchen
-		$dom = new \PHPHtmlParser\Dom;
-		$string = iconv('windows-1251', 'utf-8', $string); // Fix: mb_eregi_replace() expects parameter 3 to be string, null given
-		$dom->load($string);
-		$html = $dom->find('html')[0];
-		if($html) $lang = $html->getAttribute('lang');
-		else $lang = '';
+		if(!is_string($html))
+		{
+			return '';
+		}
 
-		return $lang ? $lang : ''; // Sprache zurückgeben
+		// 1) meta http-equiv="Content-Language"
+		if(preg_match('/<meta\s+[^>]*http-equiv=["\']Content-Language["\'][^>]*content=["\']([^"\']+)["\'][^>]*>/i', $html, $m))
+		{
+			$lang = trim($m[1]);
+			if($lang !== '')
+			{
+				// Falls der Content Wert mehrere Sprachen enthält, nur ersten extrahieren
+				$parts = preg_split('/[,\s]+/', $lang);
+				return $parts[0];
+			}
+		}
+
+		// 2) <html lang="...">
+		if(preg_match('/<html[^>]*\blang=["\']([^"\']+)["\'][^>]*>/i', $html, $m))
+		{
+			return trim($m[1]);
+		}
+
+		// 3) meta name="language" oder name="Languages"
+		if(preg_match('/<meta\s+[^>]*name=["\'](?:language|Languages)["\'][^>]*content=["\']([^"\']+)["\'][^>]*>/i', $html, $m))
+		{
+			$lang = trim($m[1]);
+			if($lang !== '')
+			{
+				$parts = preg_split('/[,\s]+/', $lang);
+				return $parts[0];
+			}
+		}
+
+		// Kein Sprachhinweis gefunden
+		return '';
+
 	}
 
 	/**
 	 * Liest den Generator aus dem DOM
-	 * @param string    HTML der Webseite
+	 * @param html    HTML der Webseite
 	 * @return string
 	 */
-	public static function checkCMS($string)
+	public static function checkCMS($html)
 	{
-		// DOM auf <meta name="generator"> untersuchen und dort das Attribut content auslesen
-		$dom = new \PHPHtmlParser\Dom;
-		$string = iconv('windows-1251', 'utf-8', $string); // Fix: mb_eregi_replace() expects parameter 3 to be string, null given
-		$dom->load($string);
-		foreach($dom->find('meta') as $meta)
+		$lower = strtolower($html);
+
+		// Häufige Generator-/Meta-Tags
+		$patterns = [
+			'/<meta\s+name=["\']generator["\']\s+content=["\']([^"\']+)["\']/' => 1,
+			'/<meta\s+content=["\'](?:wordpress|drupal|joomla|magento|prestashop|cyclone|www|x) cms/i' => 1,
+			'/<meta\s+name=["\']generator["\']\s+content=["\']([^"\']+)["\']/i',
+			'/generator.*(wordpress|drupal|joomla|magento|prestashop|woocommerce|prestashop|woocommerce)/i',
+			'/wp-content|wp-admin|wp-includes/i' // WordPress hints
+		];
+
+		foreach($patterns as $pat => $dummy)
 		{
-			if($meta->getAttribute('name') == 'generator')
+			if(preg_match($pat, $lower))
 			{
-				return $meta->getAttribute('content'); // CMS gefunden
+				// Extrahiere ggf. den CMS-Namen aus dem Treffer
+				if(preg_match('/(wordpress|drupal|joomla|magento|prestashop|typo3|laravel|opencart|shopware|woocommerce)/i', $lower, $m))
+				{
+					return ucfirst(strtolower($m[1]));
+				}
 			}
 		}
-		return ''; // Kein CMS gefunden
+
+		// Falls kein Meta-Tag gefunden, weitere Heuristik
+		if(preg_match('/wp-content|wp-admin|wp-includes/i', $lower))
+		{
+			return 'WordPress';
+		}
+		if(preg_match('/joomla/', $lower))
+		{
+			return 'Joomla';
+		}
+		if(preg_match('/drupal/', $lower))
+		{
+			return 'Drupal';
+		}
+		if(preg_match('/magento|commerce/', $lower))
+		{
+			return 'Magento';
+		}
+
+		return '';
 	}
 
 	/**

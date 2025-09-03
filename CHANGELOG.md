@@ -1,5 +1,12 @@
 # Linksammlung
 
+## Version 1.5.0 (2025-09-03)
+
+* Delete: Aufrufe PHPHtmlParser in Klasse Linkscollection auskommentiert, da nicht mehr kompatibel -> Idee: Klasse ganz ersetzen
+* Add: Funktion checkLanguage ersetzt durch eigene (ki-generierte) Routine, um PHPHtmlParser zu sparen
+* Add: Funktion checkCMS ersetzt durch eigene (ki-generierte) Routine, um PHPHtmlParser zu sparen
+* Delete: Paket paquettg/php-html-parser entfernt
+
 ## Version 1.4.2 (2025-09-02)
 
 * Change: Abhängigkeit paquettg/php-html-parser von >=2.2 auf ^3 gesetzt
