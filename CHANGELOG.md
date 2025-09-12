@@ -1,5 +1,9 @@
 # Linksammlung
 
+## Version 1.5.3 (2025-09-12)
+
+* Fix: Forwarding link ID 0 not exist -> vorher Prüfung ob ID vorhanden ist
+
 ## Version 1.5.2 (2025-09-12)
 
 * Fix: Attempted to load class "Form" from namespace "Codefog\HasteBundle\Form" in src/Module/Linksammlung.php (line 590/666) -> new \Haste\Form\Form ist der neue Aufruf
