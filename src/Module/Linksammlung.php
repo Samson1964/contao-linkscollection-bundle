@@ -587,7 +587,7 @@ class Linksammlung extends \Module
 		// Der 3. Parameter ist eine Funktion, die entscheidet wann das Formular gesendet wird (Third is a callable that decides when your form is submitted)
 		// Der optionale 4. Parameter legt fest, ob das ausgegebene Formular auf Tabellen basiert (true)
 		// oder nicht (false) (You can pass an optional fourth parameter (true by default) to turn the form into a table based one)
-		$objForm = new \Codefog\HasteBundle\Form\Form('linkform', 'POST', function($objHaste)
+		$objForm = new \Haste\Form\Form('linkform', 'POST', function($objHaste)
 		{
 			return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
 		});
@@ -663,7 +663,7 @@ class Linksammlung extends \Module
 		// Der 3. Parameter ist eine Funktion, die entscheidet wann das Formular gesendet wird (Third is a callable that decides when your form is submitted)
 		// Der optionale 4. Parameter legt fest, ob das ausgegebene Formular auf Tabellen basiert (true)
 		// oder nicht (false) (You can pass an optional fourth parameter (true by default) to turn the form into a table based one)
-		$objForm = new \Codefog\HasteBundle\Form\Form('linkform', 'POST', function($objHaste)
+		$objForm = new \Haste\Form\Form('linkform', 'POST', function($objHaste)
 		{
 			return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
 		});

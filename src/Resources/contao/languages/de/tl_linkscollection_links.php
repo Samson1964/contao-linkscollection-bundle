@@ -43,6 +43,11 @@ $GLOBALS['TL_LANG']['tl_linkscollection_links']['popular'] = array('Populärer L
 $GLOBALS['TL_LANG']['tl_linkscollection_links']['newWindow'] = array('Neues Fenster', 'Link im neuen Fenster öffnen');
 $GLOBALS['TL_LANG']['tl_linkscollection_links']['text'] = array('Beschreibung', 'Linkbeschreibung, HTML erlaubt');
 
+$GLOBALS['TL_LANG']['tl_linkscollection_links']['history_legend'] = 'Linkhistorie';
+$GLOBALS['TL_LANG']['tl_linkscollection_links']['history'] = array('Frühere Links', 'Liste der vorher gültigen Links');
+$GLOBALS['TL_LANG']['tl_linkscollection_links']['history_date'] = array('Bis', 'Gültig bis zum TT.MM.JJJJ');
+$GLOBALS['TL_LANG']['tl_linkscollection_links']['history_url'] = array('URL', 'Frühere URL');
+
 $GLOBALS['TL_LANG']['tl_linkscollection_links']['problem_legend'] = 'Meldungen';
 $GLOBALS['TL_LANG']['tl_linkscollection_links']['problem'] = array('Probleme und Änderungswünsche', 'Von Besuchern gemeldete Probleme und Korrekturen');
 $GLOBALS['TL_LANG']['tl_linkscollection_links']['problemdate'] = array('Letzte Meldung', 'Datum des letzten gemeldeten Problems oder Korrekturen');

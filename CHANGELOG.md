@@ -1,5 +1,12 @@
 # Linksammlung
 
+## Version 1.5.2 (2025-09-12)
+
+* Fix: Attempted to load class "Form" from namespace "Codefog\HasteBundle\Form" in src/Module/Linksammlung.php (line 590/666) -> new \Haste\Form\Form ist der neue Aufruf
+* Damit ist auch das Ticket "Linksammlung: Fehler bei Aufruf Meldeformular" erledigt -> Formular funktioniert wieder
+* Fix: Warning: Undefined array key 1 in /src/Resources/contao/dca/tl_linkscollection_links.php::ViewLinkrow (line 653) -> Ticket "Linksammlung: Encoding-Fehler"
+* Add: tl_linkscollection_links.history -> MCW für Speicherung der Linkhistorie (Ticket "Linksammlung: Beim Austauschen der URL sollte die alte URL automatisch in einer Historie gespeichert werden." - automatisch aber verworfen wegen zuviel Aufwand)
+
 ## Version 1.5.1 (2025-09-03)
 
 * Fix: Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL in src/Klassen/Linkscollection.php (line 191) 

@@ -77,7 +77,7 @@ class Linkscollection
 
 		// URL prüfen und ggfs. Favicon neu laden
 		$objRequest = new \Request(); // Instanz der Contao-Klasse anlegen
-		$objRequest->send(self::getWeblink($arrRow['url'], $arrRow['webarchiv']));
+		@$objRequest->send(self::getWeblink($arrRow['url'], $arrRow['webarchiv']));
 
 		$strError = '';
 		$language = '';

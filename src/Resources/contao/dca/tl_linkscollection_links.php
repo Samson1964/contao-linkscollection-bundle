@@ -145,7 +145,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 	'palettes' => array
 	(
 		'__selector__'                => array('protected'),
-		'default'                     => '{infobox_legend},infobox;{title_legend},title,url,language,webarchiv,popular,newWindow,text;{problem_legend},problem,problemdate,problemcount,warnings;{name_legend:hide},name,email;{hits_legend:hide},hits;{guests_legend:hide},ip,ipdate;{state_legend:hide},statecode,statetext,statedate;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space;{published_legend},published,start,stop'
+		'default'                     => '{infobox_legend},infobox;{title_legend},title,url,language,webarchiv,popular,newWindow,text;{history_legend:hide},history;{problem_legend},problem,problemdate,problemcount,warnings;{name_legend:hide},name,email;{hits_legend:hide},hits;{guests_legend:hide},ip,ipdate;{state_legend:hide},statecode,statetext,statedate;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space;{published_legend},published,start,stop'
 	),
 
 	// Subpalettes
@@ -286,6 +286,54 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'rgxp'=>'emails', 'decodeEntities'=>true, 'tl_class'=>'w50'),
 			'sql'                     => "varchar(128) NOT NULL default ''"
+		),
+		'history' => array
+		(
+			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['history'],
+			'exclude'                 => true,
+			'inputType'               => 'multiColumnWizard',
+			'eval'                    => array
+			(
+				'tl_class'            => 'long clr',
+				'buttonPos'           => 'top',
+				'buttons'             => array
+				(
+					'up'              => false,
+					'down'            => false
+				),
+				'columnFields'        => array
+				(
+					'date' => array
+					(
+						'label'       => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['history_date'],
+						'exclude'     => true,
+						'inputType'   => 'text',
+						'eval'        => array
+						(
+							'style'             => 'width: 90%',
+							'rgxp'              =>'date',
+							'mandatory'         => false,
+							'datepicker'        => true, 
+							'tl_class'          => 'w50 wizard'
+						),
+						'load_callback' => array
+						(
+							array('tl_linkscollection_links', 'loadDate')
+						),
+					),
+					'url' => array
+					(
+						'label'                 => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['history_url'],
+						'inputType'             => 'text',
+						'eval'                  => array
+						(
+							'mandatory'         => false,
+							'style'             => 'width: 90%',
+						)
+					),
+				)
+			),
+			'sql'                   => "blob NULL"
 		),
 		// Anzahl der Zugriffe
 		'hits' => array
@@ -687,6 +735,18 @@ class tl_linkscollection_links extends Backend
 	public function getFilterWidget($href, $label, $title, $class, $attributes)
 	{
 		//return BackendLinkscollectionFilter\Filter::getFilterWidget($this->addToUrl(''), $label, 'tl_linkscollection_links');
+	}
+
+	/**
+	 * Set the timestamp to 00:00:00 (see #26)
+	 *
+	 * @param integer $value
+	 *
+	 * @return integer
+	 */
+	public function loadDate($value)
+	{
+		return strtotime(date('d.m.Y', $value) . ' 00:00:00');
 	}
 
 }
