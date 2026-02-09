@@ -1,5 +1,9 @@
 # Linksammlung
 
+## Version 1.5.4 (2026-02-09)
+
+* Fix: date(): Argument #2 ($timestamp) must be of type ?int, string given in src/Resources/contao/dca/tl_linkscollection_links.php (line 749) -> vor $value ein (int) gesetzt
+
 ## Version 1.5.3 (2025-09-12)
 
 * Fix: Forwarding link ID 0 not exist -> vorher Prüfung ob ID vorhanden ist

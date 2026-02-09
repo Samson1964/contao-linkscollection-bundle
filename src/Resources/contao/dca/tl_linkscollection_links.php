@@ -746,7 +746,7 @@ class tl_linkscollection_links extends Backend
 	 */
 	public function loadDate($value)
 	{
-		return strtotime(date('d.m.Y', $value) . ' 00:00:00');
+		return strtotime(date('d.m.Y', (int)$value) . ' 00:00:00');
 	}
 
 }
