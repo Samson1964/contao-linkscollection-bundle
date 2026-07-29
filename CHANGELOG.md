@@ -1,4 +1,4 @@
-# Linksammlung
+# Linksammlung Changelog
 
 ## Version 1.5.4 (2026-02-09)
 
@@ -126,10 +126,10 @@
 
 ## Version 1.1.0 (2019-08-17)
 
-* Neu: Suche nach CMS in der Linkliste
-* Neu: Linkliste jetzt mit den gleichen Infos wie die Links in der normalen Kategorieliste
-* Neu: Umstellung der Formulare auf Haste
-* Neu: DOM-Klasse durch externes Bundle ersetzt
+* Add: Suche nach CMS in der Linkliste
+* Add: Linkliste jetzt mit den gleichen Infos wie die Links in der normalen Kategorieliste
+* Add: Umstellung der Formulare auf Haste
+* Add: DOM-Klasse durch externes Bundle ersetzt
 * Fix: Formulare für Linkmeldungen
 * Fix: Suchfunktion
 * Fix: Fehler bei nicht vorhandenen Kategorien
@@ -146,17 +146,17 @@
 
 ## Version 0.5.0 (2019-05-15)
 
-* Neu: Anzeige der geprüften Links einer Kategorie im BE
+* Add: Anzeige der geprüften Links einer Kategorie im BE
 * Fix: Anpassung auf Contao 4
 
 ## Version 0.4.0 (2017-08-20)
 
 * Fix: Bei neuen Links im FE, wurde der erste Link nicht angezeigt
 * Fix: initdate bei neuen Links im BE wurde nicht erstellt
-* Neu: Zurück-Button in Prüfbericht ergänzt + Übersetzungen Bearbeitungsbuttons
-* Neu: Zurück-Button in Linkliste ergänzt + Übersetzungen Bearbeitungsbuttons
+* Add: Zurück-Button in Prüfbericht ergänzt + Übersetzungen Bearbeitungsbuttons
+* Add: Zurück-Button in Linkliste ergänzt + Übersetzungen Bearbeitungsbuttons
 * Fix: In Linkliste wurde der erste Suchtreffer nicht angezeigt
-* Neu: Formfield-Hook ergänzt (noch im Aufbau)
+* Add: Formfield-Hook ergänzt (noch im Aufbau)
  
 ## Version 0.3.0 (2016-03-14)
 
