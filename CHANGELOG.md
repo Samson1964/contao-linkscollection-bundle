@@ -1,5 +1,9 @@
 # Linksammlung Changelog
 
+## Version 1.5.5 (2026-07-29)
+
+* Fix: Warning: Undefined array key "deleteConfirm" bei contao:migrate -> Lesezugriffe auf $GLOBALS['TL_LANG'] in den DCA-Dateien mit `?? null` bzw. `?? array()` abgesichert, da der DcaLoader die Sprachdateien noch nicht geladen hat
+
 ## Version 1.5.4 (2026-02-09)
 
 * Fix: date(): Argument #2 ($timestamp) must be of type ?int, string given in src/Resources/contao/dca/tl_linkscollection_links.php (line 749) -> vor $value ein (int) gesetzt
