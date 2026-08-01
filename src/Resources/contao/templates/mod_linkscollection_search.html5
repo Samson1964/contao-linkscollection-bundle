@@ -1,9 +1,9 @@
 <?php
-$GLOBALS['TL_CSS'][] = 'bundles/contaolinkscollection/css/style.css'; 
+$GLOBALS['TL_CSS'][] = 'bundles/contaolinkscollection/css/style.css';
+$GLOBALS['TL_JAVASCRIPT'][] = 'bundles/contaolinkscollection/js/suche.js|static';
 ?>
-<script src="bundles/contaolinkscollection/js/ajax.js"></script>
 
-<div class="<?= $this->class ?> block"<?= $this->cssID; ?><?php if ($this->style): ?> style="<?= $this->style ?>"<?php endif; ?>>
+<div class="<?= $this->class ?> block"<?= $this->cssID ?><?php if ($this->style): ?> style="<?= $this->style ?>"<?php endif; ?>>
 
 	<?php if($this->menu): ?>
 		<div class="menu">
@@ -14,15 +14,16 @@ $GLOBALS['TL_CSS'][] = 'bundles/contaolinkscollection/css/style.css';
 			</ul>
 		</div>
 	<?php endif; ?>
-	
+
 	<div id="myFormDiv">
-		<form id="myForm" action="" method="get">
-			<label>Suchbegriff:</label>
-			<input autofocus id="s" type="text" name="s" class="form-control"> 
+		<form id="myForm" action="<?= $this->sucheUrl ?>" method="get" data-linkscollection-suche="<?= $this->sucheUrl ?>" data-linkscollection-seite="<?= $this->seite ?>">
+			<label for="s">Suchbegriff:</label>
+			<input autofocus id="s" type="text" name="s" class="form-control" minlength="3" required>
+			<input type="hidden" name="seite" value="<?= $this->seite ?>">
 			<input type="submit" value="Senden" class="btn btn-primary">
 			<span id="ajaxloader"></span>
 		</form>
 	</div>
 	<div id="searchresult"></div>
 
-</div> 
+</div>

@@ -1,43 +1,117 @@
 <?php
 
+declare(strict_types=1);
+
 /**
- * Contao Open Source CMS
+ * Linksammlung für Contao Open Source CMS
  *
- * Copyright (c) 2005-2017 Leo Feyer
- *
- * @package   Linkscollection
  * @author    Frank Hoppe
- * @license   GNU/LGPL
- * @copyright Frank Hoppe 2016 - 2017
+ * @license   LGPL-3.0-or-later
  */
+
 namespace Schachbulle\ContaoLinkscollectionBundle\Module;
 
-class Linksammlung extends \Module
+use Contao\BackendTemplate;
+use Contao\Config;
+use Contao\Controller;
+use Contao\CoreBundle\Monolog\ContaoContext;
+use Contao\Database;
+use Contao\Email;
+use Contao\Environment;
+use Contao\FrontendTemplate;
+use Contao\Idna;
+use Contao\Input;
+use Contao\Module;
+use Contao\System;
+use Schachbulle\ContaoLinkscollectionBundle\Klassen\Formular;
+use Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection;
+use Schachbulle\ContaoLinkscollectionBundle\Klassen\Protokoll;
+
+/**
+ * Frontend-Modul der Linksammlung.
+ *
+ * Das Modul bedient alle Ansichten der Linksammlung über eine einzige Seite.
+ * Welche Ansicht erscheint, steuern zusätzliche Adressbestandteile, die Contao
+ * als Parameter durchreicht:
+ *
+ *   /category/12  Kategorie 12 mit ihren Unterkategorien und Links
+ *   /link/345     Einzelansicht des Links 345 samt Meldeformular
+ *   /view/toplinks, /view/newlinks, /view/search, /view/sendlink
+ *
+ * Ohne Parameter erscheint die oberste Kategorieebene.
+ */
+class Linksammlung extends Module
 {
-
+	/**
+	 * @var string Haupttemplate der Kategorieansicht
+	 */
 	protected $strTemplate = 'mod_linkscollection';
-	protected $subTemplate = 'mod_linkscollection_linkrow';
-
-	var $baum = array(); // Hilfsvariable für Baumerstellung
-	var $level = 0;
-
-	var $tree = array(); // Kategoriebaum
-	var $numberCategories; // Anzahl der Kategorien
-	var $numberLinks; // Anzahl der Links
-	var $currentCategory; // ID der aktuellen Kategorie
-
-	var $duration_new;
-	var $duration_test;
 
 	/**
-	 * Display a wildcard in the back end
-	 * @return string
+	 * @var string Template für die Linkliste, wird in mehrere Ansichten eingebettet
+	 */
+	protected $subTemplate = 'mod_linkscollection_linkrow';
+
+	/**
+	 * @var FrontendTemplate Template der Linkliste
+	 */
+	protected $Subtemplate;
+
+	/**
+	 * @var array<int,array<int,string>> Hilfsstruktur für den Kategoriebaum: pid => [id => Titel]
+	 */
+	protected $baum = array();
+
+	/**
+	 * @var int Aktuelle Einrücktiefe beim Aufbau des Kategoriebaums
+	 */
+	protected $level = 0;
+
+	/**
+	 * @var array<int,string> Kategoriebaum als flache Liste: ID => eingerückter Titel
+	 */
+	protected $tree = array();
+
+	/**
+	 * @var int Anzahl aller veröffentlichten Kategorien
+	 */
+	protected $numberCategories = 0;
+
+	/**
+	 * @var int Anzahl aller veröffentlichten Links
+	 */
+	protected $numberLinks = 0;
+
+	/**
+	 * @var int ID der aktuell angezeigten Kategorie, 0 für die oberste Ebene
+	 */
+	protected $currentCategory = 0;
+
+	/**
+	 * @var int Zeitpunkt, ab dem ein Link als neu gilt
+	 */
+	protected $duration_new = 0;
+
+	/**
+	 * @var int Zeitpunkt, ab dem ein Link erneut geprüft wird
+	 */
+	protected $duration_test = 0;
+
+	/**
+	 * Erzeugt das Modul.
+	 *
+	 * Im Backend erscheint nur ein Platzhalter, weil die Ansichten dort weder
+	 * sinnvoll noch gefahrlos sind (das Aufrufen einer Ansicht kann eine
+	 * Linkprüfung auslösen). Im Frontend wird der Kategoriebaum aufgebaut und
+	 * das Stylesheet der Sprachfähnchen eingebunden.
+	 *
+	 * @return string Das gerenderte Modul
 	 */
 	public function generate()
 	{
-		if (TL_MODE == 'BE')
+		if (Linkscollection::istBackend())
 		{
-			$objTemplate = new \BackendTemplate('be_linkscollection');
+			$objTemplate = new BackendTemplate('be_linkscollection');
 
 			$objTemplate->wildcard = '### LINKSAMMLUNG ###';
 			$objTemplate->title = $this->name;
@@ -45,453 +119,492 @@ class Linksammlung extends \Module
 
 			return $objTemplate->parse();
 		}
-		else
+
+		$this->getCategories(); // Kategoriebaum anlegen und Kategorien/Links zählen
+		$this->Subtemplate = new FrontendTemplate($this->subTemplate);
+
+		$stil = Linkscollection::flaggenStil();
+
+		if ('' !== $stil)
 		{
-			// FE-Modus: URL mit allen möglichen Parametern auflösen
-			\Input::setGet('category', \Input::get('category')); // ID der Kategorie
-			\Input::setGet('view', \Input::get('view')); // Toplinks u.ä. anzeigen
-			\Input::setGet('link', \Input::get('link')); // Einzelnen Link anzeigen
-
-			$this->getCategories(); // Kategoriebaum anlegen und Kategorien/Links zählen
-			$this->Template = new \FrontendTemplate($this->strTemplate);
-			$this->Subtemplate = new \FrontendTemplate($this->subTemplate);
-
-			$GLOBALS['TL_CSS'][] = 'bundles/flag-icon-css/css/flag-icon.min.css|static';
+			$GLOBALS['TL_CSS'][] = $stil.'|static';
 		}
 
-		$this->duration_new = time() - ($GLOBALS['TL_CONFIG']['linkscollection_new_duration'] * 86400);
-		$this->duration_test = time() - ($GLOBALS['TL_CONFIG']['linkscollection_test_duration'] * 86400);
-
-		// Symlink für das externe Bundle components/flag-icon-css erstellen, wenn noch nicht vorhanden
-		if(!is_link(TL_ROOT.'/web/bundles/flag-icon-css')) symlink(TL_ROOT.'/vendor/components/flag-icon-css/', TL_ROOT.'/web/bundles/flag-icon-css'); // Ziel, Name
+		$this->duration_new = time() - ((int) Config::get('linkscollection_new_duration') * 86400);
+		$this->duration_test = time() - ((int) Config::get('linkscollection_test_duration') * 86400);
 
 		return parent::generate(); // Weitermachen mit dem Modul
 	}
 
 	/**
-	 * Generate the module
+	 * Füllt das Template der jeweils angeforderten Ansicht.
+	 *
+	 * @return void
 	 */
 	protected function compile()
 	{
 		global $objPage;
 
-		if(\Input::get('view'))
+		if (Input::get('view'))
 		{
-			switch(\Input::get('view'))
+			switch (Input::get('view'))
 			{
 				case 'toplinks':
-					self::Toplinks();
+					$this->Toplinks();
 					break;
+
 				case 'newlinks':
-					self::Newlinks();
+					$this->Newlinks();
 					break;
+
 				case 'search':
-					self::Search();
+					$this->Search();
 					break;
+
 				case 'sendlink':
-					self::ViewFormularLinkNeu();
+					$this->ViewFormularLinkNeu();
 					break;
 			}
+
 			return;
 		}
 
-		if(\Input::get('link'))
+		if (Input::get('link'))
 		{
 			$this->Linkinfo();
+
 			return;
 		}
 
 		// Kategorie zuweisen
-		$this->currentCategory = (int)\Input::get('category');
+		$this->currentCategory = (int) Input::get('category');
 
 		// Breadcrumb-Navigation erstellen
 		$breadcrumb = array();
 		$pagetitle = array();
-		if($this->currentCategory) // Nur bei Unterkategorien
+
+		if ($this->currentCategory) // Nur bei Unterkategorien
 		{
 			// Infos zur aktuellen Kategorie laden
-			$objActual = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection WHERE published = ? AND id = ?')
-			                                     ->execute(1, $this->currentCategory);
+			$objActual = Database::getInstance()->prepare('SELECT * FROM tl_linkscollection WHERE published = ? AND id = ?')
+			                                    ->execute(1, $this->currentCategory);
 
-			// Kategorie gefunden, jetzt ausgeben
-			if($objActual->numRows > 0)
+			if ($objActual->numRows > 0)
 			{
 				$breadcrumb[] = array
 				(
-					'title'                => $objActual->title,
-					'url'                  => '',
-					'class'                => 'last'
+					'title' => $objActual->title,
+					'url'   => '',
+					'class' => 'last'
 				);
 				$pagetitle[] = $objActual->title;
 
-				// Navigation vervollständigen
-				$pid = $objActual->pid;
-				while($pid > 0)
+				// Navigation über die Elternkategorien vervollständigen
+				$pid = (int) $objActual->pid;
+
+				while ($pid > 0)
 				{
-					$objTemp = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection WHERE published = ? AND id = ?')
-					                                   ->execute(1, $pid);
+					$objTemp = Database::getInstance()->prepare('SELECT * FROM tl_linkscollection WHERE published = ? AND id = ?')
+					                                  ->execute(1, $pid);
+
+					if (!$objTemp->numRows)
+					{
+						break;
+					}
+
 					$breadcrumb[] = array
 					(
-						'title'            => $objTemp->title,
-						'url'              => \Controller::generateFrontendUrl($objPage->row(), '/category/'.$objTemp->id),
-						'class'            => 'sibling'
+						'title' => $objTemp->title,
+						'url'   => $objPage->getFrontendUrl('/category/'.$objTemp->id),
+						'class' => 'sibling'
 					);
 					$pagetitle[] = $objTemp->title;
-					$pid = $objTemp->pid;
+					$pid = (int) $objTemp->pid;
 				}
+
 				$breadcrumb[] = array
 				(
-					'title'                => 'Startseite',
-					'url'                  => \Controller::generateFrontendUrl($objPage->row()),
-					'class'                => 'first sibling'
+					'title' => 'Startseite',
+					'url'   => $objPage->getFrontendUrl(),
+					'class' => 'first sibling'
 				);
 			}
 			else
 			{
-				// Kategorie nicht gefunden, dann Startseite der Linksammlung laden
-				$url = \Controller::generateFrontendUrl($objPage->row());
-				\Controller::redirect($url);
+				// Kategorie nicht gefunden, dann die Startseite der Linksammlung laden
+				Controller::redirect($objPage->getFrontendUrl());
 			}
 		}
 
-		// Seitentitel modifizieren
-		if($pagetitle) $objPage->pageTitle = ($objPage->pageTitle ?: $objPage->title) . ' | ' . implode(' | ', array_reverse($pagetitle));
+		// Seitentitel um die Kategoriekette ergänzen
+		if ($pagetitle)
+		{
+			$objPage->pageTitle = ($objPage->pageTitle ?: $objPage->title).' | '.implode(' | ', array_reverse($pagetitle));
+		}
 
 		// Unterkategorien laden
-		$objCats = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection WHERE published = ? AND pid = ?')
-		                                   ->execute(1, $this->currentCategory);
+		$objCats = Database::getInstance()->prepare('SELECT * FROM tl_linkscollection WHERE published = ? AND pid = ? ORDER BY title ASC')
+		                                  ->execute(1, $this->currentCategory);
 
 		$categories = array();
-		if($objCats->numRows > 1)
+		$class = 'odd';
+
+		while ($objCats->next())
 		{
-			$class = 'odd';
-			// Datensätze anzeigen
-			while($objCats->next())
-			{
-				$categories[] = array
-				(
-					'title'            => $objCats->title,
-					'link'             => \Controller::generateFrontendUrl($objPage->row(), '/category/'.$objCats->id),
-					'links'            => $objCats->links_all,
-					'new'              => ($objCats->links_new) ? NEWICON : '',
-					'class'            => $class
-				);
-				$class = ($class == 'odd') ? 'even' : 'odd';
-			}
+			$categories[] = array
+			(
+				'title' => $objCats->title,
+				'link'  => $objPage->getFrontendUrl('/category/'.$objCats->id),
+				'links' => $objCats->links_all,
+				'new'   => $objCats->links_new ? Linkscollection::NEUICON : '',
+				'class' => $class
+			);
+			$class = ('odd' === $class) ? 'even' : 'odd';
 		}
 
-		// Links laden
-		$objLinks = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection_links WHERE published = ? AND pid = ? ORDER BY popular DESC, webarchiv ASC, title ASC')
-		                                    ->execute(1, $this->currentCategory);
-
-		$links = array();
-		if($objLinks->numRows > 1)
-		{
-			$class = 'odd';
-			// Datensätze anzeigen
-			while($objLinks->next())
-			{
-				$links[] = array
-				(
-					'title'            => $objLinks->title,
-					'url'              => 'bundles/contaolinkscollection/go.php?id='.$objLinks->id,
-					'icon'             => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($objLinks->id),
-					'language'         => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getLanguageIcon($objLinks->language),
-					'new'              => $objLinks->newWindow,
-					'text'             => $objLinks->text,
-					'popular'          => $objLinks->popular,
-					'hits'             => $objLinks->hits,
-					'problem_url'      => \Controller::generateFrontendUrl($objPage->row(), '/link/'.$objLinks->id),
-					'class'            => $class,
-					'newLink'          => ($objLinks->initdate >= $this->duration_new) ? NEWICON : '',
-					'webarchiv'        => $objLinks->webarchiv
-				);
-				$class = ($class == 'odd') ? 'even' : 'odd';
-			}
-		}
+		// Links der Kategorie laden
+		$objLinks = Database::getInstance()->prepare('SELECT * FROM tl_linkscollection_links WHERE published = ? AND pid = ? ORDER BY popular DESC, webarchiv ASC, title ASC')
+		                                   ->execute(1, $this->currentCategory);
 
 		// Template füllen
 		$this->Template->menu = $this->Menu();
 		$this->Template->breadcrumb = array_reverse($breadcrumb);
 		$this->Template->categories = $categories;
-		$this->Subtemplate->links = $links;
+		$this->Subtemplate->links = $this->linkListe($objLinks);
 		$this->Template->links = $this->Subtemplate->parse();
-		$this->Template->counter = array('categories'=>$this->numberCategories,'links'=>$this->numberLinks);
-		//if($this->currentCategory) $this->Template->form = $this->SendlinkForm();
+		$this->Template->counter = array('categories' => $this->numberCategories, 'links' => $this->numberLinks);
 	}
 
 	/**
-	 * Generate Toplinks
+	 * Wandelt ein Abfrageergebnis in die Liste auf, die das Linktemplate erwartet.
+	 *
+	 * Ausgelagert, weil die Kategorieansicht, die Toplinks und die neuen Links
+	 * dieselben Angaben je Link brauchen und sich nur die Abfrage unterscheidet.
+	 *
+	 * @param \Contao\Database\Result $objLinks Ergebnis einer Abfrage auf
+	 *                                          tl_linkscollection_links
+	 * @param bool $mitDatum true ergänzt jede Zeile um das Eintragsdatum, das
+	 *                       nur die Ansicht "Neue Links" ausgibt
+	 *
+	 * @return array<int,array<string,mixed>> Die Links in der Reihenfolge der
+	 *                                        Abfrage; leer, wenn nichts gefunden wurde
 	 */
-	protected function Toplinks()
+	protected function linkListe($objLinks, bool $mitDatum = false): array
 	{
 		global $objPage;
-
-		$this->Template = new \FrontendTemplate('mod_linkscollection_toplinks');
-
-		// Links laden
-		$objLinks = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection_links WHERE published = ? ORDER BY hits DESC, title ASC')
-		                                    ->limit(100)
-		                                    ->execute(1);
 
 		$links = array();
-		if($objLinks->numRows > 1)
+		$class = 'odd';
+
+		while ($objLinks->next())
 		{
-			$class = 'odd';
-			// Datensätze anzeigen
-			while($objLinks->next())
+			$zeile = array
+			(
+				'title'       => $objLinks->title,
+				'url'         => $this->klickUrl((int) $objLinks->id),
+				'icon'        => Linkscollection::getFavicon($objLinks->id),
+				'language'    => Linkscollection::getLanguageIcon((string) $objLinks->language),
+				'new'         => $objLinks->newWindow,
+				'text'        => $objLinks->text,
+				'popular'     => $objLinks->popular,
+				'hits'        => $objLinks->hits,
+				'problem_url' => $objPage->getFrontendUrl('/link/'.$objLinks->id),
+				'class'       => $class,
+				'newLink'     => ($objLinks->initdate >= $this->duration_new) ? Linkscollection::NEUICON : '',
+				'webarchiv'   => $objLinks->webarchiv
+			);
+
+			if ($mitDatum)
 			{
-				$links[] = array
-				(
-					'title'            => $objLinks->title,
-					'url'              => 'bundles/contaolinkscollection/go.php?id='.$objLinks->id,
-					'icon'             => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($objLinks->id),
-					'language'         => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getLanguageIcon($objLinks->language),
-					'new'              => $objLinks->newWindow,
-					'text'             => $objLinks->text,
-					'popular'          => $objLinks->popular,
-					'hits'             => $objLinks->hits,
-					'problem_url'      => \Controller::generateFrontendUrl($objPage->row(), '/link/'.$objLinks->id),
-					'class'            => $class,
-					'newLink'          => ($objLinks->initdate >= $this->duration_new) ? NEWICON : '',
-					'webarchiv'        => $objLinks->webarchiv
-				);
-				$class = ($class == 'odd') ? 'even' : 'odd';
+				$zeile['date'] = date('d.m.Y', (int) $objLinks->initdate);
+				$zeile['newLink'] = ''; // In dieser Ansicht ist ohnehin alles neu
 			}
+
+			$links[] = $zeile;
+			$class = ('odd' === $class) ? 'even' : 'odd';
 		}
 
-		// Template füllen
-		$this->Template->menu = $this->Menu();
-		$this->Subtemplate->links = $links;
-		$this->Template->links = $this->Subtemplate->parse();
-		$this->Template->counter = array('categories'=>$this->numberCategories,'links'=>$this->numberLinks);
+		return $links;
 	}
 
 	/**
-	 * Generate Toplinks
+	 * Liefert die Adresse, über die ein Link angeklickt wird.
+	 *
+	 * Der Klick läuft nicht direkt auf das Ziel, sondern über eine eigene
+	 * Route. Sie zählt den Zugriff mit und leitet anschließend weiter — bei
+	 * offline gegangenen Seiten auf den Schnappschuss im Webarchiv.
+	 *
+	 * @param int $id Datensatz-ID des Links
+	 *
+	 * @return string Die erzeugte Adresse
 	 */
-	protected function Newlinks()
+	protected function klickUrl(int $id): string
 	{
-		global $objPage;
-
-		$this->Template = new \FrontendTemplate('mod_linkscollection_newlinks');
-
-		// Links laden
-		$objLinks = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection_links WHERE published = ? AND initdate >= ? ORDER BY initdate DESC, title ASC')
-		                                    ->execute(1, $this->duration_new);
-
-		$links = array();
-		if($objLinks->numRows > 0)
-		{
-			$class = 'odd';
-			// Datensätze anzeigen
-			while($objLinks->next())
-			{
-				$links[] = array
-				(
-					'title'            => $objLinks->title,
-					'url'              => 'bundles/contaolinkscollection/go.php?id='.$objLinks->id,
-					'icon'             => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($objLinks->id),
-					'language'         => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getLanguageIcon($objLinks->language),
-					'new'              => $objLinks->newWindow,
-					'text'             => $objLinks->text,
-					'popular'          => $objLinks->popular,
-					'hits'             => $objLinks->hits,
-					'date'             => date("d.m.Y", $objLinks->initdate),
-					'problem_url'      => \Controller::generateFrontendUrl($objPage->row(), '/link/'.$objLinks->id),
-					'class'            => $class,
-					'newLink'          => ($objLinks->initdate >= $this->duration_new) ? '' : '',
-					'webarchiv'        => $objLinks->webarchiv
-				);
-				$class = ($class == 'odd') ? 'even' : 'odd';
-			}
-		}
-
-		// Template füllen
-		$this->Template->menu = $this->Menu();
-		$this->Subtemplate->links = $links;
-		$this->Template->links = $this->Subtemplate->parse();
-		$this->Template->counter = array('categories'=>$this->numberCategories,'links'=>$this->numberLinks);
+		return System::getContainer()->get('router')->generate('linkscollection_go', array('id' => $id));
 	}
 
 	/**
-	 * Generate Linkform für neue Links
+	 * Zeigt die 100 meistgeklickten Links.
+	 *
+	 * @return void
 	 */
-	protected function ViewFormularLinkNeu()
+	protected function Toplinks(): void
 	{
-		global $objPage;
+		$this->Template = new FrontendTemplate('mod_linkscollection_toplinks');
 
-		$this->Template = new \FrontendTemplate('mod_linkscollection_newlinks');
+		$objLinks = Database::getInstance()->prepare('SELECT * FROM tl_linkscollection_links WHERE published = ? ORDER BY hits DESC, title ASC')
+		                                   ->limit(100)
+		                                   ->execute(1);
 
-		// Template füllen
+		$this->Template->menu = $this->Menu();
+		$this->Subtemplate->links = $this->linkListe($objLinks);
+		$this->Template->links = $this->Subtemplate->parse();
+		$this->Template->counter = array('categories' => $this->numberCategories, 'links' => $this->numberLinks);
+	}
+
+	/**
+	 * Zeigt die zuletzt aufgenommenen Links.
+	 *
+	 * Wie viele Tage ein Link als neu gilt, steht in den Einstellungen unter
+	 * "Anzahl Tage Neuer Link".
+	 *
+	 * @return void
+	 */
+	protected function Newlinks(): void
+	{
+		$this->Template = new FrontendTemplate('mod_linkscollection_newlinks');
+
+		$objLinks = Database::getInstance()->prepare('SELECT * FROM tl_linkscollection_links WHERE published = ? AND initdate >= ? ORDER BY initdate DESC, title ASC')
+		                                   ->execute(1, $this->duration_new);
+
+		$this->Template->menu = $this->Menu();
+		$this->Subtemplate->links = $this->linkListe($objLinks, true);
+		$this->Template->links = $this->Subtemplate->parse();
+		$this->Template->counter = array('categories' => $this->numberCategories, 'links' => $this->numberLinks);
+	}
+
+	/**
+	 * Zeigt das Formular zum Melden eines neuen Links.
+	 *
+	 * @return void
+	 */
+	protected function ViewFormularLinkNeu(): void
+	{
+		$this->Template = new FrontendTemplate('mod_linkscollection_newlinks');
+
 		$this->Template->menu = $this->Menu();
 		$this->Template->form = $this->FormularLinkNeu();
 	}
 
 	/**
-	 * Generate Suche
+	 * Zeigt die Suchmaske.
+	 *
+	 * Die Suche selbst läuft per JavaScript gegen die Route
+	 * linkscollection_suche. Damit die Treffer auf die richtige Seite
+	 * verlinken können, bekommt das Template die ID der aktuellen Seite mit —
+	 * früher lag diese Angabe in der Sitzung, was bei mehreren geöffneten
+	 * Linksammlungen zu Verwechslungen führen konnte.
+	 *
+	 * @return void
 	 */
-	protected function Search()
+	protected function Search(): void
 	{
 		global $objPage;
 
-		\Session::getInstance()->set('pageAlias', $objPage->alias); // Alias der Linksammlung in Sitzung speichern
-		\Session::getInstance()->set('pageId', $objPage->id); // ID der Linksammlung in Sitzung speichern
-		$this->Template = new \FrontendTemplate('mod_linkscollection_search');
+		$this->Template = new FrontendTemplate('mod_linkscollection_search');
 		$this->Template->menu = $this->Menu();
+		$this->Template->seite = (int) $objPage->id;
+		$this->Template->sucheUrl = System::getContainer()->get('router')->generate('linkscollection_suche');
 	}
 
 	/**
-	 * Generate Linkinfo
+	 * Zeigt die Einzelansicht eines Links mit dem Formular zur Fehlermeldung.
+	 *
+	 * @return void
 	 */
-	protected function Linkinfo()
+	protected function Linkinfo(): void
 	{
-		global $objPage;
+		$this->Template = new FrontendTemplate('mod_linkscollection_link');
 
-		$this->Template = new \FrontendTemplate('mod_linkscollection_link');
+		$objLink = Database::getInstance()->prepare('SELECT * FROM tl_linkscollection_links WHERE published = ? AND id = ?')
+		                                  ->execute(1, (int) Input::get('link'));
 
-		// Link laden
-		$objLink = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection_links WHERE published = ? AND id = ?')
-		                                   ->execute(1, \Input::get('link'));
-
-		if($objLink->numRows)
+		if ($objLink->numRows)
 		{
-			// Datensatz anzeigen
 			$this->Template->id = $objLink->id;
 			$this->Template->title = $objLink->title;
 			$this->Template->url_raw = $objLink->url;
-			$this->Template->url_go = 'bundles/contaolinkscollection/go.php?id='.$objLink->id;
+			$this->Template->url_go = $this->klickUrl((int) $objLink->id);
 			$this->Template->newWindow = $objLink->newWindow;
 			$this->Template->text = $objLink->text;
 			$this->Template->hits = $objLink->hits;
-			$this->Template->average = ($objLink->hits == 0) ? 0 : str_replace('.',',',sprintf("%01.1f",$objLink->hits / ((time() - $objLink->initdate) / 86400)));
+			$this->Template->average = $this->klicksJeTag((int) $objLink->hits, (int) $objLink->initdate);
 			$this->Template->popular = $objLink->popular;
-			$this->Template->icon = \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::getFavicon($objLink->id);
-			$this->Template->initdate = $objLink->initdate ? date("d.m.Y, H:i", $objLink->initdate) : 'unbekannt';
-			$this->Template->tstamp = date("d.m.Y, H:i", $objLink->tstamp);
-			$this->Template->statedate = date("d.m.Y, H:i", $objLink->statedate);
+			$this->Template->icon = Linkscollection::getFavicon($objLink->id);
+			$this->Template->initdate = $objLink->initdate ? date('d.m.Y, H:i', (int) $objLink->initdate) : 'unbekannt';
+			$this->Template->tstamp = date('d.m.Y, H:i', (int) $objLink->tstamp);
+			$this->Template->statedate = date('d.m.Y, H:i', (int) $objLink->statedate);
 			$this->Template->statecode = $objLink->statecode;
 			$this->Template->statetext = $objLink->statetext;
-			$this->Template->problemdate = ($objLink->problemdate == 0) ? '' : date("d.m.Y, H:i", $objLink->problemdate);
+			$this->Template->problemdate = $objLink->problemdate ? date('d.m.Y, H:i', (int) $objLink->problemdate) : '';
 			$this->Template->problemcount = $objLink->problemcount;
 			$this->Template->webarchiv = $objLink->webarchiv;
 		}
 
-		// Template füllen
 		$this->Template->menu = $this->Menu();
-		$this->Template->counter = array('categories'=>$this->numberCategories,'links'=>$this->numberLinks);
-		$this->Template->form = self::FormularLinkFehler($objLink);
+		$this->Template->counter = array('categories' => $this->numberCategories, 'links' => $this->numberLinks);
+		$this->Template->form = $this->FormularLinkFehler($objLink);
 	}
 
-	protected function Menu()
+	/**
+	 * Berechnet die durchschnittlichen Klicks je Tag seit Aufnahme des Links.
+	 *
+	 * @param int $hits     Anzahl der bisherigen Klicks
+	 * @param int $initdate Zeitpunkt der Aufnahme als Unixzeit
+	 *
+	 * @return string Der Durchschnitt mit einer Nachkommastelle und Komma als
+	 *                Trennzeichen; "0" bei noch nicht geklickten Links oder
+	 *                wenn kein Aufnahmedatum hinterlegt ist
+	 */
+	protected function klicksJeTag(int $hits, int $initdate): string
+	{
+		$tage = ($initdate > 0) ? (time() - $initdate) / 86400 : 0;
+
+		if (0 === $hits || $tage <= 0)
+		{
+			return '0';
+		}
+
+		return str_replace('.', ',', sprintf('%01.1f', $hits / $tage));
+	}
+
+	/**
+	 * Baut das Menü, das in jeder Ansicht über dem Inhalt steht.
+	 *
+	 * @return array<int,array{title:string,link:string}> Die Menüeinträge in
+	 *                                                    Anzeigereihenfolge
+	 */
+	protected function Menu(): array
 	{
 		global $objPage;
 
-		// Menü erstellen
-		$menu = array
+		return array
 		(
 			array
 			(
 				'title' => 'Startseite',
-				'link'  => \Controller::generateFrontendUrl($objPage->row()),
+				'link'  => $objPage->getFrontendUrl(),
 			),
 			array
 			(
 				'title' => 'Toplinks',
-				'link'  => \Controller::generateFrontendUrl($objPage->row(), '/view/toplinks'),
+				'link'  => $objPage->getFrontendUrl('/view/toplinks'),
 			),
 			array
 			(
 				'title' => 'Neue Links',
-				'link'  => \Controller::generateFrontendUrl($objPage->row(), '/view/newlinks'),
+				'link'  => $objPage->getFrontendUrl('/view/newlinks'),
 			),
 			array
 			(
 				'title' => 'Suchen',
-				'link'  => \Controller::generateFrontendUrl($objPage->row(), '/view/search'),
+				'link'  => $objPage->getFrontendUrl('/view/search'),
 			),
 			array
 			(
 				'title' => 'Neuen Link melden',
-				'link'  => \Controller::generateFrontendUrl($objPage->row(), '/view/sendlink/category/'.\Input::get('category')),
+				'link'  => $objPage->getFrontendUrl('/view/sendlink/category/'.(int) Input::get('category')),
 			),
 		);
-		return $menu;
 	}
 
 	/**
-	 * Generiert eine Baumstruktur aller Kategorien
+	 * Lädt alle veröffentlichten Kategorien und zählt Kategorien und Links.
+	 *
+	 * Das Ergebnis landet in $this->tree (Auswahlliste für das Meldeformular)
+	 * sowie in $this->numberCategories und $this->numberLinks (Fußzeile).
+	 *
+	 * @return void
 	 */
-	protected function getCategories()
+	protected function getCategories(): void
 	{
-		// Kategorien laden
-		$objCats = \Database::getInstance()->prepare('SELECT id,pid,title FROM tl_linkscollection WHERE published = ? ORDER BY title ASC')
-		                                   ->execute(1);
-		// Kategoriebaum sichern
-		if($objCats->numRows > 1)
+		$objCats = Database::getInstance()->prepare('SELECT id,pid,title FROM tl_linkscollection WHERE published = ? ORDER BY title ASC')
+		                                  ->execute(1);
+
+		while ($objCats->next())
 		{
-			// Datensätze speichern
-			while($objCats->next())
-			{
-				$this->baum[$objCats->pid][$objCats->id] = $objCats->title;
-			}
+			$this->baum[(int) $objCats->pid][(int) $objCats->id] = $objCats->title;
 		}
 
 		$this->getTree(0); // Baum $this->tree anlegen
 
-		// Jetzt noch Links zählen
-		$objLinks = \Database::getInstance()->prepare('SELECT id FROM tl_linkscollection_links WHERE published = ?')
-		                                    ->execute(1);
+		$objLinks = Database::getInstance()->prepare('SELECT id FROM tl_linkscollection_links WHERE published = ?')
+		                                   ->execute(1);
 
-		$this->numberCategories = $objCats->numRows; // Anzahl der Kategorien
-		$this->numberLinks = $objLinks->numRows; // Anzahl der Links
-
+		$this->numberCategories = (int) $objCats->numRows;
+		$this->numberLinks = (int) $objLinks->numRows;
 	}
 
-	public function getTree($id)
+	/**
+	 * Baut den Kategoriebaum ab einer Kategorie rekursiv als flache Liste auf.
+	 *
+	 * Die Einrückung wird über vorangestellte Striche dargestellt, weil die
+	 * Liste in einem Auswahlfeld landet und dort keine Verschachtelung möglich ist.
+	 *
+	 * @param int $id ID der Kategorie, ab der aufgebaut wird; 0 für die Wurzel
+	 *
+	 * @return void
+	 */
+	public function getTree(int $id): void
 	{
-		// Generiert den Baum ab der gewünschten ID
-		if(isset($this->baum[$id]))
+		if (!isset($this->baum[$id]))
 		{
-			foreach($this->baum[$id] as $key => $val)
-			{
-				$this->tree[$key] = str_repeat("- ", $this->level) . $val;
-				$this->level++;
-				$this->getTree($key);
-				$this->level--;
-			}
-			reset($this->baum[$id]);
+			return;
+		}
+
+		foreach ($this->baum[$id] as $key => $val)
+		{
+			$this->tree[$key] = str_repeat('- ', $this->level).$val;
+			++$this->level;
+			$this->getTree($key);
+			--$this->level;
 		}
 	}
 
-	protected function saveNewlink($data)
+	/**
+	 * Speichert einen von einem Besucher gemeldeten neuen Link.
+	 *
+	 * Der Link wird unveröffentlicht angelegt und muss im Backend freigegeben
+	 * werden. Zusätzlich geht eine E-Mail an die im Seitenstartpunkt
+	 * hinterlegte Administratoradresse.
+	 *
+	 * @param array $data Die geprüften Formulardaten mit den Schlüsseln
+	 *                    category, title, url, description, name und email
+	 *
+	 * @return void
+	 */
+	protected function saveNewlink(array $data): void
 	{
-		//print_r($data);
-		// Datenbank aktualisieren
 		$zeit = time();
+
 		$set = array
 		(
-			'pid' => $data['category'],
-			'tstamp' => $zeit,
-			'initdate' => $zeit,
-			'title' => $data['title'],
-			'url' => $data['url'],
-			'text' => $data['description'],
+			'pid'       => (int) $data['category'],
+			'tstamp'    => $zeit,
+			'initdate'  => $zeit,
+			'title'     => $data['title'],
+			'url'       => $data['url'],
+			'text'      => $data['description'],
 			'newWindow' => 1,
-			'name' => $data['name'],
-			'email' => $data['email']
+			'name'      => $data['name'],
+			'email'     => $data['email']
 		);
-		$objLink = \Database::getInstance()->prepare('INSERT INTO tl_linkscollection_links %s')
-		                                   ->set($set)
-		                                   ->execute();
 
-		\System::log('[Linkscollection] New Link submitted: '.$data['title'].' ('.$data['url'].')', __CLASS__.'::'.__FUNCTION__, TL_CRON);
+		$objLink = Database::getInstance()->prepare('INSERT INTO tl_linkscollection_links %s')
+		                                  ->set($set)
+		                                  ->execute();
 
-		// Email an Admin verschicken
-		$objEmail = new \Email();
-		$objEmail->from = $GLOBALS['TL_ADMIN_EMAIL'];
-		$objEmail->fromName = $GLOBALS['TL_ADMIN_NAME'];
-		$objEmail->subject = sprintf($GLOBALS['TL_LANG']['MSC']['linkscollection_subject'], \Idna::decode(\Environment::get('host')));
+		Protokoll::schreiben('[Linkscollection] New Link submitted: '.$data['title'].' ('.$data['url'].')', __METHOD__, ContaoContext::FORMS);
 
 		// Kommentar zusammenbauen
 		$strComment = 'Titel: '.$data['title']."\n";
@@ -499,22 +612,35 @@ class Linksammlung extends \Module
 		$strComment .= 'Kategorie: '.$data['category']."\n";
 		$strComment .= 'Beschreibung: '.$data['description'];
 
-		// Add the comment details
-		$objEmail->text = sprintf($GLOBALS['TL_LANG']['MSC']['linkscollection_message'],
-		                          $data['name'] . ' (' . $data['email'] . ')',
-		                          $strComment,
-		                          \Idna::decode(\Environment::get('base')) . \Environment::get('request'),
-		                          \Idna::decode(\Environment::get('base')) . 'contao/main.php?do=linkscollection&table=tl_linkscollection_links&act=edit&id=' . $objLink->insertId);
-
-		$objEmail->sendTo(array($GLOBALS['TL_ADMIN_NAME'].' <'.$GLOBALS['TL_ADMIN_EMAIL'].'>'));
+		$this->adminMail(
+			sprintf($GLOBALS['TL_LANG']['MSC']['linkscollection_subject'], Idna::decode(Environment::get('host'))),
+			sprintf(
+				$GLOBALS['TL_LANG']['MSC']['linkscollection_message'],
+				$data['name'].' ('.$data['email'].')',
+				$strComment,
+				Idna::decode(Environment::get('base')).Environment::get('request'),
+				Linkscollection::backendLink(array('table' => 'tl_linkscollection_links', 'act' => 'edit', 'id' => $objLink->insertId), false)
+			)
+		);
 	}
 
-	protected function saveProblemlink($data)
+	/**
+	 * Speichert die Meldung eines Besuchers zu einem fehlerhaften Link.
+	 *
+	 * Die Meldung wird als HTML-Block dem Feld "Probleme und Änderungswünsche"
+	 * vorangestellt, sodass die jüngste Meldung im Backend oben steht. Der
+	 * Link selbst bleibt unverändert; über die Korrektur entscheidet die
+	 * Redaktion.
+	 *
+	 * @param array $data Die geprüften Formulardaten
+	 *
+	 * @return void
+	 */
+	protected function saveProblemlink(array $data): void
 	{
-		//print_r($data);
-
-		// Meldung zusammenbauen
 		$zeit = time();
+
+		// Meldung für die E-Mail zusammenbauen
 		$content = 'Titel: '.$data['title']."\n";
 		$content .= 'URL: '.$data['url']."\n";
 		$content .= 'Fehler: '.$data['error']."\n\n";
@@ -524,19 +650,18 @@ class Linksammlung extends \Module
 		$content .= 'Neue URL: '.$data['new_url']."\n\n";
 		$content .= 'Neue Beschreibung: '.$data['new_description']."\n";
 		$content .= 'Kommentar: '.$data['comment']."\n\n";
-		$content .= 'Gemeldet am '.date("d.m.Y, H:i:s", $zeit);
+		$content .= 'Gemeldet am '.date('d.m.Y, H:i:s', $zeit);
 
-		$objLink = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection_links WHERE id = ?')
-		                                   ->execute($data['id']);
+		$objLink = Database::getInstance()->prepare('SELECT * FROM tl_linkscollection_links WHERE id = ?')
+		                                  ->execute((int) $data['id']);
 
-		if($objLink->numRows)
+		if ($objLink->numRows)
 		{
-			// Datenbank aktualisieren
-			$anzahl = $objLink->problemcount + 1;
+			$anzahl = (int) $objLink->problemcount + 1;
 
-			// Problem in Datenbank schreiben
-			$problem = "<h2>Meldung Nr. $anzahl</h2>";
-			$problem .= '<p><b>Gemeldet am '.date("d.m.Y, H:i", $zeit).'</b></p>';
+			// Meldung als HTML in die Datenbank schreiben
+			$problem = '<h2>Meldung Nr. '.$anzahl.'</h2>';
+			$problem .= '<p><b>Gemeldet am '.date('d.m.Y, H:i', $zeit).'</b></p>';
 			$problem .= '<ul>';
 			$problem .= '<li><b>Titel:</b> '.$data['title'].'</li>';
 			$problem .= '<li><b>URL:</b> '.$data['url'].'</li>';
@@ -548,7 +673,7 @@ class Linksammlung extends \Module
 			$problem .= '<li><b>Neue Beschreibung:</b> '.$data['new_description'].'</li>';
 			$problem .= '<li><b>Kommentar:</b> '.$data['comment'].'</li>';
 			$problem .= '</ul>';
-			$problem .= $objLink->problem; // Vorherige Probleme anfügen
+			$problem .= $objLink->problem; // Vorherige Meldungen anhängen
 
 			$set = array
 			(
@@ -556,195 +681,209 @@ class Linksammlung extends \Module
 				'problemdate'  => $zeit,
 				'problemcount' => $anzahl
 			);
-			$objLink = \Database::getInstance()->prepare('UPDATE tl_linkscollection_links %s WHERE id = ?')
-			                                   ->set($set)
-			                                   ->execute($data['id']);
+
+			Database::getInstance()->prepare('UPDATE tl_linkscollection_links %s WHERE id = ?')
+			                       ->set($set)
+			                       ->execute((int) $data['id']);
 		}
 
-		\System::log('[Linkscollection] Error Link ID '.$data['id'].' submitted: '.$data['title'].' ('.$data['url'].')', __CLASS__.'::'.__FUNCTION__, TL_CRON);
+		Protokoll::schreiben('[Linkscollection] Error Link ID '.$data['id'].' submitted: '.$data['title'].' ('.$data['url'].')', __METHOD__, ContaoContext::FORMS);
 
-		// Email an Admin verschicken
-		$objEmail = new \Email();
-		$objEmail->from = $GLOBALS['TL_ADMIN_EMAIL'];
-		$objEmail->fromName = $GLOBALS['TL_ADMIN_NAME'];
-		$objEmail->subject = sprintf($GLOBALS['TL_LANG']['MSC']['linkscollection_error_subject'], \Idna::decode(\Environment::get('host')));
-
-		// Add the comment details
-		$objEmail->text = sprintf($GLOBALS['TL_LANG']['MSC']['linkscollection_error_message'],
-		                          $data['name'] . ' (' . $data['email'] . ')',
-		                          $content,
-		                          \Idna::decode(\Environment::get('base')) . \Environment::get('request'),
-		                          \Idna::decode(\Environment::get('base')) . 'contao/main.php?do=linkscollection&table=tl_linkscollection_links&act=edit&id=' . $data['id']);
-
-		$objEmail->sendTo(array($GLOBALS['TL_ADMIN_NAME'].' <'.$GLOBALS['TL_ADMIN_EMAIL'].'>'));
+		$this->adminMail(
+			sprintf($GLOBALS['TL_LANG']['MSC']['linkscollection_error_subject'], Idna::decode(Environment::get('host'))),
+			sprintf(
+				$GLOBALS['TL_LANG']['MSC']['linkscollection_error_message'],
+				$data['name'].' ('.$data['email'].')',
+				$content,
+				Idna::decode(Environment::get('base')).Environment::get('request'),
+				Linkscollection::backendLink(array('table' => 'tl_linkscollection_links', 'act' => 'edit', 'id' => (int) $data['id']), false)
+			)
+		);
 	}
 
-	protected function FormularLinkNeu()
+	/**
+	 * Verschickt eine Nachricht an die Administratoradresse der Webseite.
+	 *
+	 * Absender und Empfänger sind dieselbe Adresse — sie stammt aus dem
+	 * Seitenstartpunkt beziehungsweise aus den Systemeinstellungen. Ist keine
+	 * hinterlegt, unterbleibt der Versand stillschweigend, damit ein
+	 * eingereichter Link trotzdem gespeichert bleibt.
+	 *
+	 * @param string $betreff Betreffzeile
+	 * @param string $text    Nachrichtentext als reiner Text
+	 *
+	 * @return void
+	 */
+	protected function adminMail(string $betreff, string $text): void
 	{
+		$adresse = $GLOBALS['TL_ADMIN_EMAIL'] ?? Config::get('adminEmail');
+		$name = $GLOBALS['TL_ADMIN_NAME'] ?? '';
 
-		// Der 1. Parameter ist die Formular-ID (hier "linkform")
-		// Der 2. Parameter ist GET oder POST
-		// Der 3. Parameter ist eine Funktion, die entscheidet wann das Formular gesendet wird (Third is a callable that decides when your form is submitted)
-		// Der optionale 4. Parameter legt fest, ob das ausgegebene Formular auf Tabellen basiert (true)
-		// oder nicht (false) (You can pass an optional fourth parameter (true by default) to turn the form into a table based one)
-		$objForm = new \Haste\Form\Form('linkform', 'POST', function($objHaste)
+		if (!$adresse)
 		{
-			return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
-		});
-		
-		// URL für action festlegen. Standard ist die Seite auf der das Formular eingebunden ist.
-		// $objForm->setFormActionFromUri();
-		
-		$objForm->addFormField('name', array(
-			'label'         => 'Vor- und Nachname',
-			'inputType'     => 'text',
-			'eval'          => array('mandatory'=>true, 'class'=>'form-control')
-		));
-		$objForm->addFormField('email', array(
-			'label'         => 'E-Mail',
-			'inputType'     => 'text',
-			'eval'          => array('mandatory'=>true, 'rgxp'=>'email', 'class'=>'form-control')
-		));
-		$objForm->addFormField('title', array(
-			'label'         => 'Titel des Links',
-			'inputType'     => 'text',
-			'eval'          => array('mandatory'=>true, 'class'=>'form-control')
-		));
-		$objForm->addFormField('url', array(
-			'label'         => 'URL des Links',
-			'inputType'     => 'text',
-			'eval'          => array('mandatory'=>true, 'rgxp'=>'url', 'class'=>'form-control')
-		));
-		$objForm->addFormField('category', array(
-			'label'         => 'Kategorie des Links',
-			'inputType'     => 'select',
-			'default'       => array(\Input::get('category')),
-			'options'       => array_keys($this->tree),
-			'reference'     => $this->tree,
-			'eval'          => array('mandatory'=>true, 'choosen'=>true, 'class'=>'form-control')
-		));
-		$objForm->addFormField('description', array(
-			'label'         => 'Beschreibung des Links',
-			'inputType'     => 'textarea',
-			'eval'          => array('mandatory'=>false, 'rte'=>'tinyMCE', 'class'=>'form-control')
-		));
-		// Submit-Button hinzufügen
-		$objForm->addFormField('submit', array(
-			'label'         => 'Absenden',
-			'inputType'     => 'submit',
-			'eval'          => array('class'=>'btn btn-primary')
-		));
-		$objForm->addCaptchaFormField('captcha');
-		// Ausgeblendete Felder FORM_SUBMIT und REQUEST_TOKEN automatisch hinzufügen.
-		// Nicht verwenden wenn generate() anschließend verwendet, da diese Felder dort standardmäßig bereitgestellt werden.
-		// $objForm->addContaoHiddenFields();
-		
-		// validate() prüft auch, ob das Formular gesendet wurde
-		if($objForm->validate())
-		{
-			// Alle gesendeten und analysierten Daten holen (funktioniert nur mit POST)
-			$arrData = $objForm->fetchAll();
-			self::saveNewlink($arrData); // Daten sichern
-			// Seite neu laden
-			\Controller::addToUrl('send=1'); // Hat keine Auswirkung, verhindert aber das das Formular ausgefüllt ist
-			\Controller::reload(); 
+			return;
 		}
-		
-		// Formular als String zurückgeben
-		return $objForm->generate();
 
+		$objEmail = new Email();
+		$objEmail->from = $adresse;
+		$objEmail->fromName = $name;
+		$objEmail->subject = $betreff;
+		$objEmail->text = $text;
+		$objEmail->sendTo($name ? $name.' <'.$adresse.'>' : $adresse);
 	}
 
-	protected function FormularLinkFehler($object)
+	/**
+	 * Baut das Formular zum Melden eines neuen Links und wertet es aus.
+	 *
+	 * Nach erfolgreicher Absendung wird die Seite neu geladen, damit ein
+	 * Aktualisieren im Browser den Link nicht ein zweites Mal einträgt.
+	 *
+	 * @return string Das Formular als HTML
+	 */
+	protected function FormularLinkNeu(): string
 	{
+		$objForm = new Formular('linkform');
 
-		// Der 1. Parameter ist die Formular-ID (hier "linkform")
-		// Der 2. Parameter ist GET oder POST
-		// Der 3. Parameter ist eine Funktion, die entscheidet wann das Formular gesendet wird (Third is a callable that decides when your form is submitted)
-		// Der optionale 4. Parameter legt fest, ob das ausgegebene Formular auf Tabellen basiert (true)
-		// oder nicht (false) (You can pass an optional fourth parameter (true by default) to turn the form into a table based one)
-		$objForm = new \Haste\Form\Form('linkform', 'POST', function($objHaste)
+		$objForm->feld('name', array(
+			'label'     => 'Vor- und Nachname',
+			'inputType' => 'text',
+			'eval'      => array('mandatory' => true, 'class' => 'form-control')
+		));
+		$objForm->feld('email', array(
+			'label'     => 'E-Mail',
+			'inputType' => 'text',
+			'eval'      => array('mandatory' => true, 'rgxp' => 'email', 'class' => 'form-control')
+		));
+		$objForm->feld('title', array(
+			'label'     => 'Titel des Links',
+			'inputType' => 'text',
+			'eval'      => array('mandatory' => true, 'class' => 'form-control')
+		));
+		$objForm->feld('url', array(
+			'label'     => 'URL des Links',
+			'inputType' => 'text',
+			'eval'      => array('mandatory' => true, 'rgxp' => 'url', 'class' => 'form-control')
+		));
+		$objForm->feld('category', array(
+			'label'     => 'Kategorie des Links',
+			'inputType' => 'select',
+			'default'   => (int) Input::get('category'),
+			'options'   => array_keys($this->tree),
+			'reference' => $this->tree,
+			'eval'      => array('mandatory' => true, 'class' => 'form-control')
+		));
+		$objForm->feld('description', array(
+			'label'     => 'Beschreibung des Links',
+			'inputType' => 'textarea',
+			'eval'      => array('mandatory' => false, 'class' => 'form-control')
+		));
+		$objForm->feld('captcha', array(
+			'label'     => 'Sicherheitsfrage',
+			'inputType' => 'captcha',
+			'eval'      => array('mandatory' => true)
+		));
+		$objForm->feld('submit', array(
+			'label'     => 'Absenden',
+			'inputType' => 'submit',
+			'eval'      => array('class' => 'btn btn-primary')
+		));
+
+		if ($objForm->pruefen())
 		{
-			return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
-		});
-		
-		// URL für action festlegen. Standard ist die Seite auf der das Formular eingebunden ist.
-		// $objForm->setFormActionFromUri();
-		
-		// Formularfelder hinzufügen
-		$objForm->addFormField('id', array(
-			'default'       => $object->id,
-			'inputType'     => 'hidden'
-		));
-		$objForm->addFormField('title', array(
-			'default'       => $object->title,
-			'inputType'     => 'hidden'
-		));
-		$objForm->addFormField('url', array(
-			'default'       => $object->url,
-			'inputType'     => 'hidden'
-		));
-		$objForm->addFormField('name', array(
-			'label'         => 'Vor- und Nachname',
-			'inputType'     => 'text',
-			'eval'          => array('mandatory'=>true, 'class'=>'form-control')
-		));
-		$objForm->addFormField('email', array(
-			'label'         => 'E-Mail',
-			'inputType'     => 'text',
-			'eval'          => array('mandatory'=>true, 'rgxp'=>'email', 'class'=>'form-control')
-		));
-		$objForm->addFormField('new_title', array(
-			'label'         => 'Neuer Titel',
-			'inputType'     => 'text',
-			'eval'          => array('mandatory'=>false, 'class'=>'form-control')
-		));
-		$objForm->addFormField('new_url', array(
-			'label'         => 'Neue URL',
-			'inputType'     => 'text',
-			'eval'          => array('mandatory'=>false, 'rgxp'=>'url', 'class'=>'form-control')
-		));
-		$objForm->addFormField('new_description', array(
-			'label'         => 'Neue Detailbeschreibung',
-			'inputType'     => 'textarea',
-			'eval'          => array('mandatory'=>false, 'rte'=>'tinyMCE', 'class'=>'form-control')
-		));
-		$objForm->addFormField('error', array(
-			'label'         => 'Fehler',
-			'inputType'     => 'select',
-			'options'       => &$GLOBALS['TL_LANG']['linkscollection']['errors'],
-			'eval'          => array('mandatory'=>false, 'choosen'=>true, 'class'=>'form-control')
-		));
-		$objForm->addFormField('comment', array(
-			'label'         => 'Kommentar',
-			'inputType'     => 'textarea',
-			'eval'          => array('mandatory'=>true, 'rte'=>'tinyMCE', 'class'=>'form-control')
-		));
-		// Submit-Button hinzufügen
-		$objForm->addFormField('submit', array(
-			'label'         => 'Absenden',
-			'inputType'     => 'submit',
-			'eval'          => array('class'=>'btn btn-primary')
-		));
-		$objForm->addCaptchaFormField('captcha');
-		// Ausgeblendete Felder FORM_SUBMIT und REQUEST_TOKEN automatisch hinzufügen.
-		// Nicht verwenden wenn generate() anschließend verwendet, da diese Felder dort standardmäßig bereitgestellt werden.
-		// $objForm->addContaoHiddenFields();
-		
-		// validate() prüft auch, ob das Formular gesendet wurde
-		if($objForm->validate())
-		{
-			// Alle gesendeten und analysierten Daten holen (funktioniert nur mit POST)
-			$arrData = $objForm->fetchAll();
-			self::saveProblemlink($arrData); // Daten sichern
-			// Seite neu laden
-			\Controller::addToUrl('send=1'); // Hat keine Auswirkung, verhindert aber das das Formular ausgefüllt ist
-			\Controller::reload(); 
+			$this->saveNewlink($objForm->werte());
+
+			Controller::reload();
 		}
-		
-		// Formular als String zurückgeben
-		return $objForm->generate();
 
+		return $objForm->erzeugen();
 	}
 
+	/**
+	 * Baut das Formular zum Melden eines fehlerhaften Links und wertet es aus.
+	 *
+	 * @param \Contao\Database\Result $object Datensatz des betroffenen Links;
+	 *                                        Titel und URL werden als
+	 *                                        versteckte Felder mitgeschickt,
+	 *                                        damit sie in der Meldung stehen
+	 *
+	 * @return string Das Formular als HTML, oder ein leerer String, wenn es
+	 *                den Link gar nicht gibt
+	 */
+	protected function FormularLinkFehler($object): string
+	{
+		if (!$object->numRows)
+		{
+			return '';
+		}
+
+		$objForm = new Formular('linkform');
+
+		$objForm->feld('id', array(
+			'default'   => $object->id,
+			'inputType' => 'hidden'
+		));
+		$objForm->feld('title', array(
+			'default'   => $object->title,
+			'inputType' => 'hidden'
+		));
+		$objForm->feld('url', array(
+			'default'   => $object->url,
+			'inputType' => 'hidden'
+		));
+		$objForm->feld('name', array(
+			'label'     => 'Vor- und Nachname',
+			'inputType' => 'text',
+			'eval'      => array('mandatory' => true, 'class' => 'form-control')
+		));
+		$objForm->feld('email', array(
+			'label'     => 'E-Mail',
+			'inputType' => 'text',
+			'eval'      => array('mandatory' => true, 'rgxp' => 'email', 'class' => 'form-control')
+		));
+		$objForm->feld('new_title', array(
+			'label'     => 'Neuer Titel',
+			'inputType' => 'text',
+			'eval'      => array('mandatory' => false, 'class' => 'form-control')
+		));
+		$objForm->feld('new_url', array(
+			'label'     => 'Neue URL',
+			'inputType' => 'text',
+			'eval'      => array('mandatory' => false, 'rgxp' => 'url', 'class' => 'form-control')
+		));
+		$objForm->feld('new_description', array(
+			'label'     => 'Neue Detailbeschreibung',
+			'inputType' => 'textarea',
+			'eval'      => array('mandatory' => false, 'class' => 'form-control')
+		));
+		$objForm->feld('error', array(
+			'label'     => 'Fehler',
+			'inputType' => 'select',
+			'options'   => $GLOBALS['TL_LANG']['linkscollection']['errors'] ?? array(),
+			'eval'      => array('mandatory' => false, 'class' => 'form-control')
+		));
+		$objForm->feld('comment', array(
+			'label'     => 'Kommentar',
+			'inputType' => 'textarea',
+			'eval'      => array('mandatory' => true, 'class' => 'form-control')
+		));
+		$objForm->feld('captcha', array(
+			'label'     => 'Sicherheitsfrage',
+			'inputType' => 'captcha',
+			'eval'      => array('mandatory' => true)
+		));
+		$objForm->feld('submit', array(
+			'label'     => 'Absenden',
+			'inputType' => 'submit',
+			'eval'      => array('class' => 'btn btn-primary')
+		));
+
+		if ($objForm->pruefen())
+		{
+			$this->saveProblemlink($objForm->werte());
+
+			Controller::reload();
+		}
+
+		return $objForm->erzeugen();
+	}
 }

@@ -1,0 +1,25 @@
+# Routen der Linksammlung
+#
+# _scope: frontend sorgt dafür, dass Contao die Anfrage als Frontend-Anfrage
+# behandelt (Sprache, Insert-Tags, Mitgliederanmeldung).
+# _token_check: false schaltet die Prüfung des Anfrage-Tokens ab — beide Routen
+# werden per GET aus dem Seiteninhalt heraus aufgerufen und ändern keine Daten,
+# die einen Angreifer lohnen würden.
+
+linkscollection_go:
+    path: /linkscollection/go/{id}
+    defaults:
+        _controller: Schachbulle\ContaoLinkscollectionBundle\Controller\WeiterleitungController
+        _scope: frontend
+        _token_check: false
+    requirements:
+        id: \d+
+    methods: [GET]
+
+linkscollection_suche:
+    path: /linkscollection/suche
+    defaults:
+        _controller: Schachbulle\ContaoLinkscollectionBundle\Controller\SucheController
+        _scope: frontend
+        _token_check: false
+    methods: [GET]

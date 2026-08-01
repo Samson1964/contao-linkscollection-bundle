@@ -1,27 +1,35 @@
 <?php
 
+declare(strict_types=1);
+
 /**
- * Contao Open Source CMS
+ * Linksammlung für Contao Open Source CMS
  *
- * Copyright (c) 2005-2013 Leo Feyer
- *
- * @package Core
- * @link    https://contao.org
- * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
+ * @author    Frank Hoppe
+ * @license   LGPL-3.0-or-later
  */
 
+use Contao\Backend;
+use Contao\Controller;
+use Contao\DataContainer;
+use Contao\DC_Table;
+use Contao\Database;
+use Contao\Environment;
+use Contao\Image;
+use Contao\Input;
+use Contao\StringUtil;
+use Contao\System;
 
 /**
- * Table tl_linkscollection
+ * Tabelle tl_linkscollection — die Kategorien der Linksammlung
  */
 $GLOBALS['TL_DCA']['tl_linkscollection'] = array
 (
-
 	// Config
 	'config' => array
 	(
 		'label'                       => &$GLOBALS['TL_LANG']['tl_linkscollection']['maintitle'],
-		'dataContainer'               => 'Table',
+		'dataContainer'               => DC_Table::class,
 		'ctable'                      => array('tl_linkscollection_links'),
 		'enableVersioning'            => true,
 		'onload_callback'             => array
@@ -44,9 +52,9 @@ $GLOBALS['TL_DCA']['tl_linkscollection'] = array
 	(
 		'sorting' => array
 		(
-			'mode'                    => 5,
+			'mode'                    => DataContainer::MODE_TREE,
 			'fields'                  => array('sorting'),
-			'icon'                    => 'pagemounts.gif',
+			'icon'                    => 'pagemounts.svg',
 			'panelLayout'             => 'filter,search',
 		),
 		'label' => array
@@ -83,7 +91,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection'] = array
 				'label'               => &$GLOBALS['TL_LANG']['MSC']['toggleAll'],
 				'href'                => 'ptg=all',
 				'class'               => 'header_toggle',
-				'showOnSelect'        => true 
+				'showOnSelect'        => true
 			),
 			'all' => array
 			(
@@ -99,47 +107,36 @@ $GLOBALS['TL_DCA']['tl_linkscollection'] = array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection']['edit'],
 				'href'                => 'table=tl_linkscollection_links',
-				'icon'                => 'edit.gif',
+				'icon'                => 'edit.svg',
 			),
 			'editheader' => array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection']['editheader'],
 				'href'                => 'act=edit',
-				'icon'                => 'header.gif',
-			), 
+				'icon'                => 'header.svg',
+			),
 			'cut' => array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection']['cut'],
 				'href'                => 'act=paste&amp;mode=cut',
-				'icon'                => 'cut.gif',
+				'icon'                => 'cut.svg',
 				'attributes'          => 'onclick="Backend.getScrollOffset()"',
 			),
-			//'delete' => array
-			//(
-			//	'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection']['delete'],
-			//	'href'                => 'act=delete',
-			//	'icon'                => 'delete.gif',
-			//	'attributes'          => 'onclick="if(!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm'] . '\'))return false;Backend.getScrollOffset()"',
-			//),
+			// Kategorien lassen sich bewusst nicht löschen: Mit der Kategorie
+			// verschwänden auch alle Links darin. Zum Ausblenden dient das
+			// Auge, zum endgültigen Entfernen der Weg über die Datenbank.
 			'toggle' => array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection']['toggle'],
-				'attributes'           => 'onclick="Backend.getScrollOffset()"',
-				'haste_ajax_operation' => array
-				(
-					'field'            => 'published',
-					'options'          => array
-					(
-						array('value' => '', 'icon' => 'invisible.svg'),
-						array('value' => '1', 'icon' => 'visible.svg'),
-					),
-				),
+				'href'                => 'act=toggle&amp;field=published',
+				'icon'                => 'visible.svg',
+				'showInHeader'        => true,
 			),
 			'show' => array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection']['show'],
 				'href'                => 'act=show',
-				'icon'                => 'show.gif'
+				'icon'                => 'show.svg'
 			)
 		)
 	),
@@ -147,16 +144,16 @@ $GLOBALS['TL_DCA']['tl_linkscollection'] = array
 	// Palettes
 	'palettes' => array
 	(
-		'__selector__'                => array('protected'), 
+		'__selector__'                => array('protected'),
 		'default'                     => '{title_legend},title,alias;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space;{published_legend},published,start,stop'
-	), 
+	),
 
 	// Subpalettes
 	'subpalettes' => array
 	(
 		'protected'                   => 'groups'
-	), 
-	
+	),
+
 	// Fields
 	'fields' => array
 	(
@@ -198,9 +195,9 @@ $GLOBALS['TL_DCA']['tl_linkscollection'] = array
 			'save_callback' => array
 			(
 				array('tl_linkscollection', 'generateAlias')
-			), 
+			),
 		),
-		// Anzahl der Links ohne Unterkategorien (zählt ein Cronjob)
+		// Anzahl der Links ohne Unterkategorien (zählt die Statistik)
 		'links_self' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['links_self'],
@@ -208,8 +205,8 @@ $GLOBALS['TL_DCA']['tl_linkscollection'] = array
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'rgxp'=>'numeric'),
 			'sql'                     => "int(6) unsigned NOT NULL default '0'"
-		), 
-		// Anzahl der Links inkl. Unterkategorien (zählt ein Cronjob)
+		),
+		// Anzahl der Links inklusive Unterkategorien (zählt die Statistik)
 		'links_all' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['links_all'],
@@ -217,8 +214,8 @@ $GLOBALS['TL_DCA']['tl_linkscollection'] = array
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'rgxp'=>'numeric'),
 			'sql'                     => "int(6) unsigned NOT NULL default '0'"
-		), 
-		// Anzahl der neuen Links inkl. Unterkategorien (zählt ein Cronjob)
+		),
+		// Anzahl der neuen Links inklusive Unterkategorien (zählt die Statistik)
 		'links_new' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['links_new'],
@@ -227,8 +224,8 @@ $GLOBALS['TL_DCA']['tl_linkscollection'] = array
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'rgxp'=>'numeric'),
 			'sql'                     => "int(6) unsigned NOT NULL default '0'"
-		), 
-		// Anzahl der geprüften Links (zählt ein Cronjob)
+		),
+		// Anteil geprüfter Links in Prozent (zählt die Statistik)
 		'links_checkquote' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['links_checkquote'],
@@ -236,7 +233,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection'] = array
 			'inputType'               => 'text',
 			'eval'                    => array('mandatory'=>false, 'rgxp'=>'numeric'),
 			'sql'                     => "int(3) unsigned NOT NULL default '0'"
-		), 
+		),
 		'protected' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection']['protected'],
@@ -285,10 +282,11 @@ $GLOBALS['TL_DCA']['tl_linkscollection'] = array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection']['published'],
 			'exclude'                 => true,
+			'toggle'                  => true,
 			'inputType'               => 'checkbox',
 			'eval'                    => array('doNotCopy'=>true),
 			'sql'                     => "char(1) NOT NULL default ''"
-		), 
+		),
 		'start' => array
 		(
 			'exclude'                 => true,
@@ -304,178 +302,233 @@ $GLOBALS['TL_DCA']['tl_linkscollection'] = array
 			'inputType'               => 'text',
 			'eval'                    => array('rgxp'=>'datim', 'datepicker'=>true, 'tl_class'=>'w50 wizard'),
 			'sql'                     => "varchar(10) NOT NULL default ''"
-		) 
+		)
 	)
 );
 
 /**
- * Class tl_linkscollection
+ * Rückruffunktionen der Tabelle tl_linkscollection.
  *
- * Provide miscellaneous methods that are used by the data configuration array.
- * @copyright  Leo Feyer 2005-2013
- * @author     Leo Feyer <https://contao.org>
- * @package    Core
+ * Die Klasse trägt bewusst den Tabellennamen: Contao erzeugt sie über
+ * System::importStatic(), sobald einer der oben eingetragenen Callbacks
+ * ansteht.
  */
 class tl_linkscollection extends Backend
 {
-
 	/**
-	 * Import the back end user object
+	 * Schränkt den Kategoriebaum auf einen Knoten ein und zeigt den Weg dorthin.
+	 *
+	 * Die Linksammlung kann sehr viele Kategorien enthalten. Über einen Klick
+	 * auf einen Kategorietitel merkt sich das Backend diese Kategorie als
+	 * Einstiegspunkt; die Navigationsleiste darüber führt wieder heraus.
+	 *
+	 * Der gewählte Knoten steht in der Backend-Sitzung, damit er einen
+	 * Seitenwechsel übersteht. Bis Version 1.5 lief das über die entfallene
+	 * Contao-Klasse Session.
+	 *
+	 * @return void
 	 */
-	public function __construct()
+	public function addBreadcrumb(): void
 	{
-		parent::__construct();
-		$this->import('BackendUser', 'User');
-	}
+		$sitzung = self::sitzung();
 
-	/**
-	 * Add the breadcrumb menu
-	 */
-	public function addBreadcrumb()
-	{
-
-		// Knoten in Session speichern
-		if (isset($_GET['node']))
+		// Angeklickten Knoten merken und den Parameter aus der Adresse entfernen
+		if (null !== Input::get('node'))
 		{
-			$this->Session->set('tl_linkscollection_node', $this->Input->get('node'));
-			$this->redirect(preg_replace('/&node=[^&]*/', '', $this->Environment->request));
-		}
-		$cat = $this->Session->get('tl_linkscollection_node');
-
-		// Breadcrumb-Navigation erstellen
-		$breadcrumb = array();
-		if($cat) // Nur bei Unterkategorien
-		{
-			// Kategorienbaum einschränken
-			$GLOBALS['TL_DCA']['tl_linkscollection']['list']['sorting']['root'] = array($cat);
-		
-			// Infos zur aktuellen Kategorie laden
-			$objActual = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection WHERE published = ? AND id = ?')
-			                                     ->execute(1, $cat);
-			$breadcrumb[] = '<img src="bundles/contaolinkscollection/images/category.png" width="18" height="18" alt=""> ' . $objActual->title;
-			
-			// Navigation vervollständigen
-			$pid = $objActual->pid;
-			while($pid > 0)
+			if ($sitzung)
 			{
-				$objTemp = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection WHERE published = ? AND id = ?')
-				                                   ->execute(1, $pid);
-				$breadcrumb[] = '<img src="bundles/contaolinkscollection/images/category.png" width="18" height="18" alt=""> <a href="' . \Controller::addToUrl('node='.$objTemp->id) . '" title="'.specialchars($GLOBALS['TL_LANG']['MSC']['selectNode']).'">' . $objTemp->title . '</a>';
-				$pid = $objTemp->pid;
+				$sitzung->set('tl_linkscollection_node', (int) Input::get('node'));
 			}
-			$breadcrumb[] = '<img src="' . TL_FILES_URL . 'system/themes/' . \Backend::getTheme() . '/images/pagemounts.gif" width="18" height="18" alt=""> <a href="' . \Controller::addToUrl('node=0') . '" title="'.specialchars($GLOBALS['TL_LANG']['MSC']['selectAllNodes']).'">' . $GLOBALS['TL_LANG']['MSC']['filterAll'] . '</a>';
-		}
-		$breadcrumb = array_reverse($breadcrumb);
 
-		// Insert breadcrumb menu
-		if($breadcrumb)
+			Controller::redirect(preg_replace('/[?&]node=[^&]*/', '', Environment::get('request')));
+		}
+
+		$cat = $sitzung ? (int) $sitzung->get('tl_linkscollection_node') : 0;
+
+		if (!$cat)
 		{
-			$GLOBALS['TL_DCA']['tl_linkscollection']['list']['sorting']['breadcrumb'] .= '
-			<ul id="tl_breadcrumb">
-				<li>' . implode(' &gt; </li><li>', $breadcrumb) . '</li>
-			</ul>';
+			return;
+		}
+
+		// Kategorienbaum einschränken
+		$GLOBALS['TL_DCA']['tl_linkscollection']['list']['sorting']['root'] = array($cat);
+
+		// Infos zur aktuellen Kategorie laden
+		$objActual = Database::getInstance()->prepare('SELECT * FROM tl_linkscollection WHERE published = ? AND id = ?')
+		                                    ->execute(1, $cat);
+
+		if (!$objActual->numRows)
+		{
+			return;
+		}
+
+		$symbol = '<img src="bundles/contaolinkscollection/images/category.png" width="18" height="18" alt=""> ';
+		$breadcrumb = array($symbol.$objActual->title);
+
+		// Navigation über die Elternkategorien vervollständigen
+		$pid = (int) $objActual->pid;
+
+		while ($pid > 0)
+		{
+			$objTemp = Database::getInstance()->prepare('SELECT * FROM tl_linkscollection WHERE published = ? AND id = ?')
+			                                  ->execute(1, $pid);
+
+			if (!$objTemp->numRows)
+			{
+				break;
+			}
+
+			$breadcrumb[] = $symbol.'<a href="'.Controller::addToUrl('node='.$objTemp->id).'" title="'.StringUtil::specialchars($GLOBALS['TL_LANG']['MSC']['selectNode'] ?? '').'">'.$objTemp->title.'</a>';
+			$pid = (int) $objTemp->pid;
+		}
+
+		$breadcrumb[] = Image::getHtml('pagemounts.svg').' <a href="'.Controller::addToUrl('node=0').'" title="'.StringUtil::specialchars($GLOBALS['TL_LANG']['MSC']['selectAllNodes'] ?? '').'">'.($GLOBALS['TL_LANG']['MSC']['filterAll'] ?? 'Alle').'</a>';
+
+		$GLOBALS['TL_DCA']['tl_linkscollection']['list']['sorting']['breadcrumb'] = '
+		<ul id="tl_breadcrumb">
+			<li>'.implode(' &gt; </li><li>', array_reverse($breadcrumb)).'</li>
+		</ul>';
+	}
+
+	/**
+	 * Liefert den Sitzungsspeicher des Backends.
+	 *
+	 * @return \Symfony\Component\HttpFoundation\Session\SessionBagInterface|null
+	 *         Der Sitzungsbereich, oder null wenn es keine Sitzung gibt — etwa
+	 *         beim Aufruf von contao:migrate auf der Kommandozeile
+	 */
+	private static function sitzung()
+	{
+		$container = System::getContainer();
+
+		if (null === $container || !$container->has('request_stack'))
+		{
+			return null;
+		}
+
+		$request = $container->get('request_stack')->getCurrentRequest();
+
+		if (null === $request || !$request->hasSession())
+		{
+			return null;
+		}
+
+		try
+		{
+			return $request->getSession()->getBag('contao_backend');
+		}
+		catch (\Exception $e)
+		{
+			return null;
 		}
 	}
 
 	/**
-	 * Add an image to each page in the tree
+	 * Ergänzt jede Zeile des Kategoriebaums um Symbol und Zahlen.
 	 *
-	 * @param array         $row
-	 * @param string        $label
-	 * @param DataContainer $dc
-	 * @param string        $imageAttribute
-	 * @param boolean       $blnReturnImage
-	 * @param boolean       $blnProtected
+	 * Hinter dem Kategorietitel stehen die Anzahl der Links unmittelbar in der
+	 * Kategorie, die Anzahl einschließlich aller Unterkategorien und der
+	 * Anteil erreichbarer Links. Dessen Farbe wandert von Rot über Gelb nach
+	 * Grün, damit vernachlässigte Kategorien ins Auge fallen.
 	 *
-	 * @return string
+	 * @param array              $row            Datensatz der Kategorie
+	 * @param string             $label          Der von Contao vorbereitete Titel
+	 * @param DataContainer|null $dc             Aufrufender Datencontainer
+	 * @param string             $imageAttribute Zusätzliche Attribute für das Symbol
+	 * @param bool               $blnReturnImage true liefert nur das Symbol zurück
+	 * @param bool               $blnProtected   true erzwingt die Anzeige als geschützt
+	 *
+	 * @return string Die fertige Zeile als HTML
 	 */
-	public function addIcon($row, $label, DataContainer $dc=null, $imageAttribute='', $blnReturnImage=false, $blnProtected=false)
+	public function addIcon($row, $label, ?DataContainer $dc = null, $imageAttribute = '', $blnReturnImage = false, $blnProtected = false): string
 	{
 		if ($blnProtected)
 		{
 			$row['protected'] = true;
 		}
 
-		// Kategorie-Icon und Icon-Attribute zuweisen
+		// Kategorie-Symbol und dessen Attribute zuweisen
 		$image = $row['published'] ? 'bundles/contaolinkscollection/images/category.png' : 'bundles/contaolinkscollection/images/category_inactive.png';
-		$imageAttribute = trim($imageAttribute . ' data-icon="bundles/contaolinkscollection/images/category.png" data-icon-disabled="bundles/contaolinkscollection/images/category_inactive.png"');
+		$imageAttribute = trim($imageAttribute.' data-icon="bundles/contaolinkscollection/images/category.png" data-icon-disabled="bundles/contaolinkscollection/images/category_inactive.png"');
 
-		// Return the image only
 		if ($blnReturnImage)
 		{
-			return \Image::getHtml($image, '', $imageAttribute);
+			return Image::getHtml($image, '', $imageAttribute);
 		}
 
-		// Markiere Root-Kategorien
-		if ($row['pid'] == '0')
+		// Kategorien der obersten Ebene hervorheben
+		if (!$row['pid'])
 		{
-			$label = '<strong>' . $label . '</strong>';
+			$label = '<strong>'.$label.'</strong>';
 		}
 
-		// Farben für % geprüfte Links festlegen, Farbverlauf von Rot über Gelb nach Grün
-		if($row['links_checkquote'] <= 10) $farbe = '#ff0000';
-		elseif($row['links_checkquote'] <= 19) $farbe = '#ff2800';
-		elseif($row['links_checkquote'] <= 28) $farbe = '#ff5000';
-		elseif($row['links_checkquote'] <= 37) $farbe = '#ff7800';
-		elseif($row['links_checkquote'] <= 46) $farbe = '#ffa000';
-		elseif($row['links_checkquote'] <= 55) $farbe = '#ffd200';
-		elseif($row['links_checkquote'] <= 64) $farbe = '#d8d32d';
-		elseif($row['links_checkquote'] <= 73) $farbe = '#c4d62c';
-		elseif($row['links_checkquote'] <= 82) $farbe = '#7fdf26';
-		elseif($row['links_checkquote'] <= 91) $farbe = '#39e821';
-		else $farbe = '#04c400';
-		$checkquote = '<span style="color:'.$farbe.';">'.$row['links_checkquote'].'%</span> Links in Ordnung';
+		$quote = (int) $row['links_checkquote'];
 
-		// Rückgabe der Zeile
-		return \Image::getHtml($image, '', $imageAttribute) . '<a href="' . \Controller::addToUrl('node='.$row['id']) . '" title="'.specialchars($GLOBALS['TL_LANG']['MSC']['selectNode']).'"> ' . $label . '</a> 
-		(<b>'.$row['links_self'].'</b>/'.$row['links_all'].' - '.$checkquote.')';
+		// Farbverlauf von Rot über Gelb nach Grün in Zehnerschritten
+		$farben = array(10 => '#ff0000', 19 => '#ff2800', 28 => '#ff5000', 37 => '#ff7800', 46 => '#ffa000', 55 => '#ffd200', 64 => '#d8d32d', 73 => '#c4d62c', 82 => '#7fdf26', 91 => '#39e821');
+		$farbe = '#04c400';
 
+		foreach ($farben as $grenze => $wert)
+		{
+			if ($quote <= $grenze)
+			{
+				$farbe = $wert;
+				break;
+			}
+		}
+
+		$checkquote = '<span style="color:'.$farbe.';">'.$quote.'%</span> Links in Ordnung';
+
+		return Image::getHtml($image, '', $imageAttribute)
+			.'<a href="'.Controller::addToUrl('node='.$row['id']).'" title="'.StringUtil::specialchars($GLOBALS['TL_LANG']['MSC']['selectNode'] ?? '').'"> '.$label.'</a> '
+			.'(<b>'.$row['links_self'].'</b>/'.$row['links_all'].' - '.$checkquote.')';
 	}
 
 	/**
-	 * Auto-generate a page alias if it has not been set yet
-	 * @param mixed
-	 * @param \DataContainer
-	 * @return string
-	 * @throws \Exception
+	 * Erzeugt beim Speichern einen Alias, wenn keiner eingetragen wurde.
+	 *
+	 * @param mixed         $varValue Der eingegebene Alias, in der Regel leer
+	 * @param DataContainer $dc       Aufrufender Datencontainer; liefert den
+	 *                                Titel, aus dem der Alias entsteht
+	 *
+	 * @return string Der gespeicherte Alias
+	 *
+	 * @throws \Exception Wenn ein von Hand eingegebener Alias bereits vergeben ist
 	 */
-	public function generateAlias($varValue, DataContainer $dc)
+	public function generateAlias($varValue, DataContainer $dc): string
 	{
 		$autoAlias = false;
 
-		// Generate an alias if there is none
-		if ($varValue == '')
+		if (!$varValue)
 		{
 			$autoAlias = true;
 
 			// Optionen für die Aliasgenerierung setzen
 			// Siehe: https://github.com/ausi/slug-generator/blob/master/README.md
-			$slugOptionen = (object)array
+			$slugOptionen = (object) array
 			(
 				'setValidChars' => 'a-z0-9',
 				'setLocale'     => 'de',
 				'setDelimiter'  => '-'
 			);
-			// Alias generieren
-			$varValue = Contao\System::getContainer()->get('contao.slug')->generate($dc->activeRecord->title, $slugOptionen);
+
+			$varValue = System::getContainer()->get('contao.slug')->generate($dc->activeRecord->title, $slugOptionen);
 		}
 
-		$objAlias = $this->Database->prepare("SELECT id FROM tl_linkscollection WHERE id=? OR alias=?")
-		                           ->execute($dc->id, $varValue);
+		$objAlias = Database::getInstance()->prepare('SELECT id FROM tl_linkscollection WHERE id=? OR alias=?')
+		                                   ->execute($dc->id, $varValue);
 
-		// Check whether the page alias exists
+		// Prüfen, ob der Alias bereits vergeben ist
 		if ($objAlias->numRows > 1)
 		{
 			if (!$autoAlias)
 			{
-				throw new Exception(sprintf($GLOBALS['TL_LANG']['ERR']['aliasExists'], $varValue));
+				throw new \Exception(sprintf($GLOBALS['TL_LANG']['ERR']['aliasExists'] ?? 'Der Alias "%s" ist bereits vergeben.', $varValue));
 			}
 
-			$varValue .= '-' . $dc->id;
+			$varValue .= '-'.$dc->id;
 		}
 
-		return $varValue;
+		return (string) $varValue;
 	}
-
 }
-

@@ -76,11 +76,19 @@ class FaviconDownloader
 			$this->siteUrl = $pageUrlInfo['scheme'].'://'.$pageUrlInfo['host'].'/';
 		}
 		
+		// Ohne verwertbare Adresse gibt es nichts zu suchen. Früher lief die
+		// Methode hier weiter und verkettete null-Werte, was PHP 8 bemängelt.
+		if(empty($this->siteUrl)){
+			$this->error = 'Keine gültige Adresse';
+			return false;
+		}
+
 		// Default favicon URL
 		$this->icoUrl = $this->siteUrl.'favicon.ico';
 		$this->findMethod = 'default';
-		
+
 		// HTML <head> tag extraction
+		$html = is_string($html) ? $html : '';
 		preg_match('#^(.*)<\s*body#isU', $html, $matches);
 		$htmlHead = isset($matches[1]) ? $matches[1] : $html;
 		
@@ -122,7 +130,7 @@ class FaviconDownloader
 						}
 						break;
 					case 'relative':
-						$path = preg_replace('#/[^/]+?$#i', '/', $pageUrlInfo['path']);
+						$path = preg_replace('#/[^/]+?$#i', '/', $pageUrlInfo['path'] ?? '/');
 						if(isset($base_href)){
 							$this->icoUrl = $base_href.$ico_href;
 							$this->findMethod .= ' with base href';
@@ -199,8 +207,11 @@ class FaviconDownloader
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_HEADER, false);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+		// CURLOPT_BINARYTRANSFER stand hier bis Version 1.5: Die Option ist seit
+		// PHP 5.1.3 wirkungslos und wird ab PHP 8.4 nicht mehr unterstützt.
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Don't check SSL certificate to allow autosigned certificate
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);    // Nicht ewig auf tote Hosts warten
+		curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);  // Follow redirects (302, 301)
 		curl_setopt($ch, CURLOPT_MAXREDIRS, 20);         // Follow up to 20 redirects
 		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:27.0) Gecko/20100101 Firefox/27.0');
@@ -227,13 +238,16 @@ class FaviconDownloader
 	*/
 	public static function getExtension($filename)
 	{
-		if(preg_match('#^(https?|ftp)#i', $filename)){
-			$url = parse_url($filename);
-			$filename = $url['path'];
+		if(preg_match('#^(https?|ftp)#i', (string) $filename)){
+			$url = parse_url((string) $filename);
+			$filename = $url['path'] ?? '';
 		}
-		
-		$info = pathinfo($filename);
-		return $info['extension'];
+
+		$info = pathinfo((string) $filename);
+
+		// Ohne Endung in der URL bleibt es beim üblichen ico — seit PHP 8
+		// wäre ein fehlender Schlüssel sonst eine Warnung
+		return $info['extension'] ?? 'ico';
 	}
 	
 	/**
@@ -264,4 +278,3 @@ class FaviconDownloader
 		print_r($dump);
 	}
 }
-?>

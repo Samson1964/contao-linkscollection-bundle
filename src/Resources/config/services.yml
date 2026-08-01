@@ -1,9 +1,18 @@
+# Dienste der Linksammlung
+#
+# Hinweis: Hier stand früher ein _instanceof-Block für FrameworkAwareInterface
+# und ContainerAwareInterface. Keine Klasse dieser Erweiterung setzt die beiden
+# um, und ContainerAwareInterface gibt es seit Symfony 7 nicht mehr — der Block
+# verhinderte damit den Containerbau unter Contao 5.
 services:
-    _instanceof:
-        Contao\CoreBundle\Framework\FrameworkAwareInterface:
-            calls:
-                - ["setFramework", ["@contao.framework"]]
+    _defaults:
+        autowire: true
+        autoconfigure: true
 
-        Symfony\Component\DependencyInjection\ContainerAwareInterface:
-            calls:
-                - ["setContainer", ["@service_container"]]
+    # Klickweiterleitung und Suche sind über Routen erreichbar und müssen
+    # deshalb öffentliche Dienste sein.
+    Schachbulle\ContaoLinkscollectionBundle\Controller\WeiterleitungController:
+        public: true
+
+    Schachbulle\ContaoLinkscollectionBundle\Controller\SucheController:
+        public: true

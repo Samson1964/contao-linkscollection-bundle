@@ -1,32 +1,32 @@
-<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
+<?php
+
+declare(strict_types=1);
 
 /**
- * Contao Open Source CMS
+ * Linksammlung für Contao Open Source CMS
  *
- * Copyright (C) 2005-2016 Leo Feyer
- *
- * @package   fen
  * @author    Frank Hoppe
- * @license   GNU/LGPL
- * @copyright Frank Hoppe 2013
+ * @license   LGPL-3.0-or-later
  */
 
 /**
- * palettes
+ * Palette der Systemeinstellungen um den eigenen Bereich erweitern.
+ *
+ * Die Werte landen in system/config/localconfig.php und überschreiben die
+ * Voreinstellungen aus der config.php dieser Erweiterung.
  */
 $GLOBALS['TL_DCA']['tl_settings']['palettes']['default'] .= ';{linkscollection_legend:hide},linkscollection_new_duration,linkscollection_test_duration,linkscollection_webarchiv';
 
 /**
- * fields
+ * Felder
  */
-
 $GLOBALS['TL_DCA']['tl_settings']['fields']['linkscollection_new_duration'] = array
 (
 	'label'         => &$GLOBALS['TL_LANG']['tl_settings']['linkscollection_new_duration'],
 	'inputType'     => 'text',
 	'eval'          => array
 	(
-		'tl_class'  => 'w50', 
+		'tl_class'  => 'w50',
 		'rgxp'      => 'numeric'
 	)
 );
@@ -37,7 +37,7 @@ $GLOBALS['TL_DCA']['tl_settings']['fields']['linkscollection_test_duration'] = a
 	'inputType'     => 'text',
 	'eval'          => array
 	(
-		'tl_class'  => 'w50', 
+		'tl_class'  => 'w50',
 		'rgxp'      => 'numeric'
 	)
 );
@@ -48,6 +48,6 @@ $GLOBALS['TL_DCA']['tl_settings']['fields']['linkscollection_webarchiv'] = array
 	'inputType'     => 'text',
 	'eval'          => array
 	(
-		'tl_class'  => 'long', 
+		'tl_class'  => 'long',
 	)
 );

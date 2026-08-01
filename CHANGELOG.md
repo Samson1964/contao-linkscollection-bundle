@@ -1,5 +1,25 @@
 # Linksammlung Changelog
 
+## Version 2.0.0 (2026-08-01)
+
+Die Erweiterung läuft jetzt unter **Contao 4.13 und Contao 5** mit **PHP 8.1 bis 8.4**. Das war ohne Eingriffe an einigen Stellen nicht zu haben, deshalb die neue Hauptversion — bitte vor dem Aktualisieren die Hinweise in [docs/technik.md](docs/technik.md#umstieg-von-version-1x) lesen.
+
+* Add: Dokumentation unter `docs/` — Backend-Bedienung, Frontend-Einrichtung und technische Hintergründe; die `README.md` gibt den Überblick
+* Change: Mindestanforderung ist PHP 8.1 (bisher 5.6), Contao 4.13 (bisher 4.0)
+* Change: `go.php`, `search.php` und `rebuild.php` im Web-Verzeichnis sind entfallen. Die ersten beiden sind jetzt Symfony-Routen (`/linkscollection/go/<ID>` und `/linkscollection/suche`), `rebuild.php` war eine ältere Kopie der Statistikberechnung und ersatzlos überflüssig. Die alten Dateien haben sich über `system/initialize.php` in Contao eingeklinkt — diese Datei gibt es seit Contao 5 nicht mehr
+* Change: Die Abhängigkeit `codefog/contao-haste` ist entfallen. Die beiden Frontend-Formulare bauen jetzt auf den Widget-Klassen des Contao-Kerns auf, die Ein-/Ausschalter im Backend auf der seit Contao 4.13 eingebauten `toggle`-Operation
+* Change: Die Suche kommt ohne jQuery aus (`js/ajax.js` → `js/suche.js`) und bekommt die aufrufende Seite als Parameter statt aus der Sitzung — bei mehreren geöffneten Fenstern führte das bisher zu Verwechslungen
+* Change: Alle Contao-Klassen werden mit vollem Namensraum angesprochen (`Contao\Database` statt `\Database`); die kurzen Namen gibt es in Contao 5 nicht mehr
+* Change: Systemprotokoll-Einträge laufen über Monolog statt über `System::log()`, Adressen ins Backend über den Router statt über `contao/main.php`
+* Fix: Die Farbmarkierung des HTTP-Status in den Backend-Listen wertete den Statuscode gegen Wahrheitswerte aus. Unter PHP 8 (`'' == 0` ist dort nicht mehr wahr) verlor sie damit den Fall „Host nicht erreichbar"
+* Fix: `CURLOPT_BINARYTRANSFER` im Favicon-Downloader entfernt — seit PHP 5.1.3 wirkungslos und ab PHP 8.4 nicht mehr vorhanden
+* Fix: Die Volltextsuche der Backend-Linkliste übergab ihre Parameter als Array an `execute()`; Contao deutet das seit Version 4 als einen einzigen Wert
+* Fix: `config.php` und zwei weitere Dateien lagen in Latin-1 vor und zeigten im Backend zerschossene Umlaute
+
+## Version 1.5.6 (2026-07-30)
+
+* Change: Das ungenutzte Feld `icon` aus tl_linkscollection_links entfernt. Es stand in keiner Palette, wurde nirgends ausgelesen und verwies auf eine nicht vorhandene Sprachvariable; die Favicons kommen über `Linkscollection::getFavicon()` aus dem Dateisystem. Die Datenbankspalte bleibt bestehen, bis sie mit `contao:migrate --with-deletes` entfernt wird
+
 ## Version 1.5.5 (2026-07-29)
 
 * Fix: Warning: Undefined array key "deleteConfirm" bei contao:migrate -> Lesezugriffe auf $GLOBALS['TL_LANG'] in den DCA-Dateien mit `?? null` bzw. `?? array()` abgesichert, da der DcaLoader die Sprachdateien noch nicht geladen hat

@@ -1,37 +1,47 @@
 <?php
 
-/**
- * Contao Open Source CMS
- *
- * Copyright (c) 2005-2013 Leo Feyer
- *
- * @package Core
- * @link    https://contao.org
- * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
- */
+declare(strict_types=1);
 
 /**
- * Table tl_linkscollection_links
+ * Linksammlung für Contao Open Source CMS
+ *
+ * @author    Frank Hoppe
+ * @license   LGPL-3.0-or-later
+ */
+
+use Contao\Backend;
+use Contao\CoreBundle\Monolog\ContaoContext;
+use Contao\DataContainer;
+use Contao\DC_Table;
+use Contao\Database;
+use Contao\Input;
+use Contao\StringUtil;
+use Contao\System;
+use Schachbulle\ContaoLinkscollectionBundle\Klassen\Filter;
+use Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection;
+use Schachbulle\ContaoLinkscollectionBundle\Klassen\Protokoll;
+
+/**
+ * Tabelle tl_linkscollection_links — die Links innerhalb einer Kategorie
  */
 $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 (
-
-		// Config
-		'config' => array
+	// Config
+	'config' => array
+	(
+		'dataContainer'                => DC_Table::class,
+		'ptable'                       => 'tl_linkscollection',
+		'enableVersioning'             => true,
+		'sql' => array
 		(
-			'dataContainer'            => 'Table',
-			'ptable'                   => 'tl_linkscollection',
-			'enableVersioning'         => true,
-			'sql' => array
+			'keys' => array
 			(
-				'keys' => array
-				(
-					'id'               => 'primary',
-					'pid'              => 'index',
-					'title'            => 'index',
-					'url'              => 'index'
-				)
-			),
+				'id'                   => 'primary',
+				'pid'                  => 'index',
+				'title'                => 'index',
+				'url'                  => 'index'
+			)
+		),
 		'onsubmit_callback'            => array
 		(
 			array('tl_linkscollection_links', 'saveRecord')
@@ -43,16 +53,14 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 	(
 		'sorting' => array
 		(
-			'mode'                    => 4,
+			'mode'                    => DataContainer::MODE_PARENT,
 			'fields'                  => array('title ASC'),
 			'headerFields'            => array('title'),
 			'panelLayout'             => 'search,limit',
-			//'root'                    => array(194),
 			'disableGrouping'         => true,
 			'child_record_callback'   => array('tl_linkscollection_links', 'listLinks'),
 			'child_record_class'      => 'no_padding',
-			'filter'                  => \Schachbulle\ContaoLinkscollectionBundle\Klassen\Filter::getCurrentFilterDefinition('tl_linkscollection_links'),
-			//'rootPaste'               => false
+			'filter'                  => Filter::getCurrentFilterDefinition('tl_linkscollection_links'),
 		),
 		'global_operations' => array
 		(
@@ -97,46 +105,33 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['edit'],
 				'href'                => 'act=edit',
-				'icon'                => 'edit.gif'
+				'icon'                => 'edit.svg'
 			),
-			//'copy' => array
-			//(
-			//    'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['copy'],
-			//    'href'                => 'act=paste&mode=copy',
-			//    'icon'                => 'copy.gif'
-			//),
 			'cut' => array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['cut'],
-				'href'                => 'act=paste&mode=cut',
-				'icon'                => 'cut.gif'
+				'href'                => 'act=paste&amp;mode=cut',
+				'icon'                => 'cut.svg'
 			),
 			'delete' => array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['delete'],
 				'href'                => 'act=delete',
-				'icon'                => 'delete.gif',
-				'attributes'          => 'onclick="if(!confirm(\'' . ($GLOBALS['TL_LANG']['MSC']['deleteConfirm'] ?? null) . '\'))return false;Backend.getScrollOffset()"'
+				'icon'                => 'delete.svg',
+				'attributes'          => 'onclick="if(!confirm(\''.($GLOBALS['TL_LANG']['MSC']['deleteConfirm'] ?? null).'\'))return false;Backend.getScrollOffset()"'
 			),
 			'toggle' => array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['toggle'],
-				'attributes'           => 'onclick="Backend.getScrollOffset()"',
-				'haste_ajax_operation' => array
-				(
-					'field'            => 'published',
-					'options'          => array
-					(
-						array('value' => '', 'icon' => 'invisible.svg'),
-						array('value' => '1', 'icon' => 'visible.svg'),
-					),
-				),
+				'href'                => 'act=toggle&amp;field=published',
+				'icon'                => 'visible.svg',
+				'showInHeader'        => true,
 			),
 			'show' => array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['show'],
 				'href'                => 'act=show',
-				'icon'                => 'show.gif'
+				'icon'                => 'show.svg'
 			)
 		)
 	),
@@ -153,7 +148,6 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 	(
 		'protected'                   => 'groups'
 	),
-
 
 	// Fields
 	'fields' => array
@@ -179,7 +173,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			),
 			'flag'                    => 5,
 			'sql'                     => "int(10) unsigned NOT NULL default '0'"
- 		),
+		),
 		'infobox' => array
 		(
 			'exclude'                 => true,
@@ -212,11 +206,11 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'filter'                  => true,
 			'sorting'                 => true,
 			'inputType'               => 'select',
-			'options'                 => System::getCountries(),
+			'options_callback'        => array('tl_linkscollection_links', 'getLaender'),
 			'eval'                    => array('includeBlankOption'=>true, 'chosen'=>true, 'tl_class'=>'w50'),
 			'sql'                     => "varchar(5) NOT NULL default ''"
 		),
-		// Link offline, aber auf www.archive.org
+		// Link offline, aber noch auf archive.org verfügbar
 		'webarchiv' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['webarchiv'],
@@ -226,21 +220,10 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'eval'                    => array('tl_class'=>'w50'),
 			'sql'                     => "char(1) NOT NULL default ''"
 		),
-		'icon' => array
-		(
-			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection']['icon'],
-			'exclude'                 => true,
-			'exclude'                 => true,
-			'inputType'               => 'fileTree',
-			'eval'                    => array
-			(
-				'files'               => true,
-				'fieldType'           => 'radio',
-				'filesOnly'           => true,
-				'extensions'          => 'jpg,jpeg,png,gif,ico'
-			),
-			'sql'                     => "binary(16) NULL"
-		),
+		// Das Feld "icon" ist entfallen: es stand in keiner Palette, wurde
+		// nirgends ausgelesen und sein Label verwies auf eine Sprachvariable,
+		// die es nicht gibt. Die Favicons kommen über Linkscollection::getFavicon()
+		// aus dem Verzeichnis Resources/public/favicons.
 		'text' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['text'],
@@ -279,7 +262,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'eval'                    => array('mandatory'=>false, 'decodeEntities'=>true, 'tl_class'=>'w50'),
 			'sql'                     => "varchar(64) NOT NULL default ''"
 		),
-		// Email des Linkeinreichers
+		// E-Mail des Linkeinreichers
 		'email' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['email'],
@@ -311,9 +294,9 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 						'eval'        => array
 						(
 							'style'             => 'width: 90%',
-							'rgxp'              =>'date',
+							'rgxp'              => 'date',
 							'mandatory'         => false,
-							'datepicker'        => true, 
+							'datepicker'        => true,
 							'tl_class'          => 'w50 wizard'
 						),
 						'load_callback' => array
@@ -378,7 +361,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'eval'                    => array('mandatory'=>false, 'tl_class'=>'w50'),
 			'sql'                     => "varchar(255) NOT NULL default ''"
 		),
-		// Statusdatum
+		// Zeitpunkt der letzten Prüfung
 		'statedate' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['statedate'],
@@ -396,13 +379,13 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 			'eval'                    => array('mandatory'=>false, 'tl_class'=>'w50'),
 			'sql'                     => "varchar(255) NOT NULL default ''"
 		),
-		// Datum der CMS-Prüfung
+		// Zeitpunkt der CMS-Erkennung
 		'cmsdate' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['cmsdate'],
 			'exclude'                 => true,
 			'inputType'               => 'text',
-			'eval'                    => array('mandatory'=>false, 'rgxp'=>'dateim'),
+			'eval'                    => array('mandatory'=>false, 'rgxp'=>'datim'),
 			'flag'                    => 5,
 			'sql'                     => "int(10) unsigned NOT NULL default '0'"
 		),
@@ -600,6 +583,7 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_linkscollection_links']['published'],
 			'exclude'                 => true,
+			'toggle'                  => true,
 			'inputType'               => 'checkbox',
 			'default'                 => 1,
 			'eval'                    => array('doNotCopy'=>true),
@@ -625,129 +609,202 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 );
 
 /**
- * Provide miscellaneous methods that are used by the data configuration array
+ * Rückruffunktionen der Tabelle tl_linkscollection_links.
  */
 class tl_linkscollection_links extends Backend
 {
-
-	var $oldurl; // Speichert die alte URL
-
 	/**
-	 * Beim Speichern eines Datensatzes zusätzliche Änderungen vornehmen
-	 * @param DataContainer
-	 * @return -
+	 * Prüft nach dem Speichern die URL und schreibt abgeleitete Werte fort.
+	 *
+	 * Beim Speichern eines Links wird dessen Adresse sofort abgerufen: Das
+	 * aktualisiert Statuscode, Statustext, Sprache und CMS und lädt das
+	 * Favicon neu. Außerdem wird gezählt, wie viele Besuchermeldungen noch
+	 * unerledigt sind — diese Zahl steht in der Kategorieliste.
+	 *
+	 * Nebenwirkung: greift auf die fremde Webseite zu und schreibt erneut in
+	 * den gerade gespeicherten Datensatz.
+	 *
+	 * @param DataContainer $dc Aufrufender Datencontainer
+	 *
+	 * @return void
 	 */
-	public function saveRecord(DataContainer $dc)
+	public function saveRecord(DataContainer $dc): void
 	{
-
-		// Unerledigte Warnungen zählen
+		// Unerledigte Meldungen zählen
 		$w = 0;
-		if($dc->activeRecord->warnings)
+		$warnings = StringUtil::deserialize($dc->activeRecord->warnings ?? null);
+
+		if (\is_array($warnings))
 		{
-			// $dc->activeRecord->warnings ggfs. umwandeln
-			$warnings = (is_array($dc->activeRecord->warnings)) ? $dc->activeRecord->warnings : unserialize($dc->activeRecord->warnings);
-			foreach($warnings as $warning)
+			foreach ($warnings as $warning)
 			{
-				if(!$warning['done'] && $warning['date']) $w++;
+				if (empty($warning['done']) && !empty($warning['date']))
+				{
+					++$w;
+				}
 			}
 		}
 
-		// URL neu prüfen und Favicon downloaden
+		// URL prüfen und Favicon herunterladen
 		$arrRow = array
 		(
 			'id'        => $dc->id,
-			'webarchiv' => \Input::post('webarchiv'),
-			'url'       => \Input::post('url')
+			'webarchiv' => Input::post('webarchiv'),
+			'url'       => Input::post('url')
 		);
-		$arrRow = \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::saveFavicon($arrRow);
+		$arrRow = Linkscollection::saveFavicon($arrRow);
 
-		// Update Datenbank
 		$set = array
 		(
-			'initdate'      => $dc->activeRecord->initdate ? $dc->activeRecord->initdate : $dc->activeRecord->tstamp,
+			'initdate'      => $dc->activeRecord->initdate ?: $dc->activeRecord->tstamp,
 			'statedate'     => $arrRow['statedate'],
-			'statecode'     => $arrRow['statecode'] ? $arrRow['statecode'] : '',
-			'statetext'     => $arrRow['statetext'] ? $arrRow['statetext'] : '',
+			'statecode'     => $arrRow['statecode'],
+			'statetext'     => $arrRow['statetext'],
 			'problemcount'  => $w
 		);
-		$this->Database->prepare("UPDATE tl_linkscollection_links %s WHERE id=?")
-		               ->set($set)
-		               ->execute($dc->id);
-	}
 
-	public function getDate($arrValue)
-	{
-		return ($arrValue) ? date("d.m.Y H:i", $arrValue) : '';
-	}
-
-	public function saveDate($arrValue)
-	{
-		if($arrValue)
-		{
-			$dtime = \DateTime::createFromFormat("d.m.Y H:i", $arrValue);
-			return $dtime->getTimestamp();
-		}
-		else return 0;
+		Database::getInstance()->prepare('UPDATE tl_linkscollection_links %s WHERE id=?')
+		                       ->set($set)
+		                       ->execute($dc->id);
 	}
 
 	/**
-	 * Generiere eine Zeile als HTML
-	 * @param array
-	 * @return string
+	 * Liefert die Länderliste für das Auswahlfeld "Sprache".
+	 *
+	 * Die Kürzel werden kleingeschrieben gespeichert, weil daraus die
+	 * CSS-Klasse des Sprachfähnchens entsteht (flag-icon-de). Der Dienst
+	 * contao.intl.countries liefert sie großgeschrieben; System::getCountries()
+	 * hat diese Umwandlung früher übernommen, gibt es in Contao 5 aber nicht mehr.
+	 *
+	 * Der Name lautet bewusst nicht getCountries(): Diese Klasse erbt von
+	 * Contao\Backend, und in Contao 4.13 gibt es dort noch die statische
+	 * Methode System::getCountries() — eine gleichnamige Objektmethode wäre
+	 * ein Compile-Fehler.
+	 *
+	 * @return array<string,string> Länderkürzel => Landesname
 	 */
-	public function listLinks($arrRow)
+	public function getLaender(): array
 	{
+		$laender = System::getContainer()->get('contao.intl.countries')->getCountries();
 
-		return \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::ViewLinkrow($arrRow);
-
+		return array_combine(array_map('strtolower', array_keys($laender)), $laender);
 	}
 
-	public function getInfobox(DataContainer $dc)
+	/**
+	 * Formatiert einen Zeitstempel für die Anzeige im Meldungs-Assistenten.
+	 *
+	 * @param mixed $arrValue Zeitstempel als Unixzeit
+	 *
+	 * @return string Datum und Uhrzeit, oder ein leerer String ohne Wert
+	 */
+	public function getDate($arrValue): string
 	{
-		$kategorie = \Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection::Breadcrumb($dc->activeRecord->pid);
-		$url = strlen($dc->activeRecord->url) > 7 ? '<br><b>URL in neuem Fenster öffnen:</b> <a href="'.$dc->activeRecord->url.'" target="_blank">'.$dc->activeRecord->url.'</a>' : '';
+		return $arrValue ? date('d.m.Y H:i', (int) $arrValue) : '';
+	}
+
+	/**
+	 * Wandelt die Eingabe im Meldungs-Assistenten zurück in einen Zeitstempel.
+	 *
+	 * @param mixed $arrValue Datum und Uhrzeit im Format TT.MM.JJJJ HH:MM
+	 *
+	 * @return int Die Unixzeit, oder 0 bei leerer oder unlesbarer Eingabe
+	 */
+	public function saveDate($arrValue): int
+	{
+		if (!$arrValue)
+		{
+			return 0;
+		}
+
+		$dtime = \DateTime::createFromFormat('d.m.Y H:i', (string) $arrValue);
+
+		return $dtime ? $dtime->getTimestamp() : 0;
+	}
+
+	/**
+	 * Erzeugt die Anzeige eines Links in der Kategorieliste.
+	 *
+	 * @param array $arrRow Datensatz des Links
+	 *
+	 * @return string Das HTML der Zeile
+	 */
+	public function listLinks($arrRow): string
+	{
+		return Linkscollection::ViewLinkrow($arrRow);
+	}
+
+	/**
+	 * Erzeugt den Informationskasten über dem Bearbeitungsformular.
+	 *
+	 * Er zeigt, in welcher Kategorie der Link liegt (mit Verweisen dorthin)
+	 * und bietet einen Verweis auf die Zieladresse in einem neuen Fenster.
+	 *
+	 * @param DataContainer $dc Aufrufender Datencontainer
+	 *
+	 * @return string Das HTML des Kastens
+	 */
+	public function getInfobox(DataContainer $dc): string
+	{
+		$kategorie = Linkscollection::Breadcrumb($dc->activeRecord->pid ?? 0);
+		$adresse = (string) ($dc->activeRecord->url ?? '');
+		$url = \strlen($adresse) > 7 ? '<br><b>URL in neuem Fenster öffnen:</b> <a href="'.StringUtil::specialchars($adresse).'" target="_blank" rel="noreferrer noopener">'.StringUtil::specialchars($adresse).'</a>' : '';
 
 		return '<div class="long" style="margin-left: 15px; margin-right: 15px;"><b>Kategorie:</b> '.$kategorie.$url.'</div>';
 	}
 
 	/**
-	 * Eintragsdatum schreiben
-	 * @param mixed
-	 * @return mixed
+	 * Setzt beim ersten Speichern das Eintragsdatum.
+	 *
+	 * Nebenwirkung: schreibt einen Eintrag in das Systemprotokoll, je nachdem
+	 * ob ein Link neu angelegt oder geändert wurde.
+	 *
+	 * @param mixed $varValue Bisheriges Eintragsdatum als Unixzeit
+	 *
+	 * @return int Das Eintragsdatum; bei einem neuen Link der aktuelle Zeitpunkt
 	 */
-	public function saveInitdate($varValue)
+	public function saveInitdate($varValue): int
 	{
-		if(!$varValue)
+		if (!$varValue)
 		{
-			\System::log('[Linkscollection] New Link created: '.\Input::post('title').' ('.\Input::post('url').')', __CLASS__.'::'.__FUNCTION__, TL_CRON);
+			Protokoll::schreiben('[Linkscollection] New Link created: '.Input::post('title').' ('.Input::post('url').')', __METHOD__, ContaoContext::GENERAL);
+
 			return time();
 		}
-		else
-		{
-			\System::log('[Linkscollection] Link ID '.\Input::post('id').' edited: '.\Input::post('title').' ('.\Input::post('url').')', __CLASS__.'::'.__FUNCTION__, TL_ACCESS);
-			return $varValue;
-		}
+
+		Protokoll::schreiben('[Linkscollection] Link ID '.Input::get('id').' edited: '.Input::post('title').' ('.Input::post('url').')', __METHOD__, ContaoContext::ACCESS);
+
+		return (int) $varValue;
 	}
 
 	/**
-	 * Returning the drop down for the special filter
+	 * Liefert die Bedienelemente des erweiterten Filters.
+	 *
+	 * Der Filter ist derzeit ausgeschaltet — siehe die Erläuterung in der
+	 * Klasse Filter. Zum Einschalten genügt es, hier den Aufruf von
+	 * Filter::getFilterWidget() zurückzugeben.
+	 *
+	 * @param string $href       Adresse der Schaltfläche
+	 * @param string $label      Beschriftung
+	 * @param string $title      Titel-Attribut
+	 * @param string $class      CSS-Klasse
+	 * @param string $attributes Weitere Attribute
+	 *
+	 * @return string Immer ein leerer String
 	 */
-	public function getFilterWidget($href, $label, $title, $class, $attributes)
+	public function getFilterWidget($href, $label, $title, $class, $attributes): string
 	{
-		//return BackendLinkscollectionFilter\Filter::getFilterWidget($this->addToUrl(''), $label, 'tl_linkscollection_links');
+		return '';
 	}
 
 	/**
-	 * Set the timestamp to 00:00:00 (see #26)
+	 * Setzt die Uhrzeit eines Datums im Assistenten auf 00:00:00.
 	 *
-	 * @param integer $value
+	 * @param mixed $value Unixzeit des gespeicherten Datums
 	 *
-	 * @return integer
+	 * @return int Unixzeit desselben Tages um Mitternacht
 	 */
-	public function loadDate($value)
+	public function loadDate($value): int
 	{
-		return strtotime(date('d.m.Y', (int)$value) . ' 00:00:00');
+		return (int) strtotime(date('d.m.Y', (int) $value).' 00:00:00');
 	}
-
 }
-

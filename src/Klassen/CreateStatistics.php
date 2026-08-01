@@ -1,110 +1,156 @@
 <?php
 
-namespace Schachbulle\ContaoLinkscollectionBundle\Klassen;
+declare(strict_types=1);
 
 /**
- * Class CreateStatistics
+ * Linksammlung für Contao Open Source CMS
  *
+ * @author    Frank Hoppe
+ * @license   LGPL-3.0-or-later
+ */
+
+namespace Schachbulle\ContaoLinkscollectionBundle\Klassen;
+
+use Contao\Config;
+use Contao\CoreBundle\Monolog\ContaoContext;
+use Contao\Database;
+
+/**
+ * Zählt die Links je Kategorie und schreibt die Zahlen in tl_linkscollection.
+ *
+ * Die Kategorieliste im Backend und die Kategorieübersicht im Frontend zeigen
+ * pro Kategorie an, wie viele Links darin liegen, wie viele davon neu sind und
+ * wie hoch der Anteil erreichbarer Links ist. Diese Werte werden nicht bei
+ * jeder Änderung fortgeschrieben, sondern hier in einem Durchgang neu ermittelt.
  */
 class CreateStatistics
 {
-
-	public static function run()
+	/**
+	 * Berechnet sämtliche Zähler der Kategorien neu.
+	 *
+	 * Gezählt werden je Kategorie: die Links unmittelbar darin (links_self),
+	 * die Links einschließlich aller Unterkategorien (links_all), die in den
+	 * letzten Tagen hinzugekommenen (links_new) und der Anteil der Links, die
+	 * bei der letzten Prüfung mit Status 200 geantwortet haben und deren
+	 * Prüfung nicht älter als ein Jahr ist (links_checkquote).
+	 *
+	 * Nebenwirkung: schreibt in alle Datensätze von tl_linkscollection und
+	 * hinterlässt einen Eintrag im Systemprotokoll.
+	 *
+	 * @return void
+	 */
+	public static function run(): void
 	{
-		// Startzeit für neue Links
-		$duration = time() - ($GLOBALS['TL_CONFIG']['linkscollection_new_duration'] * 86400);
-		// Unixtime vor einem Jahr:
+		// Startzeitpunkt, ab dem ein Link als neu gilt
+		$duration = time() - ((int) Config::get('linkscollection_new_duration') * 86400);
+
+		// Unixzeit vor einem Jahr
 		$einjahr = time() - 31556926;
 
-		// Anzahl der Links in jede Kategorie eintragen, dazu zuerst alle veröffentlichten Links laden
-		$objLinks = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection_links WHERE published = ?')
-		                                    ->execute(1);
+		// Alle veröffentlichten Links laden
+		$objLinks = Database::getInstance()->prepare('SELECT * FROM tl_linkscollection_links WHERE published = ?')
+		                                   ->execute(1);
 
-		// Links in jeweiligen Array-Wert für die Kategorie hochzählen
-		$links_all = array();
-		$links_self = array();
-		$links_new = array();
-		$links_newbie = array();
-		$links_check = array();
+		$links_all = array();    // Links inklusive Unterkategorien
+		$links_self = array();   // Links unmittelbar in der Kategorie
+		$links_new = array();    // Neue Links unmittelbar in der Kategorie
+		$links_newbie = array(); // Neue Links inklusive Unterkategorien
+		$links_check = array();  // Erreichbare Links in der Kategorie
 
-		while($objLinks->next())
+		while ($objLinks->next())
 		{
-			if(!isset($links_self[$objLinks->pid])) $links_self[$objLinks->pid] = 0; // Initialisieren, wenn nicht vorhanden
-			$links_self[$objLinks->pid]++; // Link in eigener Kategorie addieren
-			// Status der letzten Linkprüfung eintragen - Wenn i.O. (Status 200, nicht älter als 1 Jahr) dann Zähler hochsetzen
-			if($objLinks->statecode == 200 && $objLinks->statedate >= $einjahr) 
+			$pid = (int) $objLinks->pid;
+
+			$links_self[$pid] = ($links_self[$pid] ?? 0) + 1;
+
+			// Nur ein frischer Status 200 zählt als geprüft
+			if ($objLinks->statecode == 200 && $objLinks->statedate >= $einjahr)
 			{
-				if(!isset($links_check[$objLinks->pid])) $links_check[$objLinks->pid] = 0; // Initialisieren, wenn nicht vorhanden
-				$links_check[$objLinks->pid]++; // Status des Links addieren
+				$links_check[$pid] = ($links_check[$pid] ?? 0) + 1;
 			}
 
-			if($objLinks->initdate >= $duration) $links_new[$objLinks->pid]++; // Neuen Link zählen
-			$cats = self::foundParents($objLinks->pid); // Oberkategorien finden
-			foreach($cats as $cat)
+			if ($objLinks->initdate >= $duration)
 			{
-				if(!isset($links_all[$cat])) $links_all[$cat] = 0; // Initialisieren, wenn nicht vorhanden
-				$links_all[$cat]++;
+				$links_new[$pid] = ($links_new[$pid] ?? 0) + 1;
+			}
+
+			foreach (self::foundParents($pid) as $cat)
+			{
+				$links_all[$cat] = ($links_all[$cat] ?? 0) + 1;
 			}
 		}
 
-		foreach($links_new as $key => $value)
+		foreach (array_keys($links_new) as $key)
 		{
-			$cats = self::foundParents($key); // Oberkategorien finden
-			foreach($cats as $cat)
+			foreach (self::foundParents($key) as $cat)
 			{
-				$links_newbie[$cat]++;
+				$links_newbie[$cat] = ($links_newbie[$cat] ?? 0) + 1;
 			}
 		}
 
-		// Anzahl neue Links nullen
-		\Database::getInstance()->prepare('UPDATE tl_linkscollection SET links_new = ?')
-		                        ->execute(0);
+		// Anzahl neuer Links überall zurücksetzen, damit auch Kategorien
+		// ohne neue Links wieder auf 0 stehen
+		Database::getInstance()->prepare('UPDATE tl_linkscollection SET links_new = ?')
+		                       ->execute(0);
 
-		// Anzahl in Kategorien eintragen
-		foreach($links_all as $key => $value)
+		foreach ($links_all as $key => $value)
 		{
-			if($key)
+			if (!$key)
 			{
-				if(!isset($links_check[$key])) $links_check[$key] = 0; // Initialisieren, wenn nicht vorhanden
-				if(!isset($links_self[$key])) $links_self[$key] = 0; // Initialisieren, wenn nicht vorhanden
-				if(!isset($links_newbie[$key])) $links_newbie[$key] = 0; // Initialisieren, wenn nicht vorhanden
-				// Prozent geprüfter Links ermitteln
-				$links_check[$key] += 0;
-				$links_self[$key] += 0;
-				$prozent = $links_self[$key] == 0 ? 100 : sprintf('%d', ($links_check[$key]/$links_self[$key]) * 100);
-
-				$set = array
-				(
-					'links_all'        => $value,
-					'links_self'       => $links_self[$key],
-					'links_new'        => $links_newbie[$key] ? $links_newbie[$key] : 0,
-					'links_checkquote' => $prozent
-				);
-				\Database::getInstance()->prepare('UPDATE tl_linkscollection %s WHERE id = ?')
-				                        ->set($set)
-				                        ->execute($key);
+				continue; // Die Wurzel (pid 0) ist keine Kategorie
 			}
+
+			$geprueft = $links_check[$key] ?? 0;
+			$eigene = $links_self[$key] ?? 0;
+
+			// Anteil geprüfter Links; ohne eigene Links gilt die Kategorie als vollständig geprüft
+			$prozent = 0 === $eigene ? 100 : (int) (($geprueft / $eigene) * 100);
+
+			$set = array
+			(
+				'links_all'        => $value,
+				'links_self'       => $eigene,
+				'links_new'        => $links_newbie[$key] ?? 0,
+				'links_checkquote' => $prozent
+			);
+
+			Database::getInstance()->prepare('UPDATE tl_linkscollection %s WHERE id = ?')
+			                       ->set($set)
+			                       ->execute($key);
 		}
 
-		\System::log('[Linkscollection] Rebuild categories', __CLASS__.'::'.__FUNCTION__, TL_CRON);
-
+		Protokoll::schreiben('[Linkscollection] Rebuild categories', __METHOD__, ContaoContext::CRON);
 	}
 
-	protected static function foundParents($id)
+	/**
+	 * Ermittelt eine Kategorie und alle ihre übergeordneten Kategorien.
+	 *
+	 * Damit lässt sich ein Link in jeder Kategorie oberhalb seiner eigenen
+	 * mitzählen, ohne den Baum von oben durchlaufen zu müssen.
+	 *
+	 * @param int $id ID der Kategorie, von der aus nach oben gelaufen wird
+	 *
+	 * @return array<int> Die übergebene ID gefolgt von den IDs aller
+	 *                    Elternkategorien; bricht ab, sobald eine Kategorie
+	 *                    nicht veröffentlicht oder nicht vorhanden ist
+	 */
+	protected static function foundParents(int $id): array
 	{
 		$katids = array($id);
 
-		do
+		while ($id > 0)
 		{
-			if($id)
+			$objTemp = Database::getInstance()->prepare('SELECT pid FROM tl_linkscollection WHERE published = ? AND id = ?')
+			                                  ->execute(1, $id);
+
+			if (!$objTemp->numRows)
 			{
-				$objTemp = \Database::getInstance()->prepare('SELECT * FROM tl_linkscollection WHERE published = ? AND id = ?')
-				                                   ->execute(1, $id);
-				$katids[] = $objTemp->pid;
-				$id = $objTemp->pid;
+				break;
 			}
+
+			$id = (int) $objTemp->pid;
+			$katids[] = $id;
 		}
-		while($id > 0);
 
 		return $katids;
 	}
