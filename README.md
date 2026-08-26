@@ -46,6 +46,12 @@ vendor/bin/contao-console contao:migrate
 Dabei entstehen die Tabellen `tl_linkscollection` (Kategorien) und
 `tl_linkscollection_links` (Links).
 
+> **Umstieg von Version 1.x:** `go.php` und `search.php` im Web-Verzeichnis
+> sind entfallen und durch die Routen `/linkscollection/go/{id}` sowie
+> `/linkscollection/suche` ersetzt. Eigene Templates, die noch
+> `bundles/contaolinkscollection/go.php?id=…` verlinken, müssen angepasst
+> werden — Details in [docs/technik.md](docs/technik.md#umstieg-von-version-1x).
+
 ## Schnelleinstieg
 
 1. **Kategorien anlegen:** Im Backend unter *Inhalte → Linksammlung* mindestens
