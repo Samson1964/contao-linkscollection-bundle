@@ -93,7 +93,16 @@ Die wichtigsten Klassen:
 | `.favicon-img` | Eine Linkzeile; das Favicon liegt als Hintergrundbild darin |
 | `.popular` | Als populär gekennzeichneter Link |
 | `.webarchiv` | Link, der ins Webarchiv umgeleitet wird |
+| `.webarchiv-akkordeon` | Eingeklappter Bereich am Ende der Kategorieansicht mit allen Links dieser Kategorie, die ins Webarchiv umgeleitet werden (siehe unten) |
 | `.counter` | Fußzeile mit den Gesamtzahlen |
+
+In der Kategorieansicht erscheinen Links, deren Adresse als "URL offline"
+markiert ist, nicht mehr zwischen den aktiven Links, sondern eingeklappt in
+einem eigenen Bereich am Ende der Seite (`<details>`/`<summary>`, ohne
+JavaScript). So bleiben sie auffindbar, ohne die eigentliche Liste
+aufzublähen. Die anderen Ansichten (Toplinks, Neue Links, Suche) fassen ihre
+Links nicht dieser Kategorie zugeordnet auf und lassen Webarchiv-Links darum
+unverändert in der normalen Liste stehen.
 
 ## Sprachfähnchen
 

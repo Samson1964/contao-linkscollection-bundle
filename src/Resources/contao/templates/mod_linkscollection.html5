@@ -46,6 +46,15 @@ $GLOBALS['TL_CSS'][] = 'bundles/contaolinkscollection/css/style.css';
 		</div>
 	<?php endif; ?>
 
+	<?php if($this->webarchivLinks): ?>
+		<details class="webarchiv-akkordeon">
+			<summary>Archivierte Links (<?= $this->webarchivAnzahl ?>)</summary>
+			<ul>
+				<?= $this->webarchivLinks ?>
+			</ul>
+		</details>
+	<?php endif; ?>
+
 	<?php if($this->form): ?>
 		<h2>Neuen Link eintragen</h2>
 		<div class="form">

@@ -262,16 +262,36 @@ class Linksammlung extends Module
 			$class = ('odd' === $class) ? 'even' : 'odd';
 		}
 
-		// Links der Kategorie laden
-		$objLinks = Database::getInstance()->prepare('SELECT * FROM tl_linkscollection_links WHERE published = ? AND pid = ? ORDER BY popular DESC, webarchiv ASC, title ASC')
+		// Links der Kategorie laden. Die Sortierung nach webarchiv ist seit der
+		// Trennung in zwei Listen (siehe unten) nicht mehr nötig, popular bleibt
+		// innerhalb der jeweiligen Liste maßgeblich
+		$objLinks = Database::getInstance()->prepare('SELECT * FROM tl_linkscollection_links WHERE published = ? AND pid = ? ORDER BY popular DESC, title ASC')
 		                                   ->execute(1, $this->currentCategory);
+
+		// Links in normale und archivierte Links aufteilen. Ein Link, dessen Seite
+		// endgültig offline gegangen ist (webarchiv), leitet nur noch auf einen
+		// Schnappschuss bei archive.org weiter — er verdient in der Liste keinen
+		// Platz neben aktiven Links mehr, landet aber auch nicht ersatzlos: er
+		// erscheint eingeklappt am Ende der Seite, damit er weiterhin auffindbar bleibt.
+		$alleLinks = $this->linkListe($objLinks);
+		$normaleLinks = self::zebrastreifen(array_filter($alleLinks, static fn (array $link): bool => empty($link['webarchiv'])));
+		$webarchivLinks = self::zebrastreifen(array_filter($alleLinks, static fn (array $link): bool => !empty($link['webarchiv'])));
 
 		// Template füllen
 		$this->Template->menu = $this->Menu();
 		$this->Template->breadcrumb = array_reverse($breadcrumb);
 		$this->Template->categories = $categories;
-		$this->Subtemplate->links = $this->linkListe($objLinks);
+		$this->Subtemplate->links = $normaleLinks;
 		$this->Template->links = $this->Subtemplate->parse();
+		$this->Template->webarchivAnzahl = \count($webarchivLinks);
+
+		if ($webarchivLinks)
+		{
+			$webarchivTemplate = new FrontendTemplate($this->subTemplate);
+			$webarchivTemplate->links = $webarchivLinks;
+			$this->Template->webarchivLinks = $webarchivTemplate->parse();
+		}
+
 		$this->Template->counter = array('categories' => $this->numberCategories, 'links' => $this->numberLinks);
 	}
 
@@ -325,6 +345,32 @@ class Linksammlung extends Module
 		}
 
 		return $links;
+	}
+
+	/**
+	 * Vergibt die wechselnde Klasse "odd"/"even" für die Zeilenfärbung neu.
+	 *
+	 * linkListe() vergibt die Klasse nach der Position in der abgefragten
+	 * Gesamtliste. Wird diese Liste anschließend aufgeteilt (siehe die
+	 * Kategorieansicht: normale Links und Webarchiv-Links in zwei getrennten
+	 * Listen), fängt die neue Teilliste sonst nicht zwingend bei "odd" an —
+	 * diese Methode setzt die Abfolge innerhalb der übergebenen Teilliste neu auf.
+	 *
+	 * @param array<int,array<string,mixed>> $links Eine Teilliste aus linkListe()
+	 *
+	 * @return array<int,array<string,mixed>> Dieselben Zeilen, neu durchnummeriert
+	 *                                        und mit neu vergebener Klasse
+	 */
+	private static function zebrastreifen(array $links): array
+	{
+		$klasse = 'odd';
+
+		return array_map(static function (array $zeile) use (&$klasse): array {
+			$zeile['class'] = $klasse;
+			$klasse = ('odd' === $klasse) ? 'even' : 'odd';
+
+			return $zeile;
+		}, array_values($links));
 	}
 
 	/**

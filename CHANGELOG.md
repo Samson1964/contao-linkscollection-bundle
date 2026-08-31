@@ -1,5 +1,9 @@
 # Linksammlung Changelog
 
+## Version 2.2.0 (2026-08-31)
+
+* Add: Links, deren Adresse als „URL offline" markiert ist (Weiterleitung ins Webarchiv), erscheinen in der Kategorieansicht nicht mehr zwischen den aktiven Links, sondern eingeklappt in einem eigenen Bereich am Seitenende (`<details>`/`<summary>`, ohne JavaScript) — Details in [docs/frontend.md](docs/frontend.md#stile)
+
 ## Version 2.1.0 (2026-08-31)
 
 * Add: Backend-Knopf „Prüfen" — prüft auf Zuruf alle Links der gerade angezeigten Struktur neu (Kategorieliste: nur diese Kategorie; Kategoriebaum mit gewähltem Knoten: dieser Knoten und seine Unterkategorien; ohne gewählten Knoten: die gesamte Sammlung). Läuft im Browser Link für Link per AJAX gegen die neue Route `/contao/linkscollection/pruefen/{id}`, damit eine einzelne nicht antwortende Zielseite nicht die ganze Prüfung an einem Zeitlimit scheitern lässt — Details in [docs/backend.md](docs/backend.md#prüfen)
