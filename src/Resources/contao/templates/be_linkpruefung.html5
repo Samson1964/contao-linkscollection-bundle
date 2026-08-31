@@ -1,0 +1,28 @@
+<div id="tl_buttons">
+	<a href="<?= $this->backlink ?>" class="header_back" title="" accesskey="b" onclick="Backend.getScrollOffset()"><?= $GLOBALS['TL_LANG']['MSC']['backBT'] ?? 'Zurück' ?></a>
+</div>
+
+<div id="tl_linkpruefung" class="tl_listing_container">
+
+	<h2><?= $this->titel ?></h2>
+
+	<?php if ($this->anzahl > 0): ?>
+
+		<p id="linkpruefung_status"><?= $this->anzahl ?> Links werden geprüft. Das Fenster kann geöffnet bleiben; nicht antwortende Zielseiten bremsen nur sich selbst aus, nicht die übrigen Links.</p>
+		<progress id="linkpruefung_balken" max="<?= $this->anzahl ?>" value="0" style="width:100%"></progress>
+		<ul id="linkpruefung_log" class="tl_listing"></ul>
+
+		<script>
+			window.linkscollectionPruefung = {
+				links: <?= json_encode($this->links, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
+				basisUrl: <?= json_encode($this->basisUrl, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
+			};
+		</script>
+
+	<?php else: ?>
+
+		<p>Diese Struktur enthält keine Links.</p>
+
+	<?php endif; ?>
+
+</div>

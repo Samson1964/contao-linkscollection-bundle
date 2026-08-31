@@ -29,6 +29,7 @@ $GLOBALS['TL_LANG']['tl_linkscollection']['show'] = array('Kategoriedetails anze
 $GLOBALS['TL_LANG']['tl_linkscollection']['analyse'] = array('Prüfbericht' , 'Linksammlung prüfen');
 $GLOBALS['TL_LANG']['tl_linkscollection']['linklist'] = array('Linkliste' , 'Komplette Linkliste anzeigen');
 $GLOBALS['TL_LANG']['tl_linkscollection']['statistik'] = array('Statistik' , 'Statistik aktualisieren');
+$GLOBALS['TL_LANG']['tl_linkscollection']['pruefen'] = array('Prüfen' , 'Alle Links der aktuell angezeigten Struktur jetzt neu prüfen');
 
 /**
  * Formulare

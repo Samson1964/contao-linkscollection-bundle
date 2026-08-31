@@ -94,9 +94,9 @@ Adresse, sondern beim letzten Schnappschuss der Seite bei
 [archive.org](https://web.archive.org). Der Adressvorsatz dafür steht in den
 Einstellungen.
 
-## Die drei zusätzlichen Ansichten
+## Die vier zusätzlichen Ansichten
 
-Über der Liste stehen drei Schaltflächen, die es in beiden Ebenen gibt.
+Über der Liste stehen vier Schaltflächen, die es in beiden Ebenen gibt.
 
 ### Linkliste
 
@@ -130,6 +130,29 @@ Als erreichbar zählt ein Link, der bei der letzten Prüfung den Statuscode 200
 geliefert hat **und** dessen Prüfung nicht älter als ein Jahr ist. Der Aufruf
 lohnt nach größeren Änderungen und immer dann, wenn die Zahlen im Baum nicht
 mehr zum Inhalt passen.
+
+### Prüfen
+
+Prüft auf Zuruf alle Links der gerade angezeigten Struktur neu, statt auf die
+schleichende Prüfung beim Durchblättern zu warten (siehe „Beim Speichern ruft
+die Erweiterung die eingetragene Adresse auf" oben — dasselbe passiert hier,
+nur gesammelt für viele Links auf einmal). Was genau geprüft wird, hängt davon
+ab, wo der Knopf gedrückt wird:
+
+* **In der Linkliste einer Kategorie:** nur die Links dieser einen Kategorie.
+* **Im Kategoriebaum, mit angeklicktem Knoten:** dieser Knoten und alle seine
+  Unterkategorien.
+* **Im Kategoriebaum, ohne angeklickten Knoten:** die gesamte Sammlung — bei
+  vielen hundert Links entsprechend viele Zugriffe ins Internet. Die
+  angezeigte Anzahl vor dem Start zeigt, worauf man sich einlässt.
+
+Ein Klick fragt zur Sicherheit noch einmal nach, dann läuft die Prüfung im
+Hintergrund im Browser weiter: Für jeden Link geht ein einzelner Abruf an den
+Server, die Fortschrittsanzeige zählt mit. Antwortet eine Zielseite nicht oder
+sehr langsam, bremst das nur diesen einen Link aus — die übrigen werden trotzdem
+der Reihe nach fertig geprüft. Das Browserfenster kann während der Prüfung
+geöffnet bleiben; die Ergebnisse (Statuscode, Sprache, CMS, Favicon) stehen erst
+nach einem Neuladen der Seite in der Liste.
 
 ## Einstellungen
 

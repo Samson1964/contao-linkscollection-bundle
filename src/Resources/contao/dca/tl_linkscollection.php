@@ -19,6 +19,7 @@ use Contao\Image;
 use Contao\Input;
 use Contao\StringUtil;
 use Contao\System;
+use Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection;
 
 /**
  * Tabelle tl_linkscollection — die Kategorien der Linksammlung
@@ -85,6 +86,18 @@ $GLOBALS['TL_DCA']['tl_linkscollection'] = array
 				'href'                => 'key=statistik',
 				'icon'                => 'bundles/contaolinkscollection/images/statistik.png',
 				'attributes'          => 'onclick="Backend.getScrollOffset();"'
+			),
+			'pruefen' => array
+			(
+				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection']['pruefen'],
+				'href'                => 'key=pruefen',
+				'icon'                => 'sync.svg',
+				// Fester Text statt Sprachvariable: Die DCA-Datei wird geladen, bevor
+				// Contao die zugehörige Sprachdatei einliest (siehe die Absicherungen
+				// mit ?? null im ganzen Bundle) — bei einer Referenz (&$GLOBALS[...])
+				// löst sich das später von selbst auf, bei dieser String-Verkettung
+				// im onclick-Attribut aber nicht: Das Ergebnis wäre eine leere Meldung.
+				'attributes'          => 'onclick="if(!confirm(\'Alle Links dieser Struktur jetzt prüfen? Je nach Anzahl kann das mehrere Minuten dauern.\'))return false;Backend.getScrollOffset();"'
 			),
 			'toggleNodes' => array
 			(
@@ -330,7 +343,7 @@ class tl_linkscollection extends Backend
 	 */
 	public function addBreadcrumb(): void
 	{
-		$sitzung = self::sitzung();
+		$sitzung = Linkscollection::backendSitzung();
 
 		// Angeklickten Knoten merken und den Parameter aus der Adresse entfernen
 		if (null !== Input::get('node'))
@@ -388,39 +401,6 @@ class tl_linkscollection extends Backend
 		<ul id="tl_breadcrumb">
 			<li>'.implode(' &gt; </li><li>', array_reverse($breadcrumb)).'</li>
 		</ul>';
-	}
-
-	/**
-	 * Liefert den Sitzungsspeicher des Backends.
-	 *
-	 * @return \Symfony\Component\HttpFoundation\Session\SessionBagInterface|null
-	 *         Der Sitzungsbereich, oder null wenn es keine Sitzung gibt — etwa
-	 *         beim Aufruf von contao:migrate auf der Kommandozeile
-	 */
-	private static function sitzung()
-	{
-		$container = System::getContainer();
-
-		if (null === $container || !$container->has('request_stack'))
-		{
-			return null;
-		}
-
-		$request = $container->get('request_stack')->getCurrentRequest();
-
-		if (null === $request || !$request->hasSession())
-		{
-			return null;
-		}
-
-		try
-		{
-			return $request->getSession()->getBag('contao_backend');
-		}
-		catch (\Exception $e)
-		{
-			return null;
-		}
 	}
 
 	/**

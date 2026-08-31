@@ -10,16 +10,17 @@ declare(strict_types=1);
  */
 
 use Contao\ArrayUtil;
+use Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkpruefung;
 use Schachbulle\ContaoLinkscollectionBundle\Klassen\Linkscollection;
 use Schachbulle\ContaoLinkscollectionBundle\Module\Linksammlung;
 
 /**
  * Backend-Modul der Linksammlung im Menü "Inhalte" an zweiter Stelle einfügen.
  *
- * Die drei zusätzlichen Schlüssel sind eigene Ansichten des Moduls; Contao
- * ruft sie auf, sobald in der Adresszeile &key=analyse, &key=linklist oder
- * &key=statistik steht. Die Verweise dorthin setzen die DCA-Dateien als
- * globale Operationen.
+ * Die vier zusätzlichen Schlüssel sind eigene Ansichten des Moduls; Contao
+ * ruft sie auf, sobald in der Adresszeile &key=analyse, &key=linklist,
+ * &key=statistik oder &key=pruefen steht. Die Verweise dorthin setzen die
+ * DCA-Dateien als globale Operationen.
  */
 ArrayUtil::arrayInsert($GLOBALS['BE_MOD']['content'], 1, array
 (
@@ -29,7 +30,8 @@ ArrayUtil::arrayInsert($GLOBALS['BE_MOD']['content'], 1, array
 		'icon'      => 'bundles/contaolinkscollection/images/icon.png',
 		'analyse'   => array(Linkscollection::class, 'Linkanalyse'),
 		'linklist'  => array(Linkscollection::class, 'GenerateLinklist'),
-		'statistik' => array(Linkscollection::class, 'Statistik')
+		'statistik' => array(Linkscollection::class, 'Statistik'),
+		'pruefen'   => array(Linkpruefung::class, 'Pruefen')
 	)
 ));
 

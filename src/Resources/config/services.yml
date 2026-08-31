@@ -9,10 +9,13 @@ services:
         autowire: true
         autoconfigure: true
 
-    # Klickweiterleitung und Suche sind über Routen erreichbar und müssen
-    # deshalb öffentliche Dienste sein.
+    # Klickweiterleitung, Suche und die Sammelprüfung sind über Routen
+    # erreichbar und müssen deshalb öffentliche Dienste sein.
     Schachbulle\ContaoLinkscollectionBundle\Controller\WeiterleitungController:
         public: true
 
     Schachbulle\ContaoLinkscollectionBundle\Controller\SucheController:
+        public: true
+
+    Schachbulle\ContaoLinkscollectionBundle\Controller\PruefenController:
         public: true

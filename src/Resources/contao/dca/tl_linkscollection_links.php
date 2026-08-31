@@ -85,6 +85,14 @@ $GLOBALS['TL_DCA']['tl_linkscollection_links'] = array
 				'icon'                => 'bundles/contaolinkscollection/images/statistik.png',
 				'attributes'          => 'onclick="Backend.getScrollOffset();"'
 			),
+			'pruefen' => array
+			(
+				'label'               => &$GLOBALS['TL_LANG']['tl_linkscollection']['pruefen'],
+				'href'                => 'key=pruefen',
+				'icon'                => 'sync.svg',
+				// Fester Text statt Sprachvariable — siehe die Begründung in tl_linkscollection.php
+				'attributes'          => 'onclick="if(!confirm(\'Alle Links dieser Struktur jetzt prüfen? Je nach Anzahl kann das mehrere Minuten dauern.\'))return false;Backend.getScrollOffset();"'
+			),
 			'all' => array
 			(
 				'label'               => &$GLOBALS['TL_LANG']['MSC']['all'],

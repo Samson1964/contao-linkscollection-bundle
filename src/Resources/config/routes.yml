@@ -23,3 +23,15 @@ linkscollection_suche:
         _scope: frontend
         _token_check: false
     methods: [GET]
+
+# Liegt unter /contao/ und damit in der Zone, die Contao ohnehin nur
+# angemeldeten Backend-Benutzern öffnet — siehe PruefenController.
+linkscollection_pruefen:
+    path: /contao/linkscollection/pruefen/{id}
+    defaults:
+        _controller: Schachbulle\ContaoLinkscollectionBundle\Controller\PruefenController
+        _scope: backend
+        _token_check: false
+    requirements:
+        id: \d+
+    methods: [GET]

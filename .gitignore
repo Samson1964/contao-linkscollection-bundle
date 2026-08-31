@@ -8,3 +8,9 @@
 
 # Eigene Arbeitsnotizen, gehören nicht ins Paket
 /TODO.md
+
+# Zur Laufzeit heruntergeladene Favicons (siehe docs/technik.md) — kein
+# Paketinhalt; das Verzeichnis legt der Code bei Bedarf selbst an. Bei Tests
+# über eine Junction-Testinstallation landen Downloads sonst versehentlich
+# direkt im Quellverzeichnis
+/src/Resources/public/favicons/

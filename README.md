@@ -12,7 +12,7 @@ Die jeweils aktuellste Version ist hier im Einsatz:
 ## Funktionen
 
 - Kategorien und Unterkategorien in beliebig vielen Ebenen
-- Automatische Prüfung, ob die hinterlegten Adressen noch erreichbar sind
+- Automatische Prüfung, ob die hinterlegten Adressen noch erreichbar sind, plus ein Backend-Knopf für die Sammelprüfung auf Zuruf
 - Automatisches Laden der Favicons sowie Erkennung von Sprache und CMS der verlinkten Seiten
 - Toplinks (meistgeklickt) und neue Links als eigene Ansichten
 - Volltextsuche über Kategorien, Titel, Adressen und Beschreibungen

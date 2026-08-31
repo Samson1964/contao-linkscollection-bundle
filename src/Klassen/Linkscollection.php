@@ -928,10 +928,14 @@ class Linkscollection
 	 * Backend-Daten in einem eigenen Bereich der Symfony-Sitzung ab; ohne
 	 * laufende Anfrage (etwa auf der Kommandozeile) gibt es diesen nicht.
 	 *
+	 * Öffentlich, weil neben dieser Klasse auch tl_linkscollection (Knoten der
+	 * Baumnavigation) und Klassen\Linkpruefung (Struktur des Prüfumfangs) auf
+	 * denselben Sitzungsbereich zugreifen müssen.
+	 *
 	 * @return \Symfony\Component\HttpFoundation\Session\SessionBagInterface|null
 	 *         Der Sitzungsbereich, oder null wenn keine Sitzung verfügbar ist
 	 */
-	protected static function backendSitzung()
+	public static function backendSitzung()
 	{
 		$container = System::getContainer();
 

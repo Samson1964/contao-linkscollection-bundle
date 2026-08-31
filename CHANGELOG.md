@@ -1,5 +1,9 @@
 # Linksammlung Changelog
 
+## Version 2.1.0 (2026-08-31)
+
+* Add: Backend-Knopf „Prüfen" — prüft auf Zuruf alle Links der gerade angezeigten Struktur neu (Kategorieliste: nur diese Kategorie; Kategoriebaum mit gewähltem Knoten: dieser Knoten und seine Unterkategorien; ohne gewählten Knoten: die gesamte Sammlung). Läuft im Browser Link für Link per AJAX gegen die neue Route `/contao/linkscollection/pruefen/{id}`, damit eine einzelne nicht antwortende Zielseite nicht die ganze Prüfung an einem Zeitlimit scheitern lässt — Details in [docs/backend.md](docs/backend.md#prüfen)
+
 ## Version 2.0.0 (2026-08-01)
 
 Die Erweiterung läuft jetzt unter **Contao 4.13 und Contao 5** mit **PHP 8.1 bis 8.4**. Das war ohne Eingriffe an einigen Stellen nicht zu haben, deshalb die neue Hauptversion — bitte vor dem Aktualisieren die Hinweise in [docs/technik.md](docs/technik.md#umstieg-von-version-1x) lesen.
