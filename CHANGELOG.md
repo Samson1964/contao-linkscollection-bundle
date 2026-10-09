@@ -1,5 +1,9 @@
 # Linksammlung Changelog
 
+## Version 2.2.1 (2026-10-09)
+
+* Fix: `Data too long for column 'language'` beim Prüfen eines Links, der das Backend-Listenbild der Kategorie zum Absturz brachte. Die Sprache der verlinkten Seite wurde roh aus deren `lang`-Attribut übernommen (z. B. `zh-Hans-CN`, `en_US.UTF-8`), die Spalte fasst aber nur fünf Zeichen, und Contao läuft im Strict-Mode. Neue Methode `Linkscollection::sprachKennung()` reduziert die Angabe auf eine passende Kennung (`de`, `de-DE`; bei längeren Angaben nur der Sprachteil). Der Statustext (cURL-Fehlermeldung der Gegenstelle) wird aus demselben Grund auf 255 Zeichen gekürzt
+
 ## Version 2.2.0 (2026-08-31)
 
 * Add: Links, deren Adresse als „URL offline" markiert ist (Weiterleitung ins Webarchiv), erscheinen in der Kategorieansicht nicht mehr zwischen den aktiven Links, sondern eingeklappt in einem eigenen Bereich am Seitenende (`<details>`/`<summary>`, ohne JavaScript) — Details in [docs/frontend.md](docs/frontend.md#stile)

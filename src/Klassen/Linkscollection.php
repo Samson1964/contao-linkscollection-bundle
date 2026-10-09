@@ -275,14 +275,16 @@ class Linkscollection
 				self::faviconSpeichern((string) $arrRow['id'], (string) $favicon->icoType, (string) $favicon->icoData);
 			}
 
-			$language = self::checkLanguage($antwort['html']); // Sprache des Links ermitteln
+			$language = self::sprachKennung(self::checkLanguage($antwort['html'])); // Sprache des Links ermitteln
 			$cms = self::checkCMS($antwort['html']); // CMS des Links ermitteln
 		}
 
-		// Datenbank aktualisieren
+		// Datenbank aktualisieren. Der Statustext stammt von der fremden Gegenstelle
+		// (cURL-Fehlermeldung) und wird auf die Spaltenbreite gekürzt: Contao läuft im
+		// Strict-Mode, ein zu langer Wert wäre ein Datenbankfehler statt einer Kürzung.
 		$arrRow['statedate'] = time();
 		$arrRow['statecode'] = (string) $antwort['code'];
-		$arrRow['statetext'] = $antwort['fehler'] ?: 'OK';
+		$arrRow['statetext'] = mb_substr((string) ($antwort['fehler'] ?: 'OK'), 0, 255);
 		$arrRow['language']  = $language;
 		$arrRow['cms']       = $cms;
 
@@ -389,6 +391,44 @@ class Linkscollection
 
 		// Kein Sprachhinweis gefunden
 		return '';
+	}
+
+	/**
+	 * Bringt eine Sprachangabe einer fremden Seite in die Form, die das Feld
+	 * "language" aufnimmt.
+	 *
+	 * Fremde Seiten schreiben ihre Sprache beliebig: "de", "de-DE", aber auch
+	 * "zh-Hans-CN", "en_US.UTF-8" oder "de-DE-1996". Die Spalte fasst nur fünf
+	 * Zeichen, und Contao läuft im Strict-Mode — ein längerer Wert ließ den
+	 * Speichervorgang mit "Data too long for column 'language'" scheitern und
+	 * damit auch den Aufbau der Backend-Liste, die ihn auslöste.
+	 *
+	 * Behalten wird, was in die Spalte passt und wie eine Sprachkennung aussieht:
+	 * "de" bleibt, "de_de" wird zu "de-DE"; bei längeren Angaben zählt allein der
+	 * Sprachteil vorn ("zh-Hans-CN" → "zh").
+	 *
+	 * @param string $sprache Rohe Angabe, wie checkLanguage() sie liefert
+	 *
+	 * @return string Kennung mit höchstens fünf Zeichen, oder ein leerer String,
+	 *                wenn die Angabe nicht wie eine Sprachkennung aussieht
+	 */
+	public static function sprachKennung(string $sprache): string
+	{
+		// Zeichensatzanhang ("en_US.UTF-8") abschneiden, Unterstrich wie Bindestrich behandeln
+		$teile = explode('-', strtolower(str_replace('_', '-', trim(explode('.', $sprache)[0]))));
+
+		if (!preg_match('/^[a-z]{2,3}$/', $teile[0]))
+		{
+			return '';
+		}
+
+		// Sprache mit Land, wenn die Angabe genau so aufgebaut ist (de-DE)
+		if (2 === \count($teile) && preg_match('/^[a-z]{2}$/', $teile[1]))
+		{
+			return $teile[0].'-'.strtoupper($teile[1]);
+		}
+
+		return $teile[0];
 	}
 
 	/**
